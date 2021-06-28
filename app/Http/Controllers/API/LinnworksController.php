@@ -13,11 +13,12 @@ class LinnworksController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
+    public function index()
     {
         $user = auth()->user()->id;
         $linnworks = new Linnworks();
-        $linnworks->token = $request->token;
+        //$linnworks->token = $request->token;
+        $linnworks->token = 123;
         $linnworks->applicationId = env('LINNWORKS_APP_ID');
         $linnworks->applicationSecret = env('LINNWORKS_SECRET');
         $linnworks->created_by = $user;
