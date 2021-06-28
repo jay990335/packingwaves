@@ -15,6 +15,10 @@ class LinnworksController extends Controller
      */
     public function index(Request $request)
     {
+        $validated = $request->validate([
+            'token' => 'required',
+        ]);
+
         $user = auth()->user()->id;
         $linnworks = new Linnworks();
         $linnworks->token = $request->token;
