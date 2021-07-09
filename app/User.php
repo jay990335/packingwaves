@@ -79,4 +79,14 @@ class User extends Authenticatable
     {
         return $this->created_at->toFormattedDateString();
     }
+
+    /**
+     * Get the linnworks_token that owns the branch.
+     */
+    public function linnworks_token()
+    {
+        $id = auth()->user()->id;
+        $linnworks_token = Linnworks::where('created_by', $id)->latest()->first();
+        return $linnworks_token;
+    }
 }

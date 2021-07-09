@@ -2,9 +2,6 @@
 
 @section('content')
 
-<a href="https://apps.linnworks.net/Authorization/Authorize/9a50e415-9916-4a50-8c57-b13a73b33216?access_token={{auth()->user()->createToken('')->accessToken}}">Get Token</a>
-
-<?php exit;?>
 <div class="container-fluid">
     <div class="row">
         <div class="col-md-12" id="message">
@@ -16,8 +13,8 @@
                 <div id="list-page-actions">
                     <!--ADD NEW ITEM-->
                     @can('create company')
-                    <a href="{{ route('admin.company.create') }}" class="btn btn-danger btn-add-circle edit-add-modal-button js-ajax-ux-request reset-target-modal-form" id="popup-modal-button">
-                        <span tooltip="Create new company." flow="right"><i class="fas fa-plus"></i></span>
+                    <a href="https://apps.linnworks.net/Authorization/Authorize/9a50e415-9916-4a50-8c57-b13a73b33216?Tracking={{auth()->user()->createToken('authToken')->accessToken}}" class="btn btn-danger btn-add-circle edit-add-modal-button js-ajax-ux-request reset-target-modal-form" id="popup-modal-button" target="_blank">
+                        <span tooltip="Create new company & Get token" flow="right"><i class="fas fa-plus"></i></span>
                     </a>
                     @endcan
                     <!--ADD NEW BUTTON (link)-->
@@ -46,13 +43,8 @@
                         <table class="table table-hover dataTable no-footer" id="table" width="100%">
                             <thead>
                             <tr>
-                                <th>Id</th>
-                                <th>Name</th>
-                                <th>Email</th>
-                                <th>website</th>
-                                <th>Created At</th>
-                                <th>Updated At</th>
-                                <th class="noExport">Action</th>
+                                <th></th>
+                                <th>General Info</th>
                             </tr>
                             </thead>
                             <tbody></tbody>
@@ -85,29 +77,33 @@ function datatables() {
         serverSide    : true,
         "bDestroy"    : true,
         pagingType    : "full_numbers",
+        columnDefs: [ {
+            width: 20,
+            orderable: false,
+            className: 'select-checkbox',
+            targets: 0,
+            data: 'NumOrderId',
+            defaultContent: ''
+        } ],
+        select: {
+            style:    'multi',
+            selector: 'td:first-child'
+        },
         ajax          : {
             url     : '{{ url('admin/company/ajax/data') }}',
             dataType: 'json'
         },
         columns       : [
-            {data: 'id', name: 'id', visible: true},
-            {data: 'name', name: 'name'},
-            {data: 'email', name: 'email'},
-            {data: 'website', name: 'website'},
-            {data: 'created_at', name: 'created_at', visible: false},
-            {data: 'updated_at', name: 'updated_at', visible: false},
-            {data: 'action', name: 'action', orderable: false, searchable: false,
-                fnCreatedCell: function (nTd, sData, oData, iRow, iCol) {
-                    //  console.log( nTd );
-                    $("a", nTd).tooltip({container: 'body'});
-                }
-            }
+            {data: ''},
+            {data: 'NumOrderId', name: 'NumOrderId'}
         ],
     });
 }
 
 datatables();
 </script>
+
+
 
 
     

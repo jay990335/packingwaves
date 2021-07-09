@@ -23,6 +23,8 @@ scratch. This page gets rid of all links and provides the needed markup only.
 
         <!-- DATATABLE CSS -->
         <link rel="stylesheet" href="{{asset('public/adminLTE/plugins/datatables.net-bs/css/dataTables.bootstrap4.css')}}">
+        <link rel="stylesheet" href="https://cdn.datatables.net/select/1.3.3/css/select.dataTables.min.css">
+        
         
         <!-- Theme style -->
         <!-- <link rel="stylesheet" href="https://cdn.datatables.net/1.10.24/css/dataTables.bootstrap4.min.css"> -->
@@ -85,7 +87,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
         <script src="https://cdn.datatables.net/buttons/1.7.0/js/buttons.html5.min.js"></script>
         <script src="https://cdn.datatables.net/buttons/1.7.0/js/buttons.print.min.js"></script>
         <script src="https://cdn.datatables.net/buttons/1.7.0/js/buttons.colVis.min.js"></script>
-
+        <script src="https://cdn.datatables.net/select/1.3.3/js/dataTables.select.min.js"></script>
     <!-- REQUIRED HEAD SCRIPTS [END]-->
     
 </head>

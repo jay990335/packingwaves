@@ -15,8 +15,8 @@ class AddHeaderAccessToken
      */
     public function handle($request, Closure $next)
     {
-        if ($request->has('access_token')) {
-            $request->headers->set('Authorization', 'Bearer ' . $request->get('access_token'));
+        if ($request->has('tracking')) {
+            $request->headers->set('Authorization', 'Bearer ' . $request->get('tracking'));
         }
         return $next($request);
     }

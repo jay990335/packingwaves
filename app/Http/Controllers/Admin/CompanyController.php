@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\User;
 use App\Company;
 use App\Image;
+use App\Linnworks;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CompanyStoreRequest;
@@ -18,7 +19,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
 use Yajra\DataTables\Facades\DataTables;
-use Booni3\Linnworks\Linnworks as Linnworks;
+use Booni3\Linnworks\Linnworks as Linnworks_API;
 
 class CompanyController extends Controller
 {
@@ -36,13 +37,6 @@ class CompanyController extends Controller
     public function setUp(): void
     {
         parent::setUp();
-
-        // These are invalid credentials, for testing with mock client only
-        /*$this->config = [
-            'applicationId' => '80003999e8-b1cc-4d62-axj5-jd883cccb481',
-            'applicationSecret' => '87hhhbd72-d51a-4eed-8eab-98jjdb02c1b08',
-            'token' => 'g89605ef47af205819b9ccc96a98c8bcf',
-        ];*/
 
         $this->mock = new MockHandler([]);
 
@@ -69,27 +63,7 @@ class CompanyController extends Controller
      */
     public function index()
     {
-        //$Linnworks = new Linnworks();
-        //$linnworks = $Linnworks->make('applicationId', 'applicationSecret', 'token');
-
-        //$this->mock->append(new Response(200, [], json_encode(['hello' => 'world'])));
-        
-        $linnworks = Linnworks::make([
-            'applicationId' => env('LINNWORKS_APP_ID'),
-            'applicationSecret' => env('LINNWORKS_SECRET'),
-            'token' => 'd9639ad6fc29ce78f670498bdef20902',
-        ], $this->client);
-
-        //$orders = $linnworks->orders()->getOpenOrders('abc');
-        $orders = $linnworks->Orders()->getOpenOrders('00000000-0000-0000-0000-000000000000',
-                                                    25,
-                                                    1,
-                                                    '',
-                                                    [],
-                                                    '');
-        //dd($orders);
         return view('admin.company.index'); 
-        
     }
 
     /**
@@ -102,30 +76,78 @@ class CompanyController extends Controller
     {
 
         if ($request->ajax() == true) {
-            $data = Company::select([
-                'id',
-                'name',
-                'email',
-                'website',
-                'created_at',
-                'updated_at',
-            ]);
+            
+            $draw = $request->get('draw');
+            $page = ($request->get("start")/$request->get("length"))+1;
+            $start = $request->get("start");
+            $rowperpage = $request->get("length"); // Rows display per page
+            $linnworks = Linnworks_API::make([
+                'applicationId' => env('LINNWORKS_APP_ID'),
+                'applicationSecret' => env('LINNWORKS_SECRET'),
+                'token' => auth()->user()->linnworks_token()->token,
+            ], $this->client);
 
-            return Datatables::eloquent($data)
-                ->addColumn('action', function ($data) {
-                    
-                    $html='';
-                    if (auth()->user()->can('edit company')){
-                        $html.= '<a href="'.  route('admin.company.edit', ['company' => $data->id]) .'" class="btn btn-success btn-sm float-left mr-3"  id="popup-modal-button"><span tooltip="Edit" flow="left"><i class="fas fa-edit"></i></span></a>';
-                    }
+            $filter = '{
+                           "ListFields":[
+                              {
+                                 "FieldCode":"GENERAL_INFO_IDENTIFIER",
+                                 "Name":"Identifiers",
+                                 "FieldType":"List",
+                                 "Value":"Pickwave Complete",
+                                 "Type":0
+                              }
+                           ],
+                        }';
 
-                    if (auth()->user()->can('edit company')){
-                        $html.= '<form method="post" class="float-left delete-form" action="'.  route('admin.company.destroy', ['company' => $data->id ]) .'"><input type="hidden" name="_token" value="'. Session::token() .'"><input type="hidden" name="_method" value="delete"><button type="submit" class="btn btn-danger btn-sm"><span tooltip="Delete" flow="right"><i class="fas fa-trash"></i></span></button></form>';
-                    }
+            
+            $records_all = $linnworks->Orders()->getOpenOrders('',$rowperpage,$page,$filter,[],'');
 
-                    return $html; 
-                })
-                ->make(true);
+            $records = $linnworks->Orders()->getOpenOrders('',
+                                                        $rowperpage,
+                                                        $page,
+                                                        $filter,
+                                                        [],
+                                                        $request->search['value']?$request->search['value']:'');
+            
+            $data_arr = array();
+
+            foreach($records['Data'] as $record){
+                $NumOrderId = $record['NumOrderId'];
+
+                $data_arr[] = array(
+                  "NumOrderId" => '<div class="generalInfoColumn" style="width: 15%">
+                                        <div class="padding" data-hj-ignore-attributes="">
+                                            <div class="top-panel">
+                                                <div class="flags">
+                                                    <i class="fa fa-gbp fa-lg fa-green fa-small-fix" title="Paid"></i>
+                                                    <i class="fa fa-envelope fa-lg fa-fw fa-yellow" title="Label printed"></i>
+                                                    <i class="fa fa-print fa-lg fa-fw fa-green" title="Invoice printed" ></i>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="padding">
+                                            <div class="margin-bottom">
+                                                <strong data-hj-ignore-attributes="">#'.$NumOrderId.'</strong>
+                                                <div>via EBAY0</div>
+                                            </div>
+                                        </div>
+
+                                        <div class="margin-bottom">
+                                            <div><small><b>Date: </b>09 Jul 2021 12:28</small></div>
+                                        </div>
+                                    </div>',
+                );
+            }
+
+            $response = array(
+                "draw" => intval($draw),
+                "iTotalRecords" => $records_all['TotalEntries'],
+                "iTotalDisplayRecords" => $records['TotalEntries'],
+                "aaData" => $data_arr
+            );
+
+            return json_encode($response);
         }
     }
 

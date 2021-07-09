@@ -15,9 +15,10 @@ class CreateLinnworksTable extends Migration
     {
         Schema::create('linnworks', function (Blueprint $table) {
             $table->id();
-            $table->string('token')->unique();
+            $table->string('token');
             $table->string('applicationId');
             $table->string('applicationSecret');
+            $table->text('passportAccessToken');
 
             $table->unsignedBigInteger('created_by')->index();
             $table->unsignedBigInteger('updated_by')->index();

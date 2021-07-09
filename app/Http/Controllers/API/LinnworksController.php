@@ -17,11 +17,13 @@ class LinnworksController extends Controller
     {
         $validated = $request->validate([
             'token' => 'required',
+            'tracking' => 'required|unique:linnworks,passportAccessToken',
         ]);
 
         $user = auth()->user()->id;
         $linnworks = new Linnworks();
         $linnworks->token = $request->token;
+        $linnworks->passportAccessToken = $request->tracking;
         $linnworks->applicationId = env('LINNWORKS_APP_ID');
         $linnworks->applicationSecret = env('LINNWORKS_SECRET');
         $linnworks->created_by = $user;

@@ -23,4 +23,18 @@ class Linnworks extends Model
     protected $fillable = [
         'token', 'applicationId', 'applicationSecret', 'created_by', 'updated_by',
     ];
+
+    /**
+     * Get the creator for the company.
+     */
+    public function creator(){
+        return $this->belongsTo(User::class,'created_by');
+    }
+
+    /**
+     * Get the last editor for the company.
+     */
+    public function editor(){
+        return $this->belongsTo(User::class,'updated_by');
+    }
 }

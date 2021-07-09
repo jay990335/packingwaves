@@ -8,5 +8,5 @@ Route::post('/login', 'Api\AuthController@login');
 
 
 Route::group(['middleware' => ['auth:api']], function() {
-  Route::get('linnworks', 'API\LinnworksController@index');
+  Route::get('/linnworks', 'API\LinnworksController@index');
 });

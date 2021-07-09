@@ -308,3 +308,40 @@ ol li {
 .nav-item .active {
     color: #ffffff !important;
 }
+
+
+.top-panel {
+    margin-bottom: -12px;
+    position: relative;
+}
+
+.top-panel .flags {
+    padding-right: 10px;
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    min-height: 20px;
+    position: relative;
+}
+
+.top-panel .flags span:not(:last-of-type) {
+    margin-right: 4px;
+}
+.top-panel .flags span {
+    margin-bottom: 5px;
+}
+
+.flags .icon-type, .flags i {
+    margin-left: 3px!important;
+    margin-right: 3px!important;
+    width: 20px!important;
+    height: 20px!important;
+    max-width: 20px!important;
+    max-height: 20px!important;
+    text-align: center!important;
+    font-size: 20px!important;
+}
+
+.generalInfoColumn .padding {
+    padding: 5px;
+}
