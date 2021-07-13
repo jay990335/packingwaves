@@ -332,7 +332,7 @@ ol li {
 }
 
 .flags .icon-type, .flags i {
-    margin-left: 3px!important;
+    /*margin-left: 3px!important;*/
     margin-right: 3px!important;
     width: 20px!important;
     height: 20px!important;
@@ -343,5 +343,5 @@ ol li {
 }
 
 .generalInfoColumn .padding {
-    padding: 5px;
+    padding: 5px 5px 5px 0px;
 }

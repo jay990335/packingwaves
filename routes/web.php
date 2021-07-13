@@ -30,8 +30,9 @@ Route::group([
     Route::resource('role', 'RoleController');
 
     // Company Routes
-    Route::resource('company', 'CompanyController');
-    Route::get('company/ajax/data', 'CompanyController@datatables'); // For Datatables
+    Route::resource('packlist', 'PackOrdersController');
+    Route::get('packlist/ajax/data', 'PackOrdersController@datatables'); // For Datatables
+    Route::post('packlist/ajax/printlabel', 'PackOrdersController@printlabel'); 
 
 });
 

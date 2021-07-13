@@ -52,9 +52,9 @@
                         </li>
                         @can('view company')
                         <li class="nav-item">
-                            <a href="{{ url('admin/company') }}" class="nav-link {{ Route::is('admin.company.*') || Route::is('admin.company.*')  ? 'active' : '' }}">
+                            <a href="{{ url('admin/packlist') }}" class="nav-link {{ Route::is('admin.packlist.*') || Route::is('admin.packlist.*')  ? 'active' : '' }}">
                                 <i class="fas fa-warehouse nav-icon"></i>
-                                <p>Company</p>
+                                <p>Packlist</p>
                             </a>
                         </li>
                         @endcan 
