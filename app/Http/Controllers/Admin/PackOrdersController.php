@@ -258,7 +258,7 @@ class PackOrdersController extends Controller
 
         $parameters['source']= "EBAY";
 
-        $records = $linnworks->PrintService()->CreatePDFfromJobForceTemplate('Shipping Labels',["b4bb18b8-0075-426f-899c-a30a8db59afa"],17,$parameters,'LAPTOP-KCMR0437\DapetzOffice','',0,'19c02639-b2b7-412d-939f-9d9a23a6ec71','{"module":"OpenOrdersBeta"}');
+        $records = $linnworks->PrintService()->CreatePDFfromJobForceTemplate('Shipping Labels',["b4bb18b8-0075-426f-899c-a30a8db59afa"],17,'[{"Key":"LocationId","Value":"00000000-0000-0000-0000-000000000000"}]','LAPTOP-KCMR0437\DapetzOffice','',0,'19c02639-b2b7-412d-939f-9d9a23a6ec71','{"module":"OpenOrdersBeta"}');
 
         dd($records);
         return $records;

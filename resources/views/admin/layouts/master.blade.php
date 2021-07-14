@@ -10,6 +10,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta http-equiv="refresh" content="{{ (config('session.lifetime') * 60)+10 }}">
 
     <title>{{ config('app.name', 'Project Management System') }}</title>
 
@@ -176,6 +177,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
         <!-- CUSTOM JS -->
         <script src="{{ asset('public/js/admin/custom.js') }}"></script>
         <script src="{{ asset('public/js/admin/customUserRole.js') }}"></script>
+
 
     <!-- REQUIRED FOOTER SCRIPTS [END]-->
 
