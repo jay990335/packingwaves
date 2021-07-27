@@ -1,5 +1,10 @@
 .dataTables_info {
     padding-left: 20px;
+    position: absolute;
+}
+
+.dataTables_paginate{
+    margin-top: 10px !important;
 }
 
 .list-table-wrapper {
@@ -344,4 +349,66 @@ ol li {
 
 .generalInfoColumn .padding {
     padding: 5px 5px 5px 0px;
+}
+
+.light-left-padding {
+    font-size: 13px;
+}
+
+.btn-add-circle-label {
+    visibility: visible;
+    border-radius: 50%;
+    height: 30px;
+    width: 30px;
+    font-size: 13px;
+    box-shadow: 0 3px 15px -2px rgb(37 45 51 / 40%);
+    transition: all ease-in .15s;
+    padding: 5px 0px 0px 0px;
+}
+
+.crop-text-1 {
+   -webkit-line-clamp: 1;
+  overflow : hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+}
+
+.crop-text-3 {
+   -webkit-line-clamp: 3;
+  overflow : hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+}
+
+.floating-footer {
+    bottom: 0;
+    left: calc(50% - 25px);
+    text-align: center;
+    color: #505050;
+    width: 50px;
+    line-height: 16px;
+    font-size: 10px;
+    user-select: none;
+    background-color: #dee2e6;
+    border-radius: 10px 10px 0 0;
+}
+
+.dt-buttons{
+    padding: 15px 0px 15px 0px;
+}
+
+@media screen and (max-width: 767px)
+{
+    .dataTables_wrapper{
+        text-align: center !important;
+    }
+    .table{
+        text-align: left !important;
+    }  
+}
+
+.btn-group-sm>.btn, .btn-sm {
+    font-size: 13px !important;
 }

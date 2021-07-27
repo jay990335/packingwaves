@@ -19,6 +19,7 @@ use Illuminate\Http\Request;
 
 use Yajra\DataTables\Facades\DataTables;
 use Booni3\Linnworks\Linnworks as Linnworks_API;
+use Carbon\Carbon;
 
 class PackOrdersController extends Controller
 {
@@ -86,6 +87,20 @@ class PackOrdersController extends Controller
             ], $this->client);
 
             $filter = '{
+                            "BooleanFields":[
+                              {
+                                 "FieldCode":"GENERAL_INFO_LOCKED",
+                                 "Name":"Locked",
+                                 "FieldType":"Boolean",
+                                 "Value":"false"
+                              },
+                              {
+                                 "FieldCode":"GENERAL_INFO_PARKED",
+                                 "Name":"Parked",
+                                 "FieldType":"Boolean",
+                                 "Value":"false"
+                              }
+                            ],
                             "ListFields":[
                               {
                                  "FieldCode":"GENERAL_INFO_IDENTIFIER",
@@ -119,106 +134,140 @@ class PackOrdersController extends Controller
 
             foreach($records['Data'] as $record){
                 $NumOrderId = $record['NumOrderId'];
-                
-                if($record['GeneralInfo']['Status']==1){
-                    $paidclass = 'text-success';
-                    $status = 'Paid';
-                }else{
-                    $paidclass = 'text-danger';
-                    $status = 'Unpaid';
-                }
 
                 if($record['GeneralInfo']['LabelPrinted']==true){
-                    $labelPrintedClass = 'text-success';
+                    $labelPrintedBGClass = 'bg-dark';
                     $LabelPrinted = 'Label Printed';
                 }else{
-                    $labelPrintedClass = 'text-danger';
+                    $labelPrintedBGClass = '';
                     $LabelPrinted = 'Label Not Printed';
                 }
+                $itemCount = count($record['Items']);
+                if($itemCount==1){
+                    $Item = $record['Items'][0];
 
-                if($record['GeneralInfo']['InvoicePrinted']==true){
-                    $invoicePrintedClass = 'text-success';
-                    $InvoicePrinted = 'Label Printed';
-                }else{
-                    $invoicePrintedClass = 'text-danger';
-                    $InvoicePrinted = 'Label Not Printed';
-                }
-                
-                $ItemHTML = '';
-                foreach ($record['Items'] as $Item) {
-                    $ItemHTML.= '<tr class="itemRow">
-                        <td>
-                            <img src="'.env('LINNWORKS_IMG_URL','https://s3-eu-west-1.amazonaws.com/images.linnlive.com/81232bb2fe781fc9e8ff26f6218f7bb6/').'tumbnail_'.$Item['ImageId'].'.jpg" style="width: 80px; max-width: 80px; max-height: 80px;" tooltip="">
-                        </td>
-
-                        <td>
-                            <div class="light-left-padding">
-                                <span class="ellipsis item-number" title="ChannelSKU: '.$Item['ChannelSKU'].'">'.$Item['ChannelSKU'].'</span>
+                    if($Item['Quantity']==1){
+                        $quantityBGClass = 'bg-teal';
+                    }else{
+                        $quantityBGClass = 'bg-danger';
+                    }
+                    $ItemDetais= '<div class="row ">
+                            <div class="col-12">
+                              <div class="card '.$labelPrintedBGClass.'" style="margin-bottom: 0px;">
+                                <div class="card-header border-bottom-0">
+                                  <b>SKU: '.$Item['ChannelSKU'].'</b></span>
+                                </div>
+                                <div class="card-body pt-0 pb-1 ml-2">
+                                  <div class="row">
+                                    <ul class="list-unstyled">
+                                      <li class="media">
+                                        <img class="mr-3" src="'.env('LINNWORKS_IMG_URL','https://s3-eu-west-1.amazonaws.com/images.linnlive.com/81232bb2fe781fc9e8ff26f6218f7bb6/').'tumbnail_'.$Item['ImageId'].'.jpg" >
+                                        <div class="media-body">
+                                          <p class= "text-sm crop-text-3">'.$Item['Title'].'</p>
+                                        </div>
+                                      </li>
+                                    </ul>
+                                  </div>
+                                </div>
+                                <div class="card-footer">
+                                  <div class="text-left">
+                                    <a href="javascript:void(0)" data-orderid="'.$record['OrderId'].'" data-labelprinted="'.$LabelPrinted.'" onclick="printLabel(this)" class="btn btn-sm btn-primary mt-1">
+                                      <span tooltip="Print Label" flow="up"><i class="fas fa-print"></i>
+                                      </span>
+                                    </a>
+                                    <span class="btn btn-sm bg-secondary mt-1" tooltip="Order Id: #'.$record['NumOrderId'].'" flow="up">#'.$record['NumOrderId'].'</span>
+                                    <span class="btn btn-sm bg-secondary mt-1" tooltip="Item Location: '.$Item['BinRack'].'" flow="up">'.$Item['BinRack'].'</span>
+                                    <span class="btn btn-sm '.$quantityBGClass.' mt-1" tooltip="QTY: x '.$Item['Quantity'].'" flow="up">x '.$Item['Quantity'].'</span>
+                                    <a href="'.route("admin.packlist.order_details",$record["OrderId"]).'" id="popup-modal-button" class="btn btn-sm bg-info mt-1">
+                                      <i class="fas fa-info"></i>
+                                    </a>
+                                  </div>
+                                </div>
+                              </div>
                             </div>
-                        </td>
+                          </div>';
+                }else{
+                    if($labelPrintedBGClass==''){$labelPrintedBGClass='bg-blue';}
+                    $Item = $record['Items'][0];
+                    $Item1 = $record['Items'][1];
 
-                        <td>
-                            <span class="ellipsis" title="BinRack: '.$Item['BinRack'].'">'.$Item['BinRack'].'</span>
-                        </td>
+                    $item2_image = '';
+                    $item2_title = '';
+                    if(isset($record['Items'][2])){
+                        $Item2 = $record['Items'][2];
+                        $item2_image = '<img class="mr-3 mb-3" src="'.env('LINNWORKS_IMG_URL','https://s3-eu-west-1.amazonaws.com/images.linnlive.com/81232bb2fe781fc9e8ff26f6218f7bb6/').'tumbnail_'.$Item2['ImageId'].'.jpg" style="width: 40px;">';
+                        $item2_title = '<p class="mb-1 crop-text-1">'.$Item2['Title'].'</p><hr style="margin:0 0 0 0px;border-top: 1px solid #eeeeee;" >';
+                    }
 
-                        <td>
-                            <span class="ellipsis" title="Title: '.$Item['Title'].'">'.$Item['Title'].' </span>
-                        </td>
+                    $item3_image = '';
+                    $item3_title = '';
+                    if(isset($record['Items'][3])){
+                        $Item3 = $record['Items'][3];
+                        $item3_image = '<img class="mr-3 mb-3" src="'.env('LINNWORKS_IMG_URL','https://s3-eu-west-1.amazonaws.com/images.linnlive.com/81232bb2fe781fc9e8ff26f6218f7bb6/').'tumbnail_'.$Item3['ImageId'].'.jpg" style="width: 40px;">';
+                        $item3_title = '<p class="mb-1 crop-text-1">'.$Item3['Title'].'</p><hr style="margin:0 0 0 0px;border-top: 1px solid #eeeeee;">';
+                    }
 
-                        <td>
-                            <p class="light-right-padding item-quantity-box">
-                                <span title="Quantity">x'.$Item['Quantity'].'</span>
-                            </p>
-                        </td>
-                    </tr>';
-                }
-
-                $data_arr[] = array(
-                  "NumOrderId" => '<div class="generalInfoColumn">
-                                        <div class="padding" data-hj-ignore-attributes="">
-                                            <div class="top-panel">
-                                                <div class="flags">
-                                                    <i class="fa fa-gbp fa-lg fa-green fa-small-fix '.$paidclass.'" title="'.$status.'"></i>
-                                                    <a href="#" data-orderid="'.$record['OrderId'].'" data-labelprinted="'.$LabelPrinted.'" onclick="printLabel(this)"><i class="fa fa-envelope fa-lg fa-fw fa-yellow '.$labelPrintedClass.'" title="'.$LabelPrinted.'"></i></a>
-                                                    <i class="fa fa-print fa-lg fa-fw fa-green '.$invoicePrintedClass.'" title="'.$InvoicePrinted.'" ></i>
-                                                </div>
-                                            </div>
+                    $more_item='';
+                    if(($itemCount-4)>0){
+                        $more_item='<div class="col-2 text-center floating-footer mt-2" href="'.route("admin.packlist.order_details",$record["OrderId"]).'" id="popup-modal-button">'.($itemCount-4).'+</div>';
+                    }
+                    $ItemDetais= '<div class="row ">
+                        <div class="col-12">
+                          <div class="card '.$labelPrintedBGClass.'" style="margin-bottom: 0px;">
+                            <div class="card-header border-bottom-0"></div>
+                            <div class="card-body pt-0 pb-0">
+                                <div class="container">
+                                    <div class="row">
+                                        <div style="width:90px">
+                                          <div class="row">
+                                           <div class="col-6">
+                                             <img class="mr-3 mb-3" src="'.env('LINNWORKS_IMG_URL','https://s3-eu-west-1.amazonaws.com/images.linnlive.com/81232bb2fe781fc9e8ff26f6218f7bb6/').'tumbnail_'.$Item['ImageId'].'.jpg" style="width: 40px;">
+                                           </div>
+                                            <div class="col-6">
+                                                <img class="mr-3 mb-3" src="'.env('LINNWORKS_IMG_URL','https://s3-eu-west-1.amazonaws.com/images.linnlive.com/81232bb2fe781fc9e8ff26f6218f7bb6/').'tumbnail_'.$Item1['ImageId'].'.jpg" style="width: 40px;">
+                                           </div>
+                                           <div class="col-6">
+                                                '.$item2_image.'
+                                           </div>
+                                            <div class="col-6">
+                                                '.$item3_image.'
+                                           </div>
+                                          </div>
                                         </div>
-
-                                        <div class="padding">
-                                            <div class="margin-bottom">
-                                                <strong data-hj-ignore-attributes="">#'.$record['NumOrderId'].'</strong>
-                                                <div>via '.$record['GeneralInfo']['SubSource'].'</div>
-                                            </div>
-                                        </div>
-
-                                        <div class="margin-bottom">
-                                            <div><small><b>Date: </b>'.date('d F Y H:i',strtotime($record['GeneralInfo']['ReceivedDate'])).'</small></div>
-                                        </div>
-                                    </div>',
-
-                    "Custmer" => '<div class="generalInfoColumn">
-                                        <div class="padding">
-                                            <div class="margin-bottom">
-                                                <strong>Shipping Address</strong>
-                                                <div>'.$record['CustomerInfo']['Address']['Address1'].', '.$record['CustomerInfo']['Address']['Town'].', '.$record['CustomerInfo']['Address']['Region'].', '.$record['CustomerInfo']['Address']['PostCode'].'</div>
-                                            </div>
-                                        </div>
-                                    </div>',
-
-                    "Item" => '<div class="itemsInfoColumn">
-                                    <table>
-                                        <tbody>'.$ItemHTML.'</tbody>
-                                    </table>
-                                </div>',
-
-                    "Total" => '<div class="generalInfoColumn">
-                                    <div class="padding">
-                                        <div class="margin-bottom">
-                                            <div><strong>Total: </strong>'.$record['TotalsInfo']['Subtotal'].' GBP</div>
+                                        <div class="col pl-3">
+                                            <p class="mb-1 crop-text-1">'.$Item['Title'].'</p><hr style="margin:0 0 0 0px;border-top: 1px solid #eeeeee;">
+                                            <p class="mb-1 crop-text-1">'.$Item1['Title'].'</p><hr style="margin:0 0 0 0px;border-top: 1px solid #eeeeee;">
+                                            '.$item2_title.$item3_title.'
                                         </div>
                                     </div>
-                                </div>',
+                                </div>
+
+                                '.$more_item.'
+                            </div>
+                            <div class="card-footer">
+                              <div class="text-left">
+                                <a href="javascript:void(0)" data-orderid="'.$record['OrderId'].'" data-labelprinted="'.$LabelPrinted.'" onclick="printLabel(this)" class="btn btn-sm btn-primary mt-1">
+                                  <span tooltip="Print Label" flow="up"><i class="fas fa-print"></i>
+                                  </span>
+                                </a>
+                                <span class="btn btn-sm bg-secondary mt-1" tooltip="Order Id: #'.$record['NumOrderId'].'" flow="up">#'.$record['NumOrderId'].'</span>
+                                <span class="btn btn-sm bg-danger mt-1" tooltip="QTY: x '.array_sum(array_column($record['Items'],'Quantity')).'" flow="up">x '.array_sum(array_column($record['Items'],'Quantity')).'</span>
+                                <a href="'.route("admin.packlist.order_details",$record["OrderId"]).'" id="popup-modal-button" class="btn btn-sm bg-info mt-1">
+                                  <i class="fas fa-info"></i>
+                                </a>
+                                
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>';
+                }
+                
+                $data_arr[] = array(
+                    "OrderId" => $record['OrderId'],
+                    "LabelPrinted" => $LabelPrinted,
+                    "ItemDetais" => $ItemDetais,
+                    "labelPrintedBGClass" => $labelPrintedBGClass
                 );
             }
 
@@ -249,21 +298,99 @@ class PackOrdersController extends Controller
         pageStartNumber: 0
         operationId: 19c02639-b2b7-412d-939f-9d9a23a6ec71
         context: {"module":"OpenOrdersBeta"}*/
-        $OrderId = $request->OrderId;
+        try {
+            $printer_name = str_replace('~', '', str_replace('&#8726;', '\~', auth()->user()->printer_name));
+            $OrderIds[] = $request->OrderId;
+            $linnworks = Linnworks_API::make([
+                    'applicationId' => env('LINNWORKS_APP_ID'),
+                    'applicationSecret' => env('LINNWORKS_SECRET'),
+                    'token' => auth()->user()->linnworks_token()->token,
+                ], $this->client);
+
+            
+            $records = $linnworks->PrintService()->CreatePDFfromJobForceTemplate('Shipping Labels',$OrderIds,17,'',$printer_name,'',0,'','{"module":"OpenOrdersBeta"}');
+
+            if(count($records['PrintErrors'])>0){
+               return response()->json([
+                'error' => 'OrderId:'. $records['PrintErrors'][0] . ' - Please select other printer'
+                ]); 
+            }else{
+                return response()->json([
+                    'success' => 'Label printed successfully.' // for status 200
+                ]);  
+            }
+
+            /**/
+        } catch (\Exception $exception) {
+
+            DB::rollBack();
+
+            return response()->json([
+                'error' => $exception->getMessage() . ' ' . $exception->getLine() // for status 200
+            ]);
+        }
+    }
+
+    /**
+     * print label Ajax Data
+     *
+     * @return mixed
+     * @throws \Exception
+     */
+    public function multiple_orders_printlabels(Request $request)
+    {
+        
+        try {
+            $printer_name = str_replace('~', '', str_replace('&#8726;', '\~', auth()->user()->printer_name));
+            $OrderIds = $request->OrderIds;
+            $linnworks = Linnworks_API::make([
+                    'applicationId' => env('LINNWORKS_APP_ID'),
+                    'applicationSecret' => env('LINNWORKS_SECRET'),
+                    'token' => auth()->user()->linnworks_token()->token,
+                ], $this->client);
+
+            
+            $records = $linnworks->PrintService()->CreatePDFfromJobForceTemplate('Shipping Labels',$OrderIds,17,'',$printer_name,'',0,'','{"module":"OpenOrdersBeta"}');
+            
+            if(count($records['PrintErrors'])>0){
+                return response()->json([
+                    'error' => $records['PrintErrors']
+                ]); 
+            }else{
+                return response()->json([
+                    'success' => 'Label printed successfully.' // for status 200
+                ]);  
+            }
+
+            /**/
+        } catch (\Exception $exception) {
+
+            DB::rollBack();
+
+            return response()->json([
+                'error' => $exception->getMessage() . ' ' . $exception->getLine() // for status 200
+            ]);
+        }
+    }
+
+    /**
+     * Get order details by order id - Ajax Data
+     *
+     * @return mixed
+     * @throws \Exception
+     */
+    public function order_details(Request $request)
+    {
+        $OrderIds[] = $request->OrderId;
         $linnworks = Linnworks_API::make([
                 'applicationId' => env('LINNWORKS_APP_ID'),
                 'applicationSecret' => env('LINNWORKS_SECRET'),
                 'token' => auth()->user()->linnworks_token()->token,
             ], $this->client);
 
-        $parameters['source']= "EBAY";
-
-        $records = $linnworks->PrintService()->CreatePDFfromJobForceTemplate('Shipping Labels',["b4bb18b8-0075-426f-899c-a30a8db59afa"],17,'[{"Key":"LocationId","Value":"00000000-0000-0000-0000-000000000000"}]','LAPTOP-KCMR0437\DapetzOffice','',0,'19c02639-b2b7-412d-939f-9d9a23a6ec71','{"module":"OpenOrdersBeta"}');
-
-        dd($records);
-        return $records;
-        
-
+        $records = $linnworks->Orders()->GetOrdersById($OrderIds);
+        $record = $records[0];
+        return view('admin.packlist.order_details', compact('record'));
     }
     /**
      * Show the form for creating a new resource.

@@ -9,7 +9,7 @@
         </div>
         
         <div class="row col-sm-12 page-titles">
-            <div class="col-lg-5 p-b-9 align-self-center text-left  " id="list-page-actions-container">
+            <div class="col-5 p-b-9 align-self-center text-left  " id="list-page-actions-container">
                 <div id="list-page-actions">
                     <!--ADD NEW ITEM-->
                     @can('create company')
@@ -17,10 +17,14 @@
                         <span tooltip="Create new company & Get token" flow="right"><i class="fas fa-plus"></i></span>
                     </a>
                     @endcan
+
+                    <a href="{{ route('admin.profile.printers') }}" class="btn btn-danger btn-add-circle edit-add-modal-button js-ajax-ux-request reset-target-modal-form" id="popup-modal-buttonUserRole">
+                        <span tooltip="Select Your Printer." flow="right"><i class="fa fa-print"></i></span>
+                    </a>
                     <!--ADD NEW BUTTON (link)-->
                 </div>
             </div>
-            <div class="col-lg-7 align-self-center list-pages-crumbs text-right" id="breadcrumbs">
+            <div class="col-7 align-self-center list-pages-crumbs text-right" id="breadcrumbs">
                 <h3 class="text-themecolor">Pack List</h3>
                 <!--crumbs-->
                 <ol class="breadcrumb float-right">
@@ -41,13 +45,9 @@
                 <div class="card-body">
                     <div class="table-responsive list-table-wrapper">
                         <table class="table table-hover dataTable no-footer" id="table" width="100%">
-                            <thead>
+                            <thead style="display: none;">
                                 <tr>
-                                    <th></th>
-                                    <th>General Info</th>
-                                    <th>Customer</th>
-                                    <th>Items</th>
-                                    <th>Total</th>
+                                    <th>Details</th>
                                 </tr>
                             </thead>
                             <tbody></tbody>
@@ -65,23 +65,37 @@
 
 <script>
 
-function printLabel(d) {
-    var OrderId= $(d).data('orderid');
-    var LabelPrinted= $(d).data('labelprinted');
+function printLabel(d='',OrderId='',LabelPrinted='') {
+    if(d!=''){
+        var OrderId= $(d).data('orderid');
+        var LabelPrinted= $(d).data('labelprinted');
+    }
+
     if(LabelPrinted=="Label Printed"){
-        var confirm_reprint = confirm("This label already printed, So are you sure want to reprint it?");
-        if (confirm_reprint == false) {
+        swal({
+            title: "Warning",
+            text: "This label already printed, So are you sure want to reprint it?",
+            type: "warning",
+            showCancelButton: !0,
+            confirmButtonText: "Yes, print it!",
+            cancelButtonText: "No, cancel!",
+            reverseButtons: !0
+        }).then(function (r) {
+            if (r.value === true) {
+                printLabelAjex(OrderId);
+            } else {
+                r.dismiss;
+            }
+        }, function (dismiss) {
             return false;
-        }else{
-            printLabelAjex(OrderId);
-        }
+        })
     }else{
         printLabelAjex(OrderId);
     }
 }
 
 function printLabelAjex(OrderId) {
-    $("#pageloader").fadeIn();
+    //$("#pageloader").fadeIn();
     $.ajax({
         method: "POST",
         url: "{{ url('admin/packlist/ajax/printlabel') }}",
@@ -91,13 +105,20 @@ function printLabelAjex(OrderId) {
             alert_message(message);
             setTimeout(function() {   //calls click event after a certain time
                 datatables();
-                $("#pageloader").hide();
+                //$("#pageloader").hide();
             }, 1000);
-        },
+        }
     });
 }
 
 function datatables() {
+
+    $.fn.dataTable.ext.buttons.printlabels = {
+        text: 'Print Labels',
+        action: function ( e, dt, node, config ) {
+            multiple_orders_printlabels(dt)
+        }
+    };
 
     var table = $('#table').DataTable({
         dom: 'RBfrtip',
@@ -113,36 +134,53 @@ function datatables() {
         serverSide    : true,
         "bDestroy"    : true,
         pagingType    : "full_numbers",
-        columnDefs: [ {
-            width: 20,
-            orderable: false,
-            className: 'select-checkbox',
-            targets: 0,
-            data: 'NumOrderId',
-            defaultContent: ''
-        } ],
-        select: {
-            style:    'multi',
-            selector: 'td:first-child'
+        buttons: [
+            'selectAll',
+            'selectNone',
+            'printlabels'
+        ],
+        language: {
+            buttons: {
+                selectAll: "Select all",
+            }
         },
         ajax          : {
             url     : '{{ url('admin/packlist/ajax/data') }}',
             dataType: 'json'
         },
         columns       : [
-            {data: ''},
-            {data: 'NumOrderId', name: 'NumOrderId'},
-            {data: 'Custmer', name: 'Custmer'},
-            {data: 'Item', name: 'Item'},
-            {data: 'Total', name: 'Total'},
+            {data: 'ItemDetais', name: 'ItemDetais'},
             
         ],
     });
+
+
+    
+}
+
+function multiple_orders_printlabels(table) {
+    var OrderIds=[];
+    var selectedRow = table.rows( { selected: true } ).count();
+    for (var i = 0; i < selectedRow; i++) {
+        OrderIds.push(table.rows( { selected: true } ).data()[i]['OrderId']);
+    }
+    console.log(OrderIds);
+    $.ajax({
+        method: "POST",
+        url: "{{ url('admin/packlist/ajax/multiple_orders_printlabels') }}",
+        headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+        data: {OrderIds: OrderIds},
+        success: function(message){
+            alert_message(message);
+            setTimeout(function() {   //calls click event after a certain time
+                datatables();
+                //$("#pageloader").hide();
+            }, 1000);
+        }
+    });
+    
 }
 
 datatables();
-
-
 </script>
-
 @endsection

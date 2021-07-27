@@ -10,9 +10,35 @@ use Illuminate\Support\Facades\Hash;
 use App\Traits\UploadTrait;
 use File;
 
+use Booni3\Linnworks\Linnworks as Linnworks_API;
+
 class ProfileController extends Controller
 {
     use UploadTrait;
+
+    /** @var Client  */
+    protected $client;
+
+    /** @var MockHandler  */
+    protected $mock;
+
+    /** @var array  */
+    //protected $config;
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->mock = new MockHandler([]);
+
+        $this->mock->append(new Response(200, [],
+            file_get_contents(__DIR__.'/stubs/AuthorizeByApplication.json')));
+
+        $handlerStack = HandlerStack::create($this->mock);
+
+        $this->client = new Client(['handler' => $handlerStack]);
+    }
+
 
     public function update(Request $request)
     {
@@ -73,6 +99,20 @@ class ProfileController extends Controller
         return redirect()->route('admin.profile.index');
     }
 
+    public function updatePrinterName(Request $request)
+    {
+        $id = auth()->user()->id;
+
+        $request->validate([
+            'printer_name' => 'required',
+        ]);
+
+        auth()->user()->update($request->only('printer_name'));
+        return response()->json([
+            'success' => 'Printer name was updated successfully.' // for status 200
+        ]);
+    }
+
     public function updatePassword(Request $request)
     {
         $request->validate([
@@ -90,5 +130,19 @@ class ProfileController extends Controller
         }
         return redirect()->route('admin.profile.index')
             ->withErrors('The password changing Fail.');
+    }
+
+    public function printers()
+    {
+        $linnworks = Linnworks_API::make([
+                        'applicationId' => env('LINNWORKS_APP_ID'),
+                        'applicationSecret' => env('LINNWORKS_SECRET'),
+                        'token' => auth()->user()->linnworks_token()->token,
+                    ], $this->client);
+        $printers = $linnworks->PrintService()->VP_GetPrinters();
+
+        $user = User::findOrFail(auth()->id());
+        
+        return view('admin.profile.printers', compact('user','printers'));
     }
 }

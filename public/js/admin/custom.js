@@ -1,5 +1,6 @@
 $(document).ready(function () {
     $('body').on('click', '#popup-modal-button', function(event) {
+        $('#popup-modal-body').html('Loading..');
         event.preventDefault();
         var url = $(this).attr('href');
         $.ajax({
@@ -20,10 +21,22 @@ $(document).ready(function () {
 function alert_message(message) {
     if(typeof(message.success) != "undefined" && message.success !== null) {
         var messageHtml = '<div class="alert alert-success alert-dismissible fade show" role="alert"><strong>Success: </strong> '+ message.success +' <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>';
+        //$('#error_message').html(messageHtml);
+        //$('#message').html(messageHtml);
+        Swal.fire({icon: 'Success', title: 'Success!', text: message.success })
+
+    }else if(typeof(message.delete) != "undefined" && message.delete !== null) {
+        var messageHtml = '<div class="alert alert-success alert-dismissible fade show" role="alert"><strong>Delete: </strong> '+ message.delete +' <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>';
+        //$('#error_message').html(messageHtml);
+        //$('#message').html(messageHtml);
+        Swal.fire({ icon: 'delete', title: 'Delete!', text: message.delete })
+
     } else if(typeof(message.error) != "undefined" && message.error !== null){
         var messageHtml = '<div class="alert alert-danger alert-dismissible fade show" role="alert"><strong>Error: </strong> '+message.error+' <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>';
+        //$('#message').html(messageHtml);
+        Swal.fire({ icon: 'error',  title: 'Oops...', text: message.error})
     }
-    $('#message').html(messageHtml);
+    
 }
 
 $(document).ready(function () {
@@ -44,6 +57,10 @@ $(document).ready(function () {
                     $("#pageloader").hide();
                 }, 1000);
             },
+            error: function (data){
+                    console.log(data);
+                    $("#pageloader").hide();
+            }
         });
     }); 
 });

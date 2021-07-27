@@ -8,8 +8,32 @@ use App\Image;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Role;
 
+
 class UserController extends Controller
 {
+    /** @var Client  */
+    protected $client;
+
+    /** @var MockHandler  */
+    protected $mock;
+
+    /** @var array  */
+    //protected $config;
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->mock = new MockHandler([]);
+
+        $this->mock->append(new Response(200, [],
+            file_get_contents(__DIR__.'/stubs/AuthorizeByApplication.json')));
+
+        $handlerStack = HandlerStack::create($this->mock);
+
+        $this->client = new Client(['handler' => $handlerStack]);
+    }
+
     function __construct()
     {
         $this->middleware('can:create user', ['only' => ['create', 'store']]);

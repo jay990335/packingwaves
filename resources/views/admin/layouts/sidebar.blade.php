@@ -50,14 +50,13 @@
                                 <p>Dashboard</p>
                             </a>
                         </li>
-                        @can('view company')
+                        
                         <li class="nav-item">
                             <a href="{{ url('admin/packlist') }}" class="nav-link {{ Route::is('admin.packlist.*') || Route::is('admin.packlist.*')  ? 'active' : '' }}">
                                 <i class="fas fa-warehouse nav-icon"></i>
                                 <p>Packlist</p>
                             </a>
                         </li>
-                        @endcan 
 
                         @can('view user')
                         <li class="nav-item">

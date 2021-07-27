@@ -36,11 +36,23 @@ scratch. This page gets rid of all links and provides the needed markup only.
         <!-- DATEPICKER.CSS -->
         <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.3.0/css/datepicker.css" rel="stylesheet" type="text/css" />
 
+        <link rel="stylesheet" href="{{ asset('plugins/datetimepicker/css/jquery.datetimepicker.min.css') }}">
+
+        <!-- Select2 CSS -->
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+
+        <!-- Date Range Picker CSS -->
+        <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/7.2.0/sweetalert2.min.css">
+        
         <!-- Font Awesome Icons -->
         <link rel="stylesheet" href="{{ asset('public/plugins/fontawesome-free/css/all.min.css') }}">
 
         <!-- Theme style -->
         <link rel="stylesheet" href="{{ asset('public/dist/css/adminlte.min.css') }}">
+
+        <link rel="stylesheet" href="{{asset('public/adminLTE/plugins/fullcalendar/dist/fullcalendar.min.css')}}">
 
         <!-- CUSTOM STYLE -->
         <link rel="stylesheet" href="{{ asset('public/css/admin/custom.css') }}">
@@ -90,6 +102,18 @@ scratch. This page gets rid of all links and provides the needed markup only.
         <script src="https://cdn.datatables.net/buttons/1.7.0/js/buttons.colVis.min.js"></script>
         <script src="https://cdn.datatables.net/select/1.3.3/js/dataTables.select.min.js"></script>
         <script src="https://cdn.jsdelivr.net/gh/jeffreydwalter/ColReorderWithResize@9ce30c640e394282c9e0df5787d54e5887bc8ecc/ColReorderWithResize.js"></script>
+
+        <!-- Select2 JS-->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+
+        <!-- Date Range Picker JS -->
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+
+        <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/7.2.0/sweetalert2.all.min.js"></script>
+
+        <script src="{{asset('public/adminLTE/plugins/fullcalendar/dist/fullcalendar.min.js')}}"></script>
     <!-- REQUIRED HEAD SCRIPTS [END]-->
     
 </head>
