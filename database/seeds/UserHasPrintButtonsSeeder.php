@@ -2,10 +2,9 @@
 
 namespace Database\Seeders;
 
-use App\Linnworks;
 use Illuminate\Database\Seeder;
 
-class LinnworksSeeder extends Seeder
+class UserHasPrintButtonsSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -14,6 +13,6 @@ class LinnworksSeeder extends Seeder
      */
     public function run()
     {
-        Linnworks::factory(1)->create();
+        //
     }
 }

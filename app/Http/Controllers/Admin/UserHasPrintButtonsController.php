@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Linnworks;
+use App\User_has_printButtons;
 use Illuminate\Http\Request;
 
-class LinnworksController extends Controller
+class UserHasPrintButtonsController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -41,10 +41,10 @@ class LinnworksController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Linnworks  $linnworks
+     * @param  \App\User_has_printButtons  $user_has_printButtons
      * @return \Illuminate\Http\Response
      */
-    public function show(Linnworks $linnworks)
+    public function show(User_has_printButtons $user_has_printButtons)
     {
         //
     }
@@ -52,10 +52,10 @@ class LinnworksController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Linnworks  $linnworks
+     * @param  \App\User_has_printButtons  $user_has_printButtons
      * @return \Illuminate\Http\Response
      */
-    public function edit(Linnworks $linnworks)
+    public function edit(User_has_printButtons $user_has_printButtons)
     {
         //
     }
@@ -64,10 +64,10 @@ class LinnworksController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Linnworks  $linnworks
+     * @param  \App\User_has_printButtons  $user_has_printButtons
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Linnworks $linnworks)
+    public function update(Request $request, User_has_printButtons $user_has_printButtons)
     {
         //
     }
@@ -75,10 +75,10 @@ class LinnworksController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Linnworks  $linnworks
+     * @param  \App\User_has_printButtons  $user_has_printButtons
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Linnworks $linnworks)
+    public function destroy(User_has_printButtons $user_has_printButtons)
     {
         //
     }

@@ -11,24 +11,27 @@
             <div class="card">
                 <div class="card-header">
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
-                    <h3 class="card-title">Edit Company</h3>
+                    <h3 class="card-title">Select Printer Zone</h3>
                 </div>
                 <!-- /.card-header -->
                 <div class="card-body">
-                    <form action="{{ route('admin.company.update', ['company' => $company->id]) }}" method="put"  id="popup-form" >
+                    <form action="{{ route('admin.profile.updatePrinterZone', ['user' => $user->id]) }}" method="put"  id="popup-formUserRole" >
                         @csrf
                         @method('PUT')
                         <div class="form-group">
-                            <label>Name</label>
-                            <input type="text" name="name" value="{{ $company->name }}" class="form-control" required autocomplete="name" autofocus maxlength="200">
-                        </div>
-                        <div class="form-group">
-                            <label>Email</label>
-                            <input type="email" name="email" value="{{ $company->email }}" class="form-control" required autocomplete="email">
-                        </div>
-                        <div class="form-group">
-                            <label>Website</label>
-                            <input type="text" name="website" value="{{ $company->website }}" class="form-control" required autocomplete="website">
+                            <label>Printer Zone</label>
+                            <select class="form-control" name="printer_zone" id="printer_name">
+                                @foreach ($printer_zone['PrintZones'] as $printer_zone)
+                                <?php 
+
+                                    $PrintZoneName = $printer_zone['PrintZoneName'];
+                                    $PrintZoneCode = $printer_zone['PrintZoneCode'];
+                                ?>
+                                <option value="{{ $PrintZoneCode }}" 
+                                {{ $PrintZoneCode === $user->printer_zone ? 'selected' : null }}
+                                >{{ $PrintZoneName }}</option>
+                                @endforeach
+                            </select>
                         </div>
                         <button type="submit" class="btn btn-primary">Update</button>
                         <a href="" class="btn btn-secondary"  data-dismiss="modal">Close</a>
@@ -42,7 +45,7 @@
 <script type="text/javascript">
     // jQuery Validation
     $(function(){
-        $('#popup-form').validate(
+        $('#popup-formUserRole').validate(
         {
             rules:{
               

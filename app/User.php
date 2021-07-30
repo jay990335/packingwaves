@@ -21,7 +21,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 'biography', 'dateOfBirth', 'printer_name', 'email', 'password',
+        'name', 'biography', 'dateOfBirth', 'printer_name', 'printer_zone', 'email', 'password',
     ];
 
     /**
@@ -88,5 +88,13 @@ class User extends Authenticatable
         $id = auth()->user()->id;
         $linnworks_token = Linnworks::where('created_by', $id)->latest()->first();
         return $linnworks_token;
+    }
+
+    /**
+     * The branches that belong to the user.
+     */
+    public function print_buttons()
+    {
+        return $this->belongsToMany(printButtons::class, 'user_has_print_buttons');
     }
 }

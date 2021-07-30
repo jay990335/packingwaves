@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ea7302be80114a41cb86f7b1d80cfb3b",
+    "content-hash": "9abbf45ea8596418b6ed9c2befcf78c5",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -2223,6 +2223,59 @@
                 }
             ],
             "time": "2021-02-18T15:41:32+00:00"
+        },
+        {
+            "name": "onfuro/linnworks",
+            "version": "0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/onfuro/linnworks.git",
+                "reference": "9987ff7a60d999918cf9e21bdab107b52a2e19a6"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/onfuro/linnworks/zipball/9987ff7a60d999918cf9e21bdab107b52a2e19a6",
+                "reference": "9987ff7a60d999918cf9e21bdab107b52a2e19a6",
+                "shasum": ""
+            },
+            "require": {
+                "guzzlehttp/guzzle": "^6.3"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^9.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Onfuro\\Linnworks\\LinnworksServiceProvider"
+                    ],
+                    "aliases": {
+                        "Linnworks": "Onfuro\\Linnworks\\LinnworksFacade"
+                    }
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Onfuro\\Linnworks\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Onfuro",
+                    "email": "adam@profilestudio.com"
+                }
+            ],
+            "description": "Linnworks API wrapper",
+            "support": {
+                "issues": "https://github.com/onfuro/linnworks/issues",
+                "source": "https://github.com/onfuro/linnworks/tree/0.1"
+            },
+            "time": "2021-07-27T11:57:51+00:00"
         },
         {
             "name": "opis/closure",

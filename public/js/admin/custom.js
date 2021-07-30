@@ -13,7 +13,7 @@ $(document).ready(function () {
                     console.log(data);
             }
         });
-
+        $('#sticky').removeClass('stick');
         $('#popup-modal').modal('show');
     });
 });
@@ -68,25 +68,38 @@ $(document).ready(function () {
 $(document).ready(function () {
     $(document).on('submit','.delete-form',function(e){
         e.preventDefault();
-        var confirm_delete = confirm("Are you sure want to delete it?");
-        if (confirm_delete == true) {
-            $("#pageloader").fadeIn();
-            var url = $(this).attr('action');
-            $.ajax({
-                method: "POST",
-                url: url,
-                headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
-                data: $(this).serialize(),
-                success: function(message){
-                    alert_message(message);
-                    setTimeout(function() {   //calls click event after a certain time
-                        datatables();
-                        $("#pageloader").hide();
-                    }, 1000);
-                },
-            });
-        }
-        return confirm_delete;
+        var url = $(this).attr('action');
+        var data = $(this).serialize();
+        swal({
+            title: "Delete?",
+            text: "Are you sure want to delete it?",
+            type: "warning",
+            showCancelButton: !0,
+            confirmButtonText: "Yes, delete it!",
+            cancelButtonText: "No, cancel!",
+            reverseButtons: !0
+        }).then(function (r) {
+            if (r.value === true) {
+                $("#pageloader").fadeIn();
+                $.ajax({
+                    method: "POST",
+                    url: url,
+                    headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                    data: data,
+                    success: function(message){
+                        setTimeout(function() {   //calls click event after a certain time
+                            datatables();
+                            $("#pageloader").hide();
+                            alert_message(message);
+                        }, 1000);
+                    },
+                });
+            } else {
+                r.dismiss;
+            }
+        }, function (dismiss) {
+            return false;
+        })
     }); 
 });
 

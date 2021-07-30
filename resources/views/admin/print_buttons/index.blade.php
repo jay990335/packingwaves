@@ -12,20 +12,20 @@
             <div class="col-lg-5 p-b-9 align-self-center text-left  " id="list-page-actions-container">
                 <div id="list-page-actions">
                     <!--ADD NEW ITEM-->
-                    @can('create company')
-                    <a href="https://apps.linnworks.net/Authorization/Authorize/9a50e415-9916-4a50-8c57-b13a73b33216?Tracking={{auth()->user()->createToken('authToken')->accessToken}}" class="btn btn-danger btn-add-circle edit-add-modal-button js-ajax-ux-request reset-target-modal-form" id="popup-modal-button" target="_blank">
-                        <span tooltip="Create new company & Get token" flow="right"><i class="fas fa-plus"></i></span>
+                    @can('create Print Buttons')
+                    <a href="{{ route('admin.print_buttons.create') }}" class="btn btn-danger btn-add-circle edit-add-modal-button js-ajax-ux-request reset-target-modal-form" id="popup-modal-button">
+                        <span tooltip="Create new print buttons." flow="right"><i class="fas fa-plus"></i></span>
                     </a>
                     @endcan
                     <!--ADD NEW BUTTON (link)-->
                 </div>
             </div>
             <div class="col-lg-7 align-self-center list-pages-crumbs text-right" id="breadcrumbs">
-                <h3 class="text-themecolor">Companies</h3>
+                <h3 class="text-themecolor">Print Buttons</h3>
                 <!--crumbs-->
                 <ol class="breadcrumb float-right">
                     <li class="breadcrumb-item">App</li>    
-                    <li class="breadcrumb-item  active active-bread-crumb ">Companies</li>
+                    <li class="breadcrumb-item  active active-bread-crumb ">Print Buttons</li>
                 </ol>
                 <!--crumbs-->
             </div>
@@ -35,7 +35,7 @@
         <div class="col-md-12">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">All Companies List</h3>
+                    <h3 class="card-title">All Print Buttons List</h3>
                 </div>
                 <!-- /.card-header -->
                 <div class="card-body">
@@ -43,8 +43,11 @@
                         <table class="table table-hover dataTable no-footer" id="table" width="100%">
                             <thead>
                             <tr>
-                                <th></th>
-                                <th>General Info</th>
+                                <th>Name</th>
+                                <th>Preview</th>
+                                <th>User</th>
+                                <th>Status</th>
+                                <th class="noExport" style="width: 100px;">Action</th>
                             </tr>
                             </thead>
                             <tbody></tbody>
@@ -64,7 +67,7 @@
 function datatables() {
 
     var table = $('#table').DataTable({
-        dom: 'Bfrtip',
+        dom: 'RBfrtip',
         buttons: [],
         select: true,
         
@@ -77,33 +80,46 @@ function datatables() {
         serverSide    : true,
         "bDestroy"    : true,
         pagingType    : "full_numbers",
-        columnDefs: [ {
-            width: 20,
-            orderable: false,
-            className: 'select-checkbox',
-            targets: 0,
-            data: 'NumOrderId',
-            defaultContent: ''
-        } ],
-        select: {
-            style:    'multi',
-            selector: 'td:first-child'
-        },
         ajax          : {
-            url     : '{{ url('admin/company/ajax/data') }}',
+            url     : '{{ url('admin/print_buttons/ajax/data') }}',
             dataType: 'json'
         },
         columns       : [
-            {data: ''},
-            {data: 'NumOrderId', name: 'NumOrderId'}
+            {data: 'name', name: 'name'},
+            {data: 'preview_button', name: 'preview_button'},
+            {data: 'users_avatars', name: 'users_avatars'},
+            {data: 'print_button_status', name: 'print_button_status'},
+            {data: 'action', name: 'action', orderable: false, searchable: false,
+                fnCreatedCell: function (nTd, sData, oData, iRow, iCol) {
+                    //  console.log( nTd );
+                    $("a", nTd).tooltip({container: 'body'});
+                }
+            }
         ],
     });
 }
 
 datatables();
+
+function funChangeStatus(id,status) {
+    $("#pageloader").fadeIn();
+    $.ajax({
+      url : '{{ route('admin.print_buttons.ajax.change_status') }}',
+      data: {
+        "_token": "{{ csrf_token() }}",
+        "id": id,
+        "status": status
+        },
+      type: 'get',
+      dataType: 'json',
+      success: function( result )
+      {
+        datatables();
+        $("#pageloader").hide();
+      }
+    });
+}
 </script>
-
-
 
 
     

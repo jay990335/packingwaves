@@ -20,10 +20,10 @@ class Permission extends ModelsPermission
             'edit user',
             'delete user',
 
-            'view hobby',
-            'create hobby',
-            'edit hobby',
-            'delete hobby',
+            'view Print Buttons',
+            'create Print Buttons',
+            'edit Print Buttons',
+            'delete Print Buttons',
 
             'view company',
             'create company',

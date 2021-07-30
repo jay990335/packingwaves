@@ -395,10 +395,6 @@ ol li {
     border-radius: 10px 10px 0 0;
 }
 
-.dt-buttons{
-    padding: 15px 0px 15px 0px;
-}
-
 @media screen and (max-width: 767px)
 {
     .dataTables_wrapper{
@@ -407,8 +403,98 @@ ol li {
     .table{
         text-align: left !important;
     }  
+
+    .select-info{
+        text-align: left;
+        padding: 5px 0 0 0;
+    }
 }
 
 .btn-group-sm>.btn, .btn-sm {
     font-size: 13px !important;
+}
+
+
+.avatar_overlapping {
+  margin-left: -25px;
+}
+
+.avatar_overlapping img {
+    width: 50px;
+    height: 50px;
+    border: 4px solid white;
+    border-radius: 50%;
+    box-shadow: 0px 3px 8px rgb(44 44 84 / 20%);
+    display: inline-block;
+    background: white;
+    cursor: pointer;
+    background-size: cover;
+    background-position: center center;
+    transition: all 200ms ease;
+}
+
+.avatar_overlapping:hover:after {
+    position: absolute;
+    content: attr(username);
+    background: rgba(255, 255, 255, 0.95);
+    color: inherit;
+    font-size: 10px;
+    padding: 4px;
+    width: auto;
+    bottom: -0.5rem;
+    right: -0.5rem;
+    box-shadow: 0px 5px 12px rgb(0 0 0 / 12%);
+    opacity: 0;
+    border-radius: 0.15rem;
+    -webkit-animation: fade 100ms ease 750ms forwards;
+    animation: fade 100ms ease 750ms forwards;
+}
+
+.avatar_overlapping:hover {
+    transform: scale(1.2);
+}
+
+.avatars_overlapping {
+    direction: rtl;
+    display: inline-flex;
+    position: relative;
+    width: auto;
+    margin-bottom: -20px;
+    padding-left: 20px;
+}
+
+.btn.btn-rounded {
+    border-radius: 50px;
+}
+.btn-white {
+    background-color: #fff;
+    border: 1px solid #ccc;
+    color: #333;
+}
+
+.btn-purple {
+    color: #fff;
+    background-color: #b23cfd;
+}
+
+
+#sticky {
+    padding: 0px 10px 12px 10px;
+    /* width: 600px; */
+     background-color: #333; 
+    color: #fff;
+    font-size: 2em;
+    border-radius: 0.5ex;
+}
+
+#sticky.stick {
+    position: fixed;
+    top: 0px;
+    z-index: 10000;
+    /* border-radius: 0 0 0.5em 0.5em; */
+    left: 0;
+    /* margin-bottom: 18px; */
+    padding-bottom: 10px;
+    width: 84%;
+    margin-left: 8%;
 }

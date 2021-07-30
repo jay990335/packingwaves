@@ -7,6 +7,7 @@ use App\User;
 use App\Company;
 use App\Image;
 use App\Linnworks;
+use App\printButtons;
 
 use App\Http\Controllers\Controller;
 use App\Traits\UploadTrait;
@@ -18,7 +19,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
 use Yajra\DataTables\Facades\DataTables;
-use Booni3\Linnworks\Linnworks as Linnworks_API;
+use Onfuro\Linnworks\Linnworks as Linnworks_API;
 use Carbon\Carbon;
 
 class PackOrdersController extends Controller
@@ -62,7 +63,23 @@ class PackOrdersController extends Controller
      */
     public function index()
     {
-        return view('admin.packlist.index'); 
+        $PickingWaveId = 0;
+        $user_id = auth()->user()->id;
+        $print_buttons = printButtons::where('status','Yes')->whereHas('users', function($q) use ($user_id) { $q->where('user_id', $user_id); })->get();
+        return view('admin.packlist.index', compact('print_buttons','PickingWaveId')); 
+    }
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function packorderslist(Request $request)
+    {
+        $PickingWaveId = $request->PickingWaveId;
+        $user_id = auth()->user()->id;
+        $print_buttons = printButtons::where('status','Yes')->whereHas('users', function($q) use ($user_id) { $q->where('user_id', $user_id); })->get();
+        return view('admin.packlist.index', compact('print_buttons','PickingWaveId')); 
     }
 
     /**
@@ -75,7 +92,7 @@ class PackOrdersController extends Controller
     {
 
         if ($request->ajax() == true) {
-            
+            $user_id = auth()->user()->id;
             $draw = $request->get('draw');
             $page = ($request->get("start")/$request->get("length"))+1;
             $start = $request->get("start");
@@ -85,6 +102,26 @@ class PackOrdersController extends Controller
                 'applicationSecret' => env('LINNWORKS_SECRET'),
                 'token' => auth()->user()->linnworks_token()->token,
             ], $this->client);
+
+            $PickingWaveId = $request->PickingWaveId;
+            $filter_order = '';
+            if($PickingWaveId != 0){
+                $PickingWaveOrders = $linnworks->Picking()->GetPickingWave($PickingWaveId);
+
+                $filter_order .= '"TextFields":[';
+                foreach($PickingWaveOrders['PickingWaves'] as $record){
+                    foreach ($record['Orders'] as $Order) {
+                        $filter_order .= '{
+                            "FieldCode":"GENERAL_INFO_ORDER_ID",
+                            "Name":"Order Id",
+                            "FieldType":"Text",
+                            "Type":0,
+                            "Text":"'.$Order['OrderId'].'"
+                        },';
+                    }
+                }
+                $filter_order .= ']';
+            }
 
             $filter = '{
                             "BooleanFields":[
@@ -118,19 +155,23 @@ class PackOrdersController extends Controller
                                  "Value":1
                               }
                             ],
+                            '.$filter_order.'
                         }';
 
-            
-            $records_all = $linnworks->Orders()->getOpenOrders('',$rowperpage,$page,$filter,[],'');
+            $sorting = '[{"Direction":'.$request->sortby_type.',"FieldCode":"'.$request->sortby_field.'","Order":1}]';
+
+            $records_all = $linnworks->Orders()->getOpenOrders('',$rowperpage,$page,$filter,$sorting,'');
 
             $records = $linnworks->Orders()->getOpenOrders('',
                                                         $rowperpage,
                                                         $page,
                                                         $filter,
-                                                        [],
+                                                        $sorting,
                                                         $request->search['value']?$request->search['value']:'');
             //dd($records);
             $data_arr = array();
+
+            $print_buttons = printButtons::where('status','Yes')->whereHas('users', function($q) use ($user_id) { $q->where('user_id', $user_id); })->get();
 
             foreach($records['Data'] as $record){
                 $NumOrderId = $record['NumOrderId'];
@@ -142,6 +183,16 @@ class PackOrdersController extends Controller
                     $labelPrintedBGClass = '';
                     $LabelPrinted = 'Label Not Printed';
                 }
+
+                /*print buttons dynamic code [Start]*/
+                $print_buttons_html = '';
+                if(isset(auth()->user()->printer_zone)){
+                    foreach ($print_buttons as $print_button) {
+                        $print_buttons_html .= '<a href="javascript:void(0)" data-orderid="'.$record['OrderId'].'" data-labelprinted="'.$LabelPrinted.'" data-templateid="'.$print_button->templateID.'" data-templatetype="'.$print_button->templateType.'" onclick="printLabel(this)" class="'.$print_button->style.' btn-sm mt-1 mr-1"><span tooltip="'.$print_button->name.'" flow="up"><i class="fas fa-print"></i> '.$print_button->name.'</span></a>';
+                    }  
+                }
+                /*print buttons dynamic code [End]*/
+
                 $itemCount = count($record['Items']);
                 if($itemCount==1){
                     $Item = $record['Items'][0];
@@ -171,10 +222,7 @@ class PackOrdersController extends Controller
                                 </div>
                                 <div class="card-footer">
                                   <div class="text-left">
-                                    <a href="javascript:void(0)" data-orderid="'.$record['OrderId'].'" data-labelprinted="'.$LabelPrinted.'" onclick="printLabel(this)" class="btn btn-sm btn-primary mt-1">
-                                      <span tooltip="Print Label" flow="up"><i class="fas fa-print"></i>
-                                      </span>
-                                    </a>
+                                    '.$print_buttons_html.'
                                     <span class="btn btn-sm bg-secondary mt-1" tooltip="Order Id: #'.$record['NumOrderId'].'" flow="up">#'.$record['NumOrderId'].'</span>
                                     <span class="btn btn-sm bg-secondary mt-1" tooltip="Item Location: '.$Item['BinRack'].'" flow="up">'.$Item['BinRack'].'</span>
                                     <span class="btn btn-sm '.$quantityBGClass.' mt-1" tooltip="QTY: x '.$Item['Quantity'].'" flow="up">x '.$Item['Quantity'].'</span>
@@ -246,10 +294,7 @@ class PackOrdersController extends Controller
                             </div>
                             <div class="card-footer">
                               <div class="text-left">
-                                <a href="javascript:void(0)" data-orderid="'.$record['OrderId'].'" data-labelprinted="'.$LabelPrinted.'" onclick="printLabel(this)" class="btn btn-sm btn-primary mt-1">
-                                  <span tooltip="Print Label" flow="up"><i class="fas fa-print"></i>
-                                  </span>
-                                </a>
+                                '.$print_buttons_html.'
                                 <span class="btn btn-sm bg-secondary mt-1" tooltip="Order Id: #'.$record['NumOrderId'].'" flow="up">#'.$record['NumOrderId'].'</span>
                                 <span class="btn btn-sm bg-danger mt-1" tooltip="QTY: x '.array_sum(array_column($record['Items'],'Quantity')).'" flow="up">x '.array_sum(array_column($record['Items'],'Quantity')).'</span>
                                 <a href="'.route("admin.packlist.order_details",$record["OrderId"]).'" id="popup-modal-button" class="btn btn-sm bg-info mt-1">
@@ -283,6 +328,19 @@ class PackOrdersController extends Controller
     }
 
     /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function pickingwaves()
+    {
+
+        $user_id = auth()->user()->id;
+        $print_buttons = printButtons::where('status','Yes')->whereHas('users', function($q) use ($user_id) { $q->where('user_id', $user_id); })->get();
+        return view('admin.packlist.index', compact('print_buttons')); 
+    }
+
+    /**
      * print label Ajax Data
      *
      * @return mixed
@@ -300,15 +358,24 @@ class PackOrdersController extends Controller
         context: {"module":"OpenOrdersBeta"}*/
         try {
             $printer_name = str_replace('~', '', str_replace('&#8726;', '\~', auth()->user()->printer_name));
+            $printer_zone = auth()->user()->printer_zone;
+            if($printer_zone==''){
+                return response()->json([
+                    'error' => 'Please select your printer zone!!'
+                ]); 
+            }
             $OrderIds[] = $request->OrderId;
+            $templateID = $request->templateID;
+            $templateType = $request->templateType;
+        
             $linnworks = Linnworks_API::make([
-                    'applicationId' => env('LINNWORKS_APP_ID'),
-                    'applicationSecret' => env('LINNWORKS_SECRET'),
-                    'token' => auth()->user()->linnworks_token()->token,
-                ], $this->client);
+                'applicationId' => env('LINNWORKS_APP_ID'),
+                'applicationSecret' => env('LINNWORKS_SECRET'),
+                'token' => auth()->user()->linnworks_token()->token,
+            ], $this->client);
 
             
-            $records = $linnworks->PrintService()->CreatePDFfromJobForceTemplate('Shipping Labels',$OrderIds,17,'',$printer_name,'',0,'','{"module":"OpenOrdersBeta"}');
+            $records = $linnworks->PrintService()->CreatePDFfromJobForceTemplate($templateType,$OrderIds,$templateID,'','',$printer_zone,0,'','{"module":"OpenOrdersBeta"}');
 
             if(count($records['PrintErrors'])>0){
                return response()->json([
@@ -342,16 +409,31 @@ class PackOrdersController extends Controller
         
         try {
             $printer_name = str_replace('~', '', str_replace('&#8726;', '\~', auth()->user()->printer_name));
-            $OrderIds = $request->OrderIds;
-            $linnworks = Linnworks_API::make([
-                    'applicationId' => env('LINNWORKS_APP_ID'),
-                    'applicationSecret' => env('LINNWORKS_SECRET'),
-                    'token' => auth()->user()->linnworks_token()->token,
-                ], $this->client);
+            $printer_zone = auth()->user()->printer_zone;
+            if($printer_zone==''){
+                return response()->json([
+                    'error' => 'Please select your printer zone!!'
+                ]); 
+            }
 
+            $OrderIds = $request->OrderIds;
+            if($OrderIds==''){
+                return response()->json([
+                    'error' => 'Please select atleast one order!!'
+                ]);
+            }
+
+            $templateID = $request->templateID;
+            $templateType = $request->templateType;
             
-            $records = $linnworks->PrintService()->CreatePDFfromJobForceTemplate('Shipping Labels',$OrderIds,17,'',$printer_name,'',0,'','{"module":"OpenOrdersBeta"}');
-            
+            $linnworks = Linnworks_API::make([
+                'applicationId' => env('LINNWORKS_APP_ID'),
+                'applicationSecret' => env('LINNWORKS_SECRET'),
+                'token' => auth()->user()->linnworks_token()->token,
+            ], $this->client);
+
+            $records = $linnworks->PrintService()->CreatePDFfromJobForceTemplate($templateType,$OrderIds,$templateID,'','',$printer_zone,0,'','{"module":"OpenOrdersBeta"}');
+
             if(count($records['PrintErrors'])>0){
                 return response()->json([
                     'error' => $records['PrintErrors']
@@ -390,71 +472,39 @@ class PackOrdersController extends Controller
 
         $records = $linnworks->Orders()->GetOrdersById($OrderIds);
         $record = $records[0];
-        return view('admin.packlist.order_details', compact('record'));
-    }
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
+
+        $PostalServices = $linnworks->PostalServices()->getPostalServices();
+        return view('admin.packlist.order_details', compact('record','PostalServices'));
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Get order details by order id - Ajax Data
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return mixed
+     * @throws \Exception
      */
-    public function store(Request $request)
+    public function changeShippingMethod(Request $request)
     {
-        //
-    }
+        try {
+            $OrderIds[] = $request->OrderId;
+            $shippingMethod = $request->shippingMethod;
+            $linnworks = Linnworks_API::make([
+                    'applicationId' => env('LINNWORKS_APP_ID'),
+                    'applicationSecret' => env('LINNWORKS_SECRET'),
+                    'token' => auth()->user()->linnworks_token()->token,
+                ], $this->client);
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\packOrders  $packOrders
-     * @return \Illuminate\Http\Response
-     */
-    public function show(packOrders $packOrders)
-    {
-        //
-    }
+            $records = $linnworks->Orders()->ChangeShippingMethod($OrderIds,$shippingMethod);
+            return response()->json([
+                'success' => 'Shipping method changed successfully.' // for status 200
+            ]); 
+        } catch (\Exception $exception) {
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\packOrders  $packOrders
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(packOrders $packOrders)
-    {
-        //
-    }
+            DB::rollBack();
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\packOrders  $packOrders
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, packOrders $packOrders)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\packOrders  $packOrders
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(packOrders $packOrders)
-    {
-        //
+            return response()->json([
+                'error' => $exception->getMessage() . ' ' . $exception->getLine() // for status 200
+            ]);
+        }
     }
 }

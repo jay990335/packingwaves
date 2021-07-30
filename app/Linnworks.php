@@ -21,7 +21,7 @@ class Linnworks extends Model
      * @var array
      */
     protected $fillable = [
-        'token', 'applicationId', 'applicationSecret', 'created_by', 'updated_by',
+        'token', 'applicationId', 'applicationSecret', 'passportAccessToken', 'created_by', 'updated_by',
     ];
 
     /**

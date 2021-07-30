@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Hash;
 use App\Traits\UploadTrait;
 use File;
 
-use Booni3\Linnworks\Linnworks as Linnworks_API;
+use Onfuro\Linnworks\Linnworks as Linnworks_API;
 
 class ProfileController extends Controller
 {
@@ -113,6 +113,20 @@ class ProfileController extends Controller
         ]);
     }
 
+    public function updatePrinterZone(Request $request)
+    {
+        $id = auth()->user()->id;
+
+        $request->validate([
+            'printer_zone' => 'required',
+        ]);
+        
+        auth()->user()->update($request->only('printer_zone'));
+        return response()->json([
+            'success' => 'Printer zone was updated successfully.' // for status 200
+        ]);
+    }
+
     public function updatePassword(Request $request)
     {
         $request->validate([
@@ -135,14 +149,28 @@ class ProfileController extends Controller
     public function printers()
     {
         $linnworks = Linnworks_API::make([
-                        'applicationId' => env('LINNWORKS_APP_ID'),
-                        'applicationSecret' => env('LINNWORKS_SECRET'),
-                        'token' => auth()->user()->linnworks_token()->token,
-                    ], $this->client);
+                'applicationId' => env('LINNWORKS_APP_ID'),
+                'applicationSecret' => env('LINNWORKS_SECRET'),
+                'token' => auth()->user()->linnworks_token()->token,
+            ], $this->client);
         $printers = $linnworks->PrintService()->VP_GetPrinters();
 
         $user = User::findOrFail(auth()->id());
         
         return view('admin.profile.printers', compact('user','printers'));
+    }
+
+    public function printers_zone()
+    {
+        $linnworks = Linnworks_API::make([
+                'applicationId' => env('LINNWORKS_APP_ID'),
+                'applicationSecret' => env('LINNWORKS_SECRET'),
+                'token' => auth()->user()->linnworks_token()->token,
+            ], $this->client);
+        $printer_zone = $linnworks->PrintZone()->GetAllPrintZones();
+
+        $user = User::findOrFail(auth()->id());
+        
+        return view('admin.profile.printer_zone', compact('user','printer_zone'));
     }
 }

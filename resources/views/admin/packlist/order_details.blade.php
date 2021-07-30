@@ -1,6 +1,7 @@
 @extends('admin.layouts.popup')
 
 @section('content')
+
 <div class="invoice p-3 mb-3">
     <div class="row">
         <div class="col-12">
@@ -12,7 +13,7 @@
     </div>
     <div class="row invoice-info">
         <div class="col-sm-6 invoice-col mb-3">
-          <b>Source: {{$record['GeneralInfo']['Source']}}/{{$record['GeneralInfo']['SubSource']}}</b><br>
+          <b>Source: <span class="text-themecolor">{{$record['GeneralInfo']['Source']}}/{{$record['GeneralInfo']['SubSource']}}</span></b><br>
           <b>Order Date:</b>  {{ \Carbon\Carbon::parse($record['PaidDateTime'])}}<br>
           
           <b>Status: @if($record['GeneralInfo']['Status']==0) 
@@ -26,13 +27,26 @@
                       @else
                         <span class="text-danger">RESEND</span>
                       @endif
-          </b>
+          </b><br>
+          <b>Payment Methods:</b> {{$record['TotalsInfo']['PaymentMethod']}}
           <br>
+          <div class="mb-1">
+          @if(count($record['GeneralInfo']['Identifiers'])>0)
+            <b>Identifiers:</b> @foreach($record['GeneralInfo']['Identifiers'] as $Identifier) <span class="btn btn-warning btn-sm mt-1">{{$Identifier['Name']}}</span> @endforeach
+          @endif
+          </div>
+          <br>
+          <b>Shipping Service</b>
+          <select class="form-control select2" id="shippingMethod" name="shippingMethod" required autocomplete="shippingMethod">
+              @foreach ($PostalServices as $PostalService)
+                  <option value="{{ $PostalService['PostalServiceName'] }}" @if($PostalService['PostalServiceName'] == $record['ShippingInfo']['PostalServiceName']) selected @endif>{{ $PostalService['PostalServiceName'] }}</option>
+              @endforeach
+          </select>
         </div>
         <div class="col-sm-6 invoice-col">
-          Address
+          <strong>Address</strong>
           <address>
-            <strong>{{$record['CustomerInfo']['Address']['FullName']}}</strong><br>
+            <span class="text-themecolor">{{$record['CustomerInfo']['Address']['FullName']}}</span><br>
             {{$record['CustomerInfo']['Address']['Address1']}}, <!-- {{$record['CustomerInfo']['Address']['Address2']}} --><br>
             {{$record['CustomerInfo']['Address']['Town']}}, {{$record['CustomerInfo']['Address']['Region']}}, {{$record['CustomerInfo']['Address']['Country']}}, {{$record['CustomerInfo']['Address']['PostCode']}}<br>
             Phone: {{$record['CustomerInfo']['Address']['PhoneNumber']}}<br>
@@ -68,12 +82,10 @@
     </div>
 
     <div class="row">
-        <div class="col-4">
-          <p style="font-size: 10px;">
-            Payment Methods: {{$record['TotalsInfo']['PaymentMethod']}}
-          </p>
+        <div class="col-3">
+          <p>&nbsp;</p>
         </div>
-        <div class="col-8">
+        <div class="col-9">
           <div class="table-responsive">
             <table class="table">
               <tbody><tr>
@@ -103,4 +115,46 @@
         </div>
     </div>
 </div>
+<script type="text/javascript">
+  $("#shippingMethod").select2({
+      placeholder: "Select Shipping Method",
+      allowClear: false
+    });
+
+  $( "#shippingMethod" ).change(function() {
+      swal({
+          title: "Update?",
+          text: "Are you sure you want to change shipping method?",
+          type: "warning",
+          showCancelButton: !0,
+          confirmButtonText: "Yes, change it!",
+          cancelButtonText: "No, cancel!",
+          reverseButtons: !0
+      }).then(function (r) {
+          if (r.value === true) {
+              $("#pageloader").fadeIn();
+              var shippingMethod = $("#shippingMethod").val();
+              var OrderId="{{$record['OrderId']}}";
+
+              $.ajax({
+                  method: "POST",
+                  url: "{{ url('admin/packlist/ajax/changeShippingMethod') }}",
+                  headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                  data: {OrderId: OrderId,
+                          shippingMethod: shippingMethod},
+                  success: function(message){
+                      alert_message(message);
+                      setTimeout(function() {   //calls click event after a certain time
+                          $("#pageloader").hide();
+                      }, 1000);
+                  }
+              }); 
+          } else {
+              r.dismiss;
+          }
+      }, function (dismiss) {
+          return false;
+      })
+  }); 
+</script>
 @endsection

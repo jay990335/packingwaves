@@ -137,7 +137,23 @@ scratch. This page gets rid of all links and provides the needed markup only.
         <div class="content-wrapper">
             <!-- Content Header (Page header) -->
             <div class="content-header">
-                
+                @if(!isset(auth()->user()->linnworks_token()->token))
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <strong>Token Not Found </strong> Please go to the setting/get token menu. Create Token. If you have any question contact to admin.
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                @endif
+
+                @if(!isset(auth()->user()->printer_zone))
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <strong>Printer Zone Not Found </strong> Please go to the setting/printer_zone and select your printer zone. If you have any question contact to admin.
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                @endif
             </div>
             <!-- /.content-header -->
 

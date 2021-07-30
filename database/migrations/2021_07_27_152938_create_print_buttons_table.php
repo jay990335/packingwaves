@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateCompaniesTable extends Migration
+class CreatePrintButtonsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,19 +13,20 @@ class CreateCompaniesTable extends Migration
      */
     public function up()
     {
-        Schema::create('companies', function (Blueprint $table) {
+        Schema::create('print_buttons', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('email')->unique();
-            $table->string('website');
+            $table->integer('templateID')->comment('linnworks templateID')->default('0');
+            $table->string('templateType')->nullable();
+            $table->string('style')->nullable();
+            $table->enum('status', ['Yes', 'No'])->default('Yes');
 
-            $table->unsignedBigInteger('created_by');
-            $table->unsignedBigInteger('updated_by');
+            $table->unsignedBigInteger('created_by')->index();
+            $table->unsignedBigInteger('updated_by')->index();
             $table->timestamps();
 
             $table->foreign('created_by')->references('id')->on('users');
             $table->foreign('updated_by')->references('id')->on('users');
-
         });
     }
 
@@ -40,6 +41,6 @@ class CreateCompaniesTable extends Migration
             $table->dropForeign(['created_by']);
             $table->dropForeign(['updated_by']);
         });
-        Schema::dropIfExists('companies');
+        Schema::dropIfExists('print_buttons');
     }
 }
