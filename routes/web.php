@@ -13,6 +13,10 @@ Route::group([
 ], function () {
     Route::view('/', 'admin.layouts.master');
     
+    Route::view('notifications-dropdown-menu', 'admin.layouts.notifications')->name('notifications-dropdown-menu');
+    Route::get('/notificationMarkAsRead/{id}', 'DashboardController@notificationMarkAsRead');
+    Route::get('/notificationMarkAllAsRead/{id}', 'DashboardController@notificationMarkAllAsRead');
+    
     // Profile Routes
     Route::view('profile', 'admin.profile.index')->name('profile.index');;
     Route::view('profile/edit', 'admin.profile.edit')->name('profile.edit');
@@ -45,6 +49,8 @@ Route::group([
     Route::get('packlist/order_details/{OrderId}', 'PackOrdersController@order_details')->name('packlist.order_details'); 
     Route::post('packlist/ajax/changeShippingMethod', 'PackOrdersController@changeShippingMethod');
     Route::get('packlist/packorderslist/{PickingWaveId}', 'PackOrdersController@packorderslist')->name('packlist.packorderslist'); 
+    Route::post('packlist/ajax/packingwavesCompletedNotificationSend', 'PackOrdersController@packingwavesCompletedNotificationSend')->name('packlist.ajax.packingwavesCompletedNotificationSend');
+    
 
     // Branch Routes
     Route::resource('print_buttons', 'PrintButtonsController');

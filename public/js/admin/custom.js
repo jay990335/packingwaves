@@ -101,6 +101,40 @@ $(document).ready(function () {
             return false;
         })
     }); 
+
+    $(document).on('click','#packingwavesCompletedNotification',function(e){
+        e.preventDefault();
+        var url = $(this).attr('href');
+        var data = $(this).serialize();
+        swal({
+            title: "Send Notification?",
+            text: "Are you sure you want to send Packing Waves Completed Notification to admin?",
+            type: "warning",
+            showCancelButton: !0,
+            confirmButtonText: "Yes, Send it!",
+            cancelButtonText: "No, cancel!",
+            reverseButtons: !0
+        }).then(function (r) {
+            if (r.value === true) {
+                $("#pageloader").fadeIn();
+                $.ajax({
+                      method: "POST",
+                      url: url,
+                      headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                      success: function(message){
+                          alert_message(message);
+                          setTimeout(function() {   //calls click event after a certain time
+                              $("#pageloader").hide();
+                          }, 1000);
+                      }
+                  }); 
+            } else {
+                r.dismiss;
+            }
+        }, function (dismiss) {
+            return false;
+        })
+    }); 
 });
 
 

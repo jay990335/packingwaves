@@ -32,7 +32,10 @@
           <br>
           <div class="mb-1">
           @if(count($record['GeneralInfo']['Identifiers'])>0)
-            <b>Identifiers:</b> @foreach($record['GeneralInfo']['Identifiers'] as $Identifier) <span class="btn btn-warning btn-sm mt-1">{{$Identifier['Name']}}</span> @endforeach
+            <b>Identifiers:</b> 
+              @foreach($record['GeneralInfo']['Identifiers'] as $Identifier) 
+                <span tooltip="{{$Identifier['Name']}}" flow="up" ><img tooltip="{{$Identifier['Name']}}" flow="up" src="https://linn-content.s3-eu-west-1.amazonaws.com/linn-order-identifiers/{{$Identifier['Tag']}}.svg" width="30"></span>
+              @endforeach
           @endif
           </div>
           <br>

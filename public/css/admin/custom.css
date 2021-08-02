@@ -492,9 +492,54 @@ ol li {
     top: 0px;
     z-index: 10000;
     /* border-radius: 0 0 0.5em 0.5em; */
-    left: 0;
+    left: 161px;
     /* margin-bottom: 18px; */
     padding-bottom: 10px;
-    width: 84%;
+    width: 79%;
     margin-left: 8%;
 }
+
+@media screen and (max-width: 767px)
+{
+    #sticky.stick {
+        position: fixed;
+        top: 0px;
+        z-index: 10000;
+        /* border-radius: 0 0 0.5em 0.5em; */
+        left: 0;
+        /* margin-bottom: 18px; */
+        padding-bottom: 10px;
+        width: 84%;
+        margin-left: 8%;
+    }
+
+}
+
+@media only screen and (min-device-width: 481px) and (max-device-width: 1024px) and (orientation:portrait) {
+    #sticky.stick {
+        position: fixed;
+        top: 0px;
+        z-index: 10000;
+        /* border-radius: 0 0 0.5em 0.5em; */
+        left: 0;
+        /* margin-bottom: 18px; */
+        padding-bottom: 10px;
+        width: 84%;
+        margin-left: 8%;
+    }
+}
+
+@media only screen and (min-device-width: 481px) and (max-device-width: 1024px) and (orientation:landscape) {
+    #sticky.stick {
+        position: fixed;
+        top: 0px;
+        z-index: 10000;
+        /* border-radius: 0 0 0.5em 0.5em; */
+        left: 0;
+        /* margin-bottom: 18px; */
+        padding-bottom: 10px;
+        width: 84%;
+        margin-left: 8%;
+    }
+}
+

@@ -87,7 +87,7 @@ class PickingWavesController extends Controller
             foreach($records['PickingWaves'] as $record){
 
                 $PickingWaveId = $record['PickingWaveId'];
-
+                $picked_order = 0;
                 $filter = '{
                     "BooleanFields":[
                       {
@@ -104,13 +104,13 @@ class PickingWavesController extends Controller
                       }
                    ],
                    "ListFields":[
-                      {
+                      /*{
                          "FieldCode":"GENERAL_INFO_IDENTIFIER",
                          "Name":"Identifiers",
                          "FieldType":"List",
                          "Value":"Pickwave Complete",
                          "Type":0
-                      },
+                      },*/
 
                       {
                          "FieldCode":"GENERAL_INFO_STATUS",
@@ -122,6 +122,9 @@ class PickingWavesController extends Controller
                     ],
                    "TextFields":[';
                         foreach ($record['Orders'] as $Order) {
+                            if($Order['PickState']=='Picked'){
+                                $picked_order++;
+                            }
                             $filter .= '{
                                 "FieldCode":"GENERAL_INFO_ORDER_ID",
                                 "Name":"Order Id",
@@ -135,9 +138,9 @@ class PickingWavesController extends Controller
 
                 $orders_pickwave_complete = $linnworks->Orders()->getOpenOrders('',100,$page,$filter,'[]','');
                 
-                /*if($PickingWaveId == 31){
-                    echo $filter;
-                    dd($orders_pickwave_complete);
+                /*if($PickingWaveId == 33){
+                    //echo $filter;
+                    //dd($orders_pickwave_complete);
                     //dd($record);
                 }*/
                 
@@ -148,18 +151,19 @@ class PickingWavesController extends Controller
                     }
                 }
 
-                if($record['State']=='Complete' && $orders_not_printed_count==0){
+
+                if($record['State']=='Complete' && $orders_not_printed_count==0 && $picked_order!=0){
                     $pickingWaveBGClass = 'bg-dark';
                     $btnBGClass = 'btn-success';
                     $pickingWaveState = 'Complete';
                     $href = route("admin.packlist.packorderslist",$PickingWaveId);
-                }elseif($record['State']!='Complete' && $orders_pickwave_complete['TotalEntries']!=0 && $orders_not_printed_count==0){
-                    $pickingWaveBGClass = 'bg-dark';
+                }elseif($record['State']!='Complete' && $orders_pickwave_complete['TotalEntries']!=0 && $orders_not_printed_count==0 && $picked_order!=0){
+                    $pickingWaveBGClass = 'bg-white';
                     $btnBGClass = 'btn-purple';
                     $pickingWaveState = 'Partial Complete';
                     $href = route("admin.packlist.packorderslist",$PickingWaveId);
-                }elseif($orders_not_printed_count!=0){
-                    $pickingWaveBGClass = 'bg-dark';
+                }elseif($orders_not_printed_count!=0 && $picked_order!=0){
+                    $pickingWaveBGClass = 'bg-white';
                     $btnBGClass = 'btn-purple';
                     $pickingWaveState = 'Partial Complete';
                     $href = route("admin.packlist.packorderslist",$PickingWaveId);
@@ -169,6 +173,11 @@ class PickingWavesController extends Controller
                     $pickingWaveState = 'In Picklist';
                     $href = 'javascript:pickingAlert();';
                     //$href = route("admin.packlist.packorderslist",$PickingWaveId);
+                }
+
+                $picked_order_html = '';
+                if($picked_order!=0){
+                    $picked_order_html .= '<span class="btn btn-sm bg-secondary mt-1" tooltip="Picked Orders: '.$picked_order.'" flow="up">Picked Orders: '.$picked_order.'</span>';                 
                 }
                 
                 $Detais= '<a href="'.$href.'"><div class="row ">
@@ -191,6 +200,11 @@ class PickingWavesController extends Controller
                                     <span class="btn btn-sm bg-secondary mt-1" tooltip="Orders: '.count($record['Orders']).'" flow="up">Orders: '.count($record['Orders']).'</span>
 
                                     <span class="btn btn-sm bg-secondary mt-1" tooltip="Items: '.array_sum(array_column($record['Orders'],'ItemCount')).'" flow="up">Items: '.array_sum(array_column($record['Orders'],'ItemCount')).'</span>
+                                    
+                                    <span class="btn btn-sm bg-secondary mt-1" tooltip="Picked Orders: '.$picked_order.'" flow="up">Picked Orders: '.$picked_order.'</span>
+
+                                    <span class="btn btn-sm bg-secondary mt-1" tooltip="Printed Orders: '.(count($record['Orders']) - $orders_not_printed_count).'" flow="up">Printed Orders: '.(count($record['Orders']) - $orders_not_printed_count).'</span>
+
                                   </div>
                                 </div>
                               </div>

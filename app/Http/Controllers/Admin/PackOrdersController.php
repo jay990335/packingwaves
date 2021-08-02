@@ -11,6 +11,7 @@ use App\printButtons;
 
 use App\Http\Controllers\Controller;
 use App\Traits\UploadTrait;
+use App\Notifications\packingwavesCompletedNotification;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
@@ -21,6 +22,7 @@ use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 use Onfuro\Linnworks\Linnworks as Linnworks_API;
 use Carbon\Carbon;
+use Notification;
 
 class PackOrdersController extends Controller
 {
@@ -97,6 +99,7 @@ class PackOrdersController extends Controller
             $page = ($request->get("start")/$request->get("length"))+1;
             $start = $request->get("start");
             $rowperpage = $request->get("length"); // Rows display per page
+
             $linnworks = Linnworks_API::make([
                 'applicationId' => env('LINNWORKS_APP_ID'),
                 'applicationSecret' => env('LINNWORKS_SECRET'),
@@ -111,13 +114,15 @@ class PackOrdersController extends Controller
                 $filter_order .= '"TextFields":[';
                 foreach($PickingWaveOrders['PickingWaves'] as $record){
                     foreach ($record['Orders'] as $Order) {
-                        $filter_order .= '{
-                            "FieldCode":"GENERAL_INFO_ORDER_ID",
-                            "Name":"Order Id",
-                            "FieldType":"Text",
-                            "Type":0,
-                            "Text":"'.$Order['OrderId'].'"
-                        },';
+                        if($Order['PickState']=='Picked'){
+                            $filter_order .= '{
+                                "FieldCode":"GENERAL_INFO_ORDER_ID",
+                                "Name":"Order Id",
+                                "FieldType":"Text",
+                                "Type":0,
+                                "Text":"'.$Order['OrderId'].'"
+                            },';
+                        }
                     }
                 }
                 $filter_order .= ']';
@@ -139,13 +144,13 @@ class PackOrdersController extends Controller
                               }
                             ],
                             "ListFields":[
-                              {
+                              /*{
                                  "FieldCode":"GENERAL_INFO_IDENTIFIER",
                                  "Name":"Identifiers",
                                  "FieldType":"List",
                                  "Value":"Pickwave Complete",
                                  "Type":0
-                              },
+                              },*/
 
                               {
                                  "FieldCode":"GENERAL_INFO_STATUS",
@@ -507,4 +512,48 @@ class PackOrdersController extends Controller
             ]);
         }
     }
+
+    /**
+     * Send Packing Waves Completed Notification
+     *
+     * @return mixed
+     * @throws \Exception
+     */
+    public function packingwavesCompletedNotificationSend(Request $request)
+    {
+        try {
+            $sender_id = auth()->user()->id;
+            $sender_name = auth()->user()->name;
+            $admin_users = User::role('admin')->get();
+            
+            foreach ($admin_users as $admin_user) {
+                $packingwaveData = [
+                    'name' => 'Packingwaves Completed' ,
+                    'subject' => $sender_name.' Packingwaves Completed'  ,
+                    'body' => 'Please create new Pickingwaves for '.$sender_name,
+                    'thanks' => 'Thank you',
+                    'actionUrl' => '',
+                    'id' => 1,
+                    'sender_id' => $sender_id,
+                    'sender_name' => $sender_name,
+                    'receiver_name' => $admin_user->name,
+                    'text' => 'Please create new Pickingwaves for '.$sender_name,
+                ];
+                $receiver_id = $admin_user->id;
+                $admin_user->notify(new packingwavesCompletedNotification($packingwaveData));
+            }
+            return response()->json([
+                'success' => 'Notification send successfully.' // for status 200
+            ]); 
+        } catch (\Exception $exception) {
+
+            DB::rollBack();
+
+            return response()->json([
+                'error' => $exception->getMessage() . ' ' . $exception->getLine() // for status 200
+            ]);
+        }
+    }
+
+
 }

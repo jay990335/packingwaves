@@ -104,7 +104,13 @@
                                         <p>Print Zone</p>
                                     </a>
                                 </li>
-
+                                <li class="nav-item">
+                                    <a href="{{ route('admin.packlist.ajax.packingwavesCompletedNotificationSend') }}" class="nav-link" id="packingwavesCompletedNotification">
+                                        <i class="fas fa-envelope nav-icon"></i>
+                                        <p>Packingwaves</p>
+                                        <p>Completed Notification</p>
+                                    </a>
+                                </li>
                                 @if(!isset(auth()->user()->linnworks_token()->token))
                                 <li class="nav-item">
                                     <a href="{{ env('LINNWORKS_INSTALLATION_URL'), 'https://apps.linnworks.net/Authorization/Authorize/9a50e415-9916-4a50-8c57-b13a73b33216' }}?Tracking={{auth()->user()->createToken('authToken')->accessToken}}" class="nav-link" target="_blank">
