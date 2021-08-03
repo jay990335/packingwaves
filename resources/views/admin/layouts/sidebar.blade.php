@@ -53,7 +53,7 @@
                         
                         <li class="nav-item">
                             @if(isset(auth()->user()->linnworks_token()->token))
-                            <a href="{{ url('admin/pickingwaves') }}" class="nav-link {{ Route::is('admin.pickingwaves.*') || Route::is('admin.packlist.*')  ? 'active' : '' }}">
+                            <a href="{{ url('admin/packingwaves') }}" class="nav-link {{ Route::is('admin.packingwaves.*') || Route::is('admin.packlist.*')  ? 'active' : '' }}">
                                 <i class="fas fa-warehouse nav-icon"></i>
                                 <p>Packlist</p>
                             </a>

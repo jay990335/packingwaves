@@ -37,9 +37,9 @@ Route::group([
     Route::put('role/{id}/update', 'RoleController@update');
     Route::resource('role', 'RoleController');
 
-    // pickingwaves Routes
-    Route::resource('pickingwaves', 'PickingWavesController');
-    Route::get('pickingwaves/ajax/data', 'PickingWavesController@datatables'); // For Datatables
+    // packingwaves Routes
+    Route::resource('packingwaves', 'PackingWavesController');
+    Route::get('packingwaves/ajax/data', 'PackingWavesController@datatables'); // For Datatables
 
     // Packlist Routes
     Route::resource('packlist', 'PackOrdersController');

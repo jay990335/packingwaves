@@ -22,7 +22,7 @@ use Yajra\DataTables\Facades\DataTables;
 use Onfuro\Linnworks\Linnworks as Linnworks_API;
 use Carbon\Carbon;
 
-class PickingWavesController extends Controller
+class PackingWavesController extends Controller
 {
     use UploadTrait;
 
@@ -56,7 +56,7 @@ class PickingWavesController extends Controller
      */
     public function index()
     {
-        return view('admin.pickingwaves.index');
+        return view('admin.packingwaves.index');
     }
 
     /**
@@ -122,7 +122,7 @@ class PickingWavesController extends Controller
                     ],
                    "TextFields":[';
                         foreach ($record['Orders'] as $Order) {
-                            if($Order['PickState']=='Picked'){
+                            if($Order['PickState']=='Picked' || $Order['PickState']=='PartialPicked'){
                                 $picked_order++;
                             }
                             $filter .= '{
@@ -138,7 +138,7 @@ class PickingWavesController extends Controller
 
                 $orders_pickwave_complete = $linnworks->Orders()->getOpenOrders('',100,$page,$filter,'[]','');
                 
-                /*if($PickingWaveId == 33){
+                /*if($PickingWaveId == 35){
                     //echo $filter;
                     //dd($orders_pickwave_complete);
                     //dd($record);

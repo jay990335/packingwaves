@@ -96,10 +96,10 @@ class PackOrdersController extends Controller
         if ($request->ajax() == true) {
             $user_id = auth()->user()->id;
             $draw = $request->get('draw');
-            $page = ($request->get("start")/$request->get("length"))+1;
             $start = $request->get("start");
             $rowperpage = $request->get("length"); // Rows display per page
-
+            $page = ($start/$rowperpage)+1;
+            
             $linnworks = Linnworks_API::make([
                 'applicationId' => env('LINNWORKS_APP_ID'),
                 'applicationSecret' => env('LINNWORKS_SECRET'),
@@ -112,6 +112,7 @@ class PackOrdersController extends Controller
                 $PickingWaveOrders = $linnworks->Picking()->GetPickingWave($PickingWaveId);
 
                 $filter_order .= '"TextFields":[';
+                $PartialPickedOrderArray=[];
                 foreach($PickingWaveOrders['PickingWaves'] as $record){
                     foreach ($record['Orders'] as $Order) {
                         if($Order['PickState']=='Picked'){
@@ -122,10 +123,30 @@ class PackOrdersController extends Controller
                                 "Type":0,
                                 "Text":"'.$Order['OrderId'].'"
                             },';
+                        }elseif($Order['PickState']=='PartialPicked'){
+                            $filter_order .= '{
+                                "FieldCode":"GENERAL_INFO_ORDER_ID",
+                                "Name":"Order Id",
+                                "FieldType":"Text",
+                                "Type":0,
+                                "Text":"'.$Order['OrderId'].'"
+                            },';
+                            $PartialPickedOrderArray[]=$Order['OrderId'];
                         }
                     }
                 }
                 $filter_order .= ']';
+                $check_identifier = '';
+                
+            }else{
+
+                $check_identifier = '{
+                     "FieldCode":"GENERAL_INFO_IDENTIFIER",
+                     "Name":"Identifiers",
+                     "FieldType":"List",
+                     "Value":"Pickwave Complete",
+                     "Type":0
+                  },';
             }
 
             $filter = '{
@@ -144,13 +165,7 @@ class PackOrdersController extends Controller
                               }
                             ],
                             "ListFields":[
-                              /*{
-                                 "FieldCode":"GENERAL_INFO_IDENTIFIER",
-                                 "Name":"Identifiers",
-                                 "FieldType":"List",
-                                 "Value":"Pickwave Complete",
-                                 "Type":0
-                              },*/
+                              '.$check_identifier.'
 
                               {
                                  "FieldCode":"GENERAL_INFO_STATUS",
@@ -177,7 +192,7 @@ class PackOrdersController extends Controller
             $data_arr = array();
 
             $print_buttons = printButtons::where('status','Yes')->whereHas('users', function($q) use ($user_id) { $q->where('user_id', $user_id); })->get();
-
+            
             foreach($records['Data'] as $record){
                 $NumOrderId = $record['NumOrderId'];
 
@@ -191,10 +206,12 @@ class PackOrdersController extends Controller
 
                 /*print buttons dynamic code [Start]*/
                 $print_buttons_html = '';
-                if(isset(auth()->user()->printer_zone)){
+                if(isset(auth()->user()->printer_zone) && !in_array($NumOrderId, $PartialPickedOrderArray)){
                     foreach ($print_buttons as $print_button) {
                         $print_buttons_html .= '<a href="javascript:void(0)" data-orderid="'.$record['OrderId'].'" data-labelprinted="'.$LabelPrinted.'" data-templateid="'.$print_button->templateID.'" data-templatetype="'.$print_button->templateType.'" onclick="printLabel(this)" class="'.$print_button->style.' btn-sm mt-1 mr-1"><span tooltip="'.$print_button->name.'" flow="up"><i class="fas fa-print"></i> '.$print_button->name.'</span></a>';
                     }  
+                }else{
+                    $print_buttons_html .= '<a href="javascript:void(0)" data-orderid="'.$record['OrderId'].'" class="btn bg-danger btn-sm mt-1"><span tooltip="Partial Picked Order" flow="up">Partial Picked</span></a>';
                 }
                 /*print buttons dynamic code [End]*/
 
@@ -207,6 +224,12 @@ class PackOrdersController extends Controller
                     }else{
                         $quantityBGClass = 'bg-danger';
                     }
+
+                    $BinRackHTML = '';
+                    if($Item['BinRack']!=''){
+                        $BinRackHTML .= '<span class="btn btn-sm bg-secondary mt-1" tooltip="Item Location: '.$Item['BinRack'].'" flow="up">'.$Item['BinRack'].'</span>';
+                    }
+
                     $ItemDetais= '<div class="row ">
                             <div class="col-12">
                               <div class="card '.$labelPrintedBGClass.'" style="margin-bottom: 0px;">
@@ -229,7 +252,7 @@ class PackOrdersController extends Controller
                                   <div class="text-left">
                                     '.$print_buttons_html.'
                                     <span class="btn btn-sm bg-secondary mt-1" tooltip="Order Id: #'.$record['NumOrderId'].'" flow="up">#'.$record['NumOrderId'].'</span>
-                                    <span class="btn btn-sm bg-secondary mt-1" tooltip="Item Location: '.$Item['BinRack'].'" flow="up">'.$Item['BinRack'].'</span>
+                                    '.$BinRackHTML.'
                                     <span class="btn btn-sm '.$quantityBGClass.' mt-1" tooltip="QTY: x '.$Item['Quantity'].'" flow="up">x '.$Item['Quantity'].'</span>
                                     <a href="'.route("admin.packlist.order_details",$record["OrderId"]).'" id="popup-modal-button" class="btn btn-sm bg-info mt-1">
                                       <i class="fas fa-info"></i>
@@ -312,7 +335,7 @@ class PackOrdersController extends Controller
                         </div>
                       </div>';
                 }
-                
+
                 $data_arr[] = array(
                     "OrderId" => $record['OrderId'],
                     "LabelPrinted" => $LabelPrinted,
@@ -330,19 +353,6 @@ class PackOrdersController extends Controller
 
             return json_encode($response);
         }
-    }
-
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function pickingwaves()
-    {
-
-        $user_id = auth()->user()->id;
-        $print_buttons = printButtons::where('status','Yes')->whereHas('users', function($q) use ($user_id) { $q->where('user_id', $user_id); })->get();
-        return view('admin.packlist.index', compact('print_buttons')); 
     }
 
     /**
@@ -413,6 +423,44 @@ class PackOrdersController extends Controller
     {
         
         try {
+            $linnworks = Linnworks_API::make([
+                'applicationId' => env('LINNWORKS_APP_ID'),
+                'applicationSecret' => env('LINNWORKS_SECRET'),
+                'token' => auth()->user()->linnworks_token()->token,
+            ], $this->client);
+
+
+            /*Get Partial Picked Order List [Start] */
+            $PickingWaveId = $request->PickingWaveId;
+            $PartialPickedOrderArray=[];
+            if($PickingWaveId != 0){
+                $PickingWaveOrders = $linnworks->Picking()->GetPickingWave($PickingWaveId);
+                foreach($PickingWaveOrders['PickingWaves'] as $record){
+                    foreach ($record['Orders'] as $Order) {
+                        if($Order['PickState']=='PartialPicked'){
+                            $PartialPickedOrderArray[]=$Order['OrderId_Guid'];
+                            $PartialPickedOrderID[]=$Order['OrderId'];
+                        }
+                    }
+                }
+            }
+            /*Get Partial Picked Order List [End] */
+
+            /*Remove Partial Picked Order In Print Order List [Start] */
+            $OrderIds = $request->OrderIds;
+            $OrderIds = array_diff($OrderIds,$PartialPickedOrderArray);
+            $OrderIdsArray=[];
+            foreach ($OrderIds as $OrderId) {
+                $OrderIdsArray[]= $OrderId;
+            }
+            /*Remove Partial Picked Order In Print Order List [End] */
+
+            if($OrderIds==''){
+                return response()->json([
+                    'error' => 'Please select atleast one order!!'
+                ]);
+            }
+
             $printer_name = str_replace('~', '', str_replace('&#8726;', '\~', auth()->user()->printer_name));
             $printer_zone = auth()->user()->printer_zone;
             if($printer_zone==''){
@@ -421,41 +469,32 @@ class PackOrdersController extends Controller
                 ]); 
             }
 
-            $OrderIds = $request->OrderIds;
-            if($OrderIds==''){
-                return response()->json([
-                    'error' => 'Please select atleast one order!!'
-                ]);
-            }
-
             $templateID = $request->templateID;
             $templateType = $request->templateType;
-            
-            $linnworks = Linnworks_API::make([
-                'applicationId' => env('LINNWORKS_APP_ID'),
-                'applicationSecret' => env('LINNWORKS_SECRET'),
-                'token' => auth()->user()->linnworks_token()->token,
-            ], $this->client);
 
-            $records = $linnworks->PrintService()->CreatePDFfromJobForceTemplate($templateType,$OrderIds,$templateID,'','',$printer_zone,0,'','{"module":"OpenOrdersBeta"}');
+            $records = $linnworks->PrintService()->CreatePDFfromJobForceTemplate($templateType,$OrderIdsArray,$templateID,'','',$printer_zone,0,'','{"module":"OpenOrdersBeta"}');
 
             if(count($records['PrintErrors'])>0){
                 return response()->json([
                     'error' => $records['PrintErrors']
                 ]); 
             }else{
+                if(count($PartialPickedOrderID)>0){
+                    $success = 'Partial picked orders ['.implode(", ",$PartialPickedOrderID).'] not printed. Rest label printed successfully.';
+                }else{
+                    $success = 'Label printed successfully.';
+                }
                 return response()->json([
-                    'success' => 'Label printed successfully.' // for status 200
+                    'success' => $success
                 ]);  
             }
 
-            /**/
         } catch (\Exception $exception) {
 
             DB::rollBack();
 
             return response()->json([
-                'error' => $exception->getMessage() . ' ' . $exception->getLine() // for status 200
+                'error' => $exception->getMessage() . ' ' . $exception->getLine()
             ]);
         }
     }

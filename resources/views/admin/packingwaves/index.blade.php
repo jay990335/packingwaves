@@ -67,7 +67,7 @@ function datatables() {
         info          : false,
         pagingType    : "full_numbers",
         ajax          : {
-            url     : '{{ url('admin/pickingwaves/ajax/data') }}',
+            url     : '{{ url('admin/packingwaves/ajax/data') }}',
             dataType: 'json'
         },
         columns       : [

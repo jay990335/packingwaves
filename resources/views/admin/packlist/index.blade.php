@@ -29,7 +29,7 @@
                                 <!--crumbs-->
                             </div>
                             @if($PickingWaveId!=0)
-                            <div class="col text-right"><a href="{{ url('admin/pickingwaves') }}" class="btn btn-primary btn-sm mt-1">Back</a></div>
+                            <div class="col text-right"><a href="{{ url('admin/packingwaves') }}" class="btn btn-primary btn-sm mt-1">Back</a></div>
                             @endif
                         </div>
                     </div>
@@ -164,8 +164,6 @@ function datatables() {
     $("#unselect_all").on("click", function (event) {
         table.rows().deselect();
     });
-
-
 }
 
 $('#table tbody').on( 'click', 'tr', function () {
@@ -176,7 +174,8 @@ function printLabel(d) {
     var LabelPrinted= $(d).data('labelprinted');
     var templateID= $(d).data('templateid');
     var templateType= $(d).data('templatetype');
-
+    var table = $('#table').DataTable();
+    console.log(table.row().data());
     if(LabelPrinted=="Label Printed"){
         swal({
             title: "Warning",
@@ -226,7 +225,9 @@ function multiple_orders_printlabels(templateID,templateType) {
     var table = $('#table').DataTable();
     var selectedRow = table.rows( { selected: true } ).count();
     for (var i = 0; i < selectedRow; i++) {
-        OrderIds.push(table.rows( { selected: true } ).data()[i]['OrderId']);
+        if(table.rows( { selected: true } ).data()[i]['OrderId']!=''){
+            OrderIds.push(table.rows( { selected: true } ).data()[i]['OrderId']);   
+        }
     }
     console.log(OrderIds);
 
@@ -234,7 +235,8 @@ function multiple_orders_printlabels(templateID,templateType) {
         method: "POST",
         url: "{{ url('admin/packlist/ajax/multiple_orders_printlabels') }}",
         headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
-        data: {OrderIds: OrderIds,
+        data: {PickingWaveId:{{$PickingWaveId}},
+                OrderIds: OrderIds,
                 templateID: templateID,
                 templateType: templateType},
         success: function(message){
@@ -268,6 +270,5 @@ $( "#sortby_btn" ).click(function() {
   $('#popup_modal_sortby').modal('show');
 });
 </script>
-
 
 @endsection

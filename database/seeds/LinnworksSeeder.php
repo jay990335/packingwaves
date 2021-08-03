@@ -14,6 +14,6 @@ class LinnworksSeeder extends Seeder
      */
     public function run()
     {
-        Linnworks::factory(1)->create();
+        //Linnworks::factory(1)->create();
     }
 }
