@@ -65,7 +65,8 @@
                                                                 <select class="form-control form-control-sm" id='sortby_field' name="sortby_field">
                                                                     <option value="GENERAL_INFO_ORDER_ID">Order Id</option>
                                                                     <option value="GENERAL_INFO_REFERENCE_NUMBER">Reference Number</option>
-                                                                    <option value="ITEMS_BINRACK">By Location</option>
+                                                                    <option value="LOCATION_ID">By Location</option>
+                                                                    <option value="ITEMS_BINRACK">By Bin Rack Location</option>
                                                                     <option value="ITEMS_SKU">Items SKU</option>
                                                                     <option value="GENERAL_INFO_DATE">Date</option>
                                                                     <option value="SHIPPING_INFORMATION_SERVICE">By Shipping</option>

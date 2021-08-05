@@ -11,16 +11,20 @@
         <div class="col-md-12">
             <div class="card">
                 <div class="card-header">
-                    <div class="page-titles text-left" id="breadcrumbs">
-                        <h3 class="text-themecolor" style="padding:0px;">Packing Waves</h3>
-                        <!--crumbs-->
-                        <ol class="breadcrumb float-left">
-                            <li class="breadcrumb-item">App</li>    
-                            <li class="breadcrumb-item  active active-bread-crumb ">Packing Waves</li>
-                        </ol>
-                        <!--crumbs-->
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-8 page-titles text-left" id="breadcrumbs">
+                                <h3 class="text-themecolor" style="padding:0px;">Packing Waves</h3>
+                                <!--crumbs-->
+                                <ol class="breadcrumb float-left">
+                                    <li class="breadcrumb-item">App</li>    
+                                    <li class="breadcrumb-item  active active-bread-crumb ">Packing Waves</li>
+                                </ol>
+                                <!--crumbs-->
+                            </div>
+                            <div class="col text-right"><a href="{{ route('admin.packlist.ajax.packingwavesCompletedNotificationSend') }}" class="btn btn-primary btn-sm mt-1" tooltip="add new packingwaves request to admin" flow="left" id="packingwavesCompletedNotification"><i class="fas fa-envelope nav-icon"></i> Admin Notify</a></div>
+                        </div>
                     </div>
-
                 </div>
                 <!-- /.card-header -->
                 <div class="card-body">

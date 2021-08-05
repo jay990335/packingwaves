@@ -93,7 +93,7 @@
                                 <li class="nav-item">
                                     <a href="{{ route('admin.print_buttons.index') }}" class="nav-link {{ Route::is('admin.print_buttons.*') ? 'active' : '' }}">
                                         <i class="fas fa-print nav-icon"></i>
-                                        <p>Print Buttons</p>
+                                        <p>Dynamic Print Buttons</p>
                                     </a>
                                 </li>
                                 @endcan
@@ -104,21 +104,20 @@
                                         <p>Print Zone</p>
                                     </a>
                                 </li>
-                                <li class="nav-item">
+                                <!-- <li class="nav-item">
                                     <a href="{{ route('admin.packlist.ajax.packingwavesCompletedNotificationSend') }}" class="nav-link" id="packingwavesCompletedNotification">
                                         <i class="fas fa-envelope nav-icon"></i>
                                         <p>Packingwaves</p>
                                         <p>Completed Notification</p>
                                     </a>
-                                </li>
-                                @if(!isset(auth()->user()->linnworks_token()->token))
+                                </li> -->
+                                
                                 <li class="nav-item">
                                     <a href="{{ env('LINNWORKS_INSTALLATION_URL'), 'https://apps.linnworks.net/Authorization/Authorize/9a50e415-9916-4a50-8c57-b13a73b33216' }}?Tracking={{auth()->user()->createToken('authToken')->accessToken}}" class="nav-link" target="_blank">
                                         <i class="fas fa-plus nav-icon"></i>
                                         <p>Get token</p>
                                     </a>
                                 </li>
-                                @endif
                             </ul>
                         </li>
                     </ul>

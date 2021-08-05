@@ -230,7 +230,7 @@ class PackOrdersController extends Controller
                         $BinRackHTML .= '<span class="btn btn-sm bg-secondary mt-1" tooltip="Item Location: '.$Item['BinRack'].'" flow="up">'.$Item['BinRack'].'</span>';
                     }
 
-                    $ItemDetais= '<div class="row ">
+                    $ItemDetais= '<div class="row">
                             <div class="col-12">
                               <div class="card '.$labelPrintedBGClass.'" style="margin-bottom: 0px;">
                                 <div class="card-header border-bottom-0">
@@ -542,6 +542,44 @@ class PackOrdersController extends Controller
             return response()->json([
                 'success' => 'Shipping method changed successfully.' // for status 200
             ]); 
+        } catch (\Exception $exception) {
+
+            DB::rollBack();
+
+            return response()->json([
+                'error' => $exception->getMessage() . ' ' . $exception->getLine() // for status 200
+            ]);
+        }
+    }
+
+    /**
+     * cancel Order Shipping Label by order id - Ajax Data
+     *
+     * @return mixed
+     * @throws \Exception
+     */
+    public function cancelOrderShippingLabel(Request $request)
+    {
+        try {
+            $pkOrderId = '{"pkOrderId":"'.$request->OrderId.'"}';
+            $linnworks = Linnworks_API::make([
+                    'applicationId' => env('LINNWORKS_APP_ID'),
+                    'applicationSecret' => env('LINNWORKS_SECRET'),
+                    'token' => auth()->user()->linnworks_token()->token,
+                ], $this->client);
+
+            $records = $linnworks->ShippingService()->CancelOrderShippingLabel($pkOrderId);
+            
+            if($records['LabelCanceled']==true){
+               return response()->json([
+                    'success' => 'Order Shipping Label Cancel successfully.' // for status 200
+                ]);  
+            }elseif($records['IsError']==true){
+                return response()->json([
+                    'error' => $records['ErrorMessage']
+                ]);
+            }
+            
         } catch (\Exception $exception) {
 
             DB::rollBack();

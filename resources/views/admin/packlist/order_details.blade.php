@@ -28,23 +28,32 @@
                         <span class="text-danger">RESEND</span>
                       @endif
           </b><br>
-          <b>Payment Methods:</b> {{$record['TotalsInfo']['PaymentMethod']}}
-          <br>
+          <b>Payment Methods:</b> {{$record['TotalsInfo']['PaymentMethod']}}<br>
           <div class="mb-1">
-          @if(count($record['GeneralInfo']['Identifiers'])>0)
-            <b>Identifiers:</b> 
+              <strong>Folders</strong>
+              @if(isset($record['FolderName']) && count($record['FolderName'])>0)
+                @foreach($record['FolderName'] as $FolderName) 
+                  <div class="pl-3">
+                      <i class="fa fa-folder-open"></i> {{$FolderName}}
+                  </div>
+                @endforeach
+              @else
+                  <span tooltip="No Folder" flow="up" >No Folder</span>
+              @endif
+          </div>
+          <b>Package Group:</b>  {{$record['ShippingInfo']['PackageCategory']}}<br>
+          <b>Package Type:</b>  {{$record['ShippingInfo']['PackageType']}}<br>
+          <div class="mb-1">
+          <b>Identifiers:</b> 
+          @if(isset($record['GeneralInfo']['Identifiers']) && count($record['GeneralInfo']['Identifiers'])>0)
               @foreach($record['GeneralInfo']['Identifiers'] as $Identifier) 
                 <span tooltip="{{$Identifier['Name']}}" flow="up" ><img tooltip="{{$Identifier['Name']}}" flow="up" src="https://linn-content.s3-eu-west-1.amazonaws.com/linn-order-identifiers/{{$Identifier['Tag']}}.svg" width="30"></span>
               @endforeach
+          @else
+              <span tooltip="No Identifiers" flow="up" >No Identifiers</span>
           @endif
           </div>
-          <br>
-          <b>Shipping Service</b>
-          <select class="form-control select2" id="shippingMethod" name="shippingMethod" required autocomplete="shippingMethod">
-              @foreach ($PostalServices as $PostalService)
-                  <option value="{{ $PostalService['PostalServiceName'] }}" @if($PostalService['PostalServiceName'] == $record['ShippingInfo']['PostalServiceName']) selected @endif>{{ $PostalService['PostalServiceName'] }}</option>
-              @endforeach
-          </select>
+          
         </div>
         <div class="col-sm-6 invoice-col">
           <strong>Address</strong>
@@ -54,9 +63,18 @@
             {{$record['CustomerInfo']['Address']['Town']}}, {{$record['CustomerInfo']['Address']['Region']}}, {{$record['CustomerInfo']['Address']['Country']}}, {{$record['CustomerInfo']['Address']['PostCode']}}<br>
             Phone: {{$record['CustomerInfo']['Address']['PhoneNumber']}}<br>
           </address>
+          @if($record['GeneralInfo']['LabelPrinted']==true)
+              <a href="#" class="btn btn-primary btn-sm" id="CancelOrderShippingLabel"><i class="fa fa-eraser icon"></i> Cancel Label</a><br>
+          @endif
+          <b class="pb-2">Shipping Service</b><br>
+          <select class="form-control select2 pt-2" id="shippingMethod" name="shippingMethod" required autocomplete="shippingMethod">
+              @foreach ($PostalServices as $PostalService)
+                  <option value="{{ $PostalService['PostalServiceName'] }}" @if($PostalService['PostalServiceName'] == $record['ShippingInfo']['PostalServiceName']) selected @endif>{{ $PostalService['PostalServiceName'] }}</option>
+              @endforeach
+          </select>
         </div>
-
     </div>
+    <br>
     <div class="row">
         <div class="col-12 table-responsive">
           <table class="table table-striped">
@@ -148,6 +166,41 @@
                   success: function(message){
                       alert_message(message);
                       setTimeout(function() {   //calls click event after a certain time
+                          $("#pageloader").hide();
+                      }, 1000);
+                  }
+              }); 
+          } else {
+              r.dismiss;
+          }
+      }, function (dismiss) {
+          return false;
+      })
+  }); 
+
+  $( "#CancelOrderShippingLabel" ).click(function() {
+      swal({
+          title: "Cancel Label?",
+          text: "Are you sure you want to cancel order shipping label?",
+          type: "warning",
+          showCancelButton: !0,
+          confirmButtonText: "Yes, cancel label!",
+          cancelButtonText: "No!",
+          reverseButtons: !0
+      }).then(function (r) {
+          if (r.value === true) {
+              $("#pageloader").fadeIn();
+              var OrderId="{{$record['OrderId']}}";
+              $.ajax({
+                  method: "POST",
+                  url: "{{ url('admin/packlist/ajax/cancelOrderShippingLabel') }}",
+                  headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                  data: {OrderId: OrderId},
+                  success: function(message){
+                      alert_message(message);
+                      $("#popup-modal").modal('hide');
+                      setTimeout(function() {   //calls click event after a certain time
+                          datatables();
                           $("#pageloader").hide();
                       }, 1000);
                   }

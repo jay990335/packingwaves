@@ -48,6 +48,7 @@ Route::group([
     Route::post('packlist/ajax/multiple_orders_printlabels', 'PackOrdersController@multiple_orders_printlabels');
     Route::get('packlist/order_details/{OrderId}', 'PackOrdersController@order_details')->name('packlist.order_details'); 
     Route::post('packlist/ajax/changeShippingMethod', 'PackOrdersController@changeShippingMethod');
+    Route::post('packlist/ajax/cancelOrderShippingLabel', 'PackOrdersController@cancelOrderShippingLabel');
     Route::get('packlist/packorderslist/{PickingWaveId}', 'PackOrdersController@packorderslist')->name('packlist.packorderslist'); 
     Route::post('packlist/ajax/packingwavesCompletedNotificationSend', 'PackOrdersController@packingwavesCompletedNotificationSend')->name('packlist.ajax.packingwavesCompletedNotificationSend');
     
