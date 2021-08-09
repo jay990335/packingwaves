@@ -42,7 +42,7 @@
                         <button type="button" class="btn btn-secondary btn-sm mt-1" id="unselect_all">Unselect All</button>
                         @if(isset(auth()->user()->printer_zone))
                             @foreach ($print_buttons as $print_button)
-                            <a href="javascript:void(0)" onclick="multiple_orders_printlabels({{$print_button->templateID}},'{{$print_button->templateType}}')"  class="{{$print_button->style}} btn-sm mt-1 mr-1"><span tooltip="{{$print_button->name}}" flow="up"><i class="fas fa-print"></i> {{$print_button->name}}</span></a>
+                            <a href="javascript:void(0)" onclick="multiple_orders_printlabels({{$print_button->templateID}},'{{$print_button->templateType}}')"  class="{{$print_button->style}} btn-sm mt-1"><span tooltip="{{$print_button->name}}" flow="up"><i class="fas fa-print"></i> {{$print_button->name}}</span></a>
                             @endforeach
                         @endif
                         <button type="button" class="btn btn-primary btn-sm mt-1" id="sortby_btn" tooltip="Sort By" flow="up" data-toggle="modal" data-target="#popup_modal_sortby"><i class="fas fa-sort"></i></button>
@@ -135,7 +135,7 @@ function datatables() {
         buttons: [],
         /*select: true,*/
         aaSorting     : [],
-        iDisplayLength: 25,
+        iDisplayLength: 15,
         stateSave     : true,
         responsive    : true,
         fixedHeader   : true,
@@ -172,10 +172,14 @@ $('#table tbody').on( 'click', 'tr', function () {
 });
 function printLabel(d) {
     var OrderId= $(d).data('orderid');
+    var numorderid= $(d).data('numorderid');
     var LabelPrinted= $(d).data('labelprinted');
     var templateID= $(d).data('templateid');
     var templateType= $(d).data('templatetype');
+    var overweight= $(d).data('overweight');
     var table = $('#table').DataTable();
+
+    var successPrint = 0;
     console.log(table.row().data());
     if(LabelPrinted=="Label Printed"){
         swal({
@@ -188,7 +192,29 @@ function printLabel(d) {
             reverseButtons: !0
         }).then(function (r) {
             if (r.value === true) {
-                printLabelAjex(OrderId,templateID,templateType);
+                if(overweight==1){
+                    
+                   swal({
+                        title: "Warning",
+                        text: "Order #"+numorderid+" is overwight international shipping, So are you sure want to print it?",
+                        type: "warning",
+                        showCancelButton: !0,
+                        confirmButtonText: "Yes, print it!",
+                        cancelButtonText: "No, cancel!",
+                        reverseButtons: !0
+                    }).then(function (r) {
+                        if (r.value === true) {
+                            printLabelAjex(OrderId,templateID,templateType);
+                        } else {
+                            r.dismiss;
+                        }
+                    }, function (dismiss) {
+                        return false;
+                    }) 
+                }else{
+                    printLabelAjex(OrderId,templateID,templateType);
+                }
+                    
             } else {
                 r.dismiss;
             }
@@ -196,7 +222,27 @@ function printLabel(d) {
             return false;
         })
     }else{
-        printLabelAjex(OrderId,templateID,templateType);
+        if(overweight==1){
+            swal({
+                title: "Warning",
+                text: "Order #"+numorderid+" is overwight international shipping, So are you sure want to print it?",
+                type: "warning",
+                showCancelButton: !0,
+                confirmButtonText: "Yes, print it!",
+                cancelButtonText: "No, cancel!",
+                reverseButtons: !0
+            }).then(function (r) {
+                if (r.value === true) {
+                    printLabelAjex(OrderId,templateID,templateType);
+                } else {
+                    r.dismiss;
+                }
+            }, function (dismiss) {
+                return false;
+            }) 
+        }else{
+            printLabelAjex(OrderId,templateID,templateType);
+        }
     }
 }
 
@@ -220,18 +266,61 @@ function printLabelAjex(OrderId,templateID,templateType) {
     });
 }
 
-function multiple_orders_printlabels(templateID,templateType) {
-    $("#pageloader").fadeIn();
-    var OrderIds=[];
-    var table = $('#table').DataTable();
-    var selectedRow = table.rows( { selected: true } ).count();
-    for (var i = 0; i < selectedRow; i++) {
-        if(table.rows( { selected: true } ).data()[i]['OrderId']!=''){
-            OrderIds.push(table.rows( { selected: true } ).data()[i]['OrderId']);   
-        }
-    }
-    console.log(OrderIds);
 
+
+function multiple_orders_printlabels(templateID,templateType) {
+    var table = $('#table').DataTable();
+    let rows = table.rows('.selected');
+    if(rows.data().length > 0 ) {
+        var OrderIds=[];
+        var z=1;
+        table.rows().every(function(rowIdx, tableLoop, rowLoop){
+            var data = this.data();
+            var overweight = data['overweight'];
+            var OrderId = data['OrderId'];
+            var numorderid = data['numorderid']
+            if(OrderId!=''){
+                if(overweight==1){
+                   swal({
+                        title: "Warning",
+                        text: "Order #"+numorderid+" is overwight international shipping, So are you sure want to print it?",
+                        type: "warning",
+                        showCancelButton: !0,
+                        confirmButtonText: "Yes, print it!",
+                        cancelButtonText: "No, cancel!",
+                        reverseButtons: !0
+                    }).then(function (r) {
+                        if (r.value === true) {
+                            OrderIds.push(OrderId);
+                            if(rows.data().length==z){
+                               multiple_orders_printlabels_ajax(OrderIds,templateID,templateType);
+                            }
+                            z++;
+                        } else {
+                            if(rows.data().length==z){
+                               multiple_orders_printlabels_ajax(OrderIds,templateID,templateType); 
+                            }
+                            z++;
+                            r.dismiss;
+                        }
+                        
+                    }) 
+                }else{
+                    OrderIds.push(OrderId);
+                    if(rows.data().length==z){
+                       multiple_orders_printlabels_ajax(OrderIds,templateID,templateType);
+                    }
+                    z++;
+                }   
+            }
+
+        });
+    }
+}
+
+function multiple_orders_printlabels_ajax(OrderIds,templateID,templateType) {
+    $("#pageloader").fadeIn();
+    console.log(OrderIds);
     $.ajax({
         method: "POST",
         url: "{{ url('admin/packlist/ajax/multiple_orders_printlabels') }}",
@@ -247,7 +336,7 @@ function multiple_orders_printlabels(templateID,templateType) {
                 $("#pageloader").hide();
             }, 1000);
         }
-    });    
+    });
 }
 
 datatables();

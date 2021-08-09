@@ -34,6 +34,9 @@ function alert_message(message) {
     } else if(typeof(message.error) != "undefined" && message.error !== null){
         var messageHtml = '<div class="alert alert-danger alert-dismissible fade show" role="alert"><strong>Error: </strong> '+message.error+' <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>';
         //$('#message').html(messageHtml);
+        if(typeof(message.link) != "undefined" && message.link !== null){
+            window.open(message.link, '_blank');
+        }
         Swal.fire({ icon: 'error',  title: 'Oops...', text: message.error})
     }
     

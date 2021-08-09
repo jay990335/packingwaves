@@ -14,11 +14,11 @@
                     <div class="container">
                         <div class="row">
                             <div class="col-8 page-titles text-left" id="breadcrumbs">
-                                <h3 class="text-themecolor" style="padding:0px;">Packing Waves</h3>
+                                <h3 class="text-themecolor" style="padding:0px;">Picking Waves</h3>
                                 <!--crumbs-->
                                 <ol class="breadcrumb float-left">
                                     <li class="breadcrumb-item">App</li>    
-                                    <li class="breadcrumb-item  active active-bread-crumb ">Packing Waves</li>
+                                    <li class="breadcrumb-item  active active-bread-crumb ">Picking Waves</li>
                                 </ol>
                                 <!--crumbs-->
                             </div>
@@ -59,7 +59,7 @@ function datatables() {
         select: true,
         
         aaSorting     : [[0, 'asc']],
-        iDisplayLength: 15,
+        iDisplayLength: 25,
         stateSave     : true,
         responsive    : true,
         fixedHeader   : true,
@@ -71,7 +71,7 @@ function datatables() {
         info          : false,
         pagingType    : "full_numbers",
         ajax          : {
-            url     : '{{ url('admin/packingwaves/ajax/data') }}',
+            url     : '{{ url('admin/pickingwaves/ajax/data') }}',
             dataType: 'json'
         },
         columns       : [

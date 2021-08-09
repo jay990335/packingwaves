@@ -23,6 +23,7 @@ use Yajra\DataTables\Facades\DataTables;
 use Onfuro\Linnworks\Linnworks as Linnworks_API;
 use Carbon\Carbon;
 use Notification;
+use Redirect;
 
 class PackOrdersController extends Controller
 {
@@ -141,12 +142,12 @@ class PackOrdersController extends Controller
             }else{
 
                 $check_identifier = '{
-                     "FieldCode":"GENERAL_INFO_IDENTIFIER",
-                     "Name":"Identifiers",
-                     "FieldType":"List",
-                     "Value":"Pickwave Complete",
-                     "Type":0
-                  },';
+                                        "FieldCode":"GENERAL_INFO_IDENTIFIER",
+                                        "Name":"Identifiers",
+                                        "FieldType":"List",
+                                        "Value":"Pickwave Complete",
+                                        "Type":0
+                                    },';
             }
 
             $filter = '{
@@ -194,6 +195,8 @@ class PackOrdersController extends Controller
             $print_buttons = printButtons::where('status','Yes')->whereHas('users', function($q) use ($user_id) { $q->where('user_id', $user_id); })->get();
             
             foreach($records['Data'] as $record){
+                //dd($record);
+
                 $NumOrderId = $record['NumOrderId'];
 
                 if($record['GeneralInfo']['LabelPrinted']==true){
@@ -204,11 +207,32 @@ class PackOrdersController extends Controller
                     $LabelPrinted = 'Label Not Printed';
                 }
 
+                /*Check International High Weight Shipping Alert [START]*/
+                $INTERNATIONAL_SHIPPING = explode(",", env('INTERNATIONAL_SHIPPING'));
+                $INTERNATIONAL_MAX_WEIGHT = env('INTERNATIONAL_MAX_WEIGHT','2000');
+
+                if(in_array($record['ShippingInfo']['PostalServiceName'],$INTERNATIONAL_SHIPPING) && $record['ShippingInfo']['TotalWeight'] > $INTERNATIONAL_MAX_WEIGHT){
+                    $overweight = 1;
+                }else{
+                    $overweight = 0;
+                }
+
+                //if($NumOrderId == '1745163'){
+                    /*echo $record['ShippingInfo']['PostalServiceName'];
+                    echo $record['ShippingInfo']['TotalWeight'];
+                    echo $overweight;
+                    exit;*/
+                //}
+                if($overweight==1){
+                    $labelPrintedBGClass = 'bg-danger';
+                }
+                /*Check International High Weight Shipping Alert [END]*/
+
                 /*print buttons dynamic code [Start]*/
                 $print_buttons_html = '';
                 if(isset(auth()->user()->printer_zone) && !in_array($NumOrderId, $PartialPickedOrderArray)){
                     foreach ($print_buttons as $print_button) {
-                        $print_buttons_html .= '<a href="javascript:void(0)" data-orderid="'.$record['OrderId'].'" data-labelprinted="'.$LabelPrinted.'" data-templateid="'.$print_button->templateID.'" data-templatetype="'.$print_button->templateType.'" onclick="printLabel(this)" class="'.$print_button->style.' btn-sm mt-1 mr-1"><span tooltip="'.$print_button->name.'" flow="up"><i class="fas fa-print"></i> '.$print_button->name.'</span></a>';
+                        $print_buttons_html .= '<a href="javascript:void(0)" data-orderid="'.$record['OrderId'].'" data-numorderid="'.$NumOrderId.'" data-labelprinted="'.$LabelPrinted.'" data-overweight="'.$overweight.'" data-templateid="'.$print_button->templateID.'" data-templatetype="'.$print_button->templateType.'" onclick="printLabel(this)" class="'.$print_button->style.' btn-sm mt-1 mr-1"><span tooltip="'.$print_button->name.'" flow="up"><i class="fas fa-print"></i> '.$print_button->name.'</span></a>';
                     }  
                 }else{
                     $print_buttons_html .= '<a href="javascript:void(0)" data-orderid="'.$record['OrderId'].'" class="btn bg-danger btn-sm mt-1"><span tooltip="Partial Picked Order" flow="up">Partial Picked</span></a>';
@@ -335,12 +359,14 @@ class PackOrdersController extends Controller
                         </div>
                       </div>';
                 }
-
+                
                 $data_arr[] = array(
+                    "numorderid" => $NumOrderId,
                     "OrderId" => $record['OrderId'],
                     "LabelPrinted" => $LabelPrinted,
                     "ItemDetais" => $ItemDetais,
-                    "labelPrintedBGClass" => $labelPrintedBGClass
+                    "labelPrintedBGClass" => $labelPrintedBGClass,
+                    "overweight" => $overweight
                 );
             }
 
@@ -392,10 +418,21 @@ class PackOrdersController extends Controller
             
             $records = $linnworks->PrintService()->CreatePDFfromJobForceTemplate($templateType,$OrderIds,$templateID,'','',$printer_zone,0,'','{"module":"OpenOrdersBeta"}');
 
+            
             if(count($records['PrintErrors'])>0){
-               return response()->json([
-                'error' => 'OrderId:'. $records['PrintErrors'][0] . ' - Please select other printer'
-                ]); 
+                $pos = strpos($records['PrintErrors'][0], 'PrinterNotFound');
+                if ($pos !== false) {
+                    $pdf = $linnworks->PrintService()->CreateReturnShippingLabelsPDF($OrderIds,[],'');
+                    return response()->json([
+                        'error' => $records['PrintErrors'][0],
+                        'link' => $pdf['URL']
+                    ]); 
+                }else{
+                    return response()->json([
+                        'error' => $records['PrintErrors'][0]
+                    ]); 
+                }
+                
             }else{
                 return response()->json([
                     'success' => 'Label printed successfully.' // for status 200
@@ -429,7 +466,6 @@ class PackOrdersController extends Controller
                 'token' => auth()->user()->linnworks_token()->token,
             ], $this->client);
 
-
             /*Get Partial Picked Order List [Start] */
             $PickingWaveId = $request->PickingWaveId;
             $PartialPickedOrderArray=[];
@@ -455,12 +491,15 @@ class PackOrdersController extends Controller
             }
             /*Remove Partial Picked Order In Print Order List [End] */
 
+            /*Check order selected or not [START]*/
             if($OrderIds==''){
                 return response()->json([
                     'error' => 'Please select atleast one order!!'
                 ]);
             }
+            /*Check order selected or not [END]*/
 
+            /*Check printer zone selected or not [START]*/
             $printer_name = str_replace('~', '', str_replace('&#8726;', '\~', auth()->user()->printer_name));
             $printer_zone = auth()->user()->printer_zone;
             if($printer_zone==''){
@@ -468,6 +507,7 @@ class PackOrdersController extends Controller
                     'error' => 'Please select your printer zone!!'
                 ]); 
             }
+            /*Check printer zone selected or not [END]*/
 
             $templateID = $request->templateID;
             $templateType = $request->templateType;
@@ -475,9 +515,19 @@ class PackOrdersController extends Controller
             $records = $linnworks->PrintService()->CreatePDFfromJobForceTemplate($templateType,$OrderIdsArray,$templateID,'','',$printer_zone,0,'','{"module":"OpenOrdersBeta"}');
 
             if(count($records['PrintErrors'])>0){
-                return response()->json([
-                    'error' => $records['PrintErrors']
-                ]); 
+                $pos = strpos(json_encode($records['PrintErrors']), 'PrinterNotFound');
+                if ($pos !== false) {
+                    $pdf = $linnworks->PrintService()->CreateReturnShippingLabelsPDF($OrderIds,[],'');
+                    return response()->json([
+                        'error' => $records['PrintErrors'],
+                        'link' => $pdf['URL']
+                    ]); 
+                }else{
+                    return response()->json([
+                        'error' => $records['PrintErrors'],
+                    ]); 
+                }
+
             }else{
                 if(count($PartialPickedOrderID)>0){
                     $success = 'Partial picked orders ['.implode(", ",$PartialPickedOrderID).'] not printed. Rest label printed successfully.';

@@ -53,6 +53,11 @@ Route::group([
     Route::post('packlist/ajax/packingwavesCompletedNotificationSend', 'PackOrdersController@packingwavesCompletedNotificationSend')->name('packlist.ajax.packingwavesCompletedNotificationSend');
     
 
+    // packingwaves Routes
+    Route::resource('pickingwaves', 'PickingWavesController');
+    Route::get('pickingwaves/ajax/data', 'PickingWavesController@datatables'); // For Datatables
+
+
     // Branch Routes
     Route::resource('print_buttons', 'PrintButtonsController');
     Route::get('print_buttons/ajax/data', 'PrintButtonsController@datatables'); // For Datatables

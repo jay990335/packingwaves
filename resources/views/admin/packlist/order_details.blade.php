@@ -63,6 +63,7 @@
             {{$record['CustomerInfo']['Address']['Town']}}, {{$record['CustomerInfo']['Address']['Region']}}, {{$record['CustomerInfo']['Address']['Country']}}, {{$record['CustomerInfo']['Address']['PostCode']}}<br>
             Phone: {{$record['CustomerInfo']['Address']['PhoneNumber']}}<br>
           </address>
+          <b class="pb-2">Total Wight : </b> {{$record['ShippingInfo']['TotalWeight']}}g<br>
           @if($record['GeneralInfo']['LabelPrinted']==true)
               <a href="#" class="btn btn-primary btn-sm" id="CancelOrderShippingLabel"><i class="fa fa-eraser icon"></i> Cancel Label</a><br>
           @endif
