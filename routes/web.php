@@ -49,6 +49,7 @@ Route::group([
     Route::get('packlist/order_details/{OrderId}', 'PackOrdersController@order_details')->name('packlist.order_details'); 
     Route::post('packlist/ajax/changeShippingMethod', 'PackOrdersController@changeShippingMethod');
     Route::post('packlist/ajax/cancelOrderShippingLabel', 'PackOrdersController@cancelOrderShippingLabel');
+    Route::post('packlist/ajax/assignFolder', 'PackOrdersController@assignFolder');
     Route::get('packlist/packorderslist/{PickingWaveId}', 'PackOrdersController@packorderslist')->name('packlist.packorderslist'); 
     Route::post('packlist/ajax/packingwavesCompletedNotificationSend', 'PackOrdersController@packingwavesCompletedNotificationSend')->name('packlist.ajax.packingwavesCompletedNotificationSend');
     
@@ -62,6 +63,11 @@ Route::group([
     Route::resource('print_buttons', 'PrintButtonsController');
     Route::get('print_buttons/ajax/data', 'PrintButtonsController@datatables'); // For Datatables
     Route::get('print_buttons/ajax/change_status', 'PrintButtonsController@change_status')->name('print_buttons.ajax.change_status'); // For change status
+
+
+    // Setting Routes
+    Route::get('setting/folders', 'SettingController@folders')->name('setting.folders');
+    Route::put('setting/updateFolder', 'SettingController@updateFolder')->name('setting.updateFolder');
 
 });
 

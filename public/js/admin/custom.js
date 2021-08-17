@@ -23,7 +23,11 @@ function alert_message(message) {
         var messageHtml = '<div class="alert alert-success alert-dismissible fade show" role="alert"><strong>Success: </strong> '+ message.success +' <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>';
         //$('#error_message').html(messageHtml);
         //$('#message').html(messageHtml);
-        Swal.fire({icon: 'Success', title: 'Success!', text: message.success })
+        if(typeof(message.reload) != "undefined" && message.reload == 1){
+            Swal.fire({icon: 'Success', title: 'Success!', text: message.success }).then((result) => {location.reload();});
+        }else{
+            Swal.fire({icon: 'Success', title: 'Success!', text: message.success })
+        }
 
     }else if(typeof(message.delete) != "undefined" && message.delete !== null) {
         var messageHtml = '<div class="alert alert-success alert-dismissible fade show" role="alert"><strong>Delete: </strong> '+ message.delete +' <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>';

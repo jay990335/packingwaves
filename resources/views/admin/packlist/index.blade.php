@@ -150,7 +150,7 @@ function datatables() {
                 "PickingWaveId": {{$PickingWaveId}},
                 "sortby_field": sortby_field,
                 "sortby_type": sortby_type
-            }
+            },
         },
         columns       : [
             {data: 'ItemDetais', name: 'ItemDetais'},
@@ -165,6 +165,7 @@ function datatables() {
     $("#unselect_all").on("click", function (event) {
         table.rows().deselect();
     });
+
 }
 
 $('#table tbody').on( 'click', 'tr', function () {

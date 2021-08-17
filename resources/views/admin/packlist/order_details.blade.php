@@ -29,18 +29,6 @@
                       @endif
           </b><br>
           <b>Payment Methods:</b> {{$record['TotalsInfo']['PaymentMethod']}}<br>
-          <div class="mb-1">
-              <strong>Folders</strong>
-              @if(isset($record['FolderName']) && count($record['FolderName'])>0)
-                @foreach($record['FolderName'] as $FolderName) 
-                  <div class="pl-3">
-                      <i class="fa fa-folder-open"></i> {{$FolderName}}
-                  </div>
-                @endforeach
-              @else
-                  <span tooltip="No Folder" flow="up" >No Folder</span>
-              @endif
-          </div>
           <b>Package Group:</b>  {{$record['ShippingInfo']['PackageCategory']}}<br>
           <b>Package Type:</b>  {{$record['ShippingInfo']['PackageType']}}<br>
           <div class="mb-1">
@@ -53,6 +41,29 @@
               <span tooltip="No Identifiers" flow="up" >No Identifiers</span>
           @endif
           </div>
+          <div class="mb-1">
+              <strong>Folders</strong>
+              @if(isset($record['FolderName']) && count($record['FolderName'])>0)
+                @foreach($record['FolderName'] as $FolderName) 
+                  <div class="pl-3">
+                      <i class="fa fa-folder-open"></i> {{$FolderName}}
+                  </div>
+                @endforeach
+              @else
+                  <span tooltip="No Folder" flow="up" id="no_folder">No Folder</span>
+              @endif
+              <div id="assignNewFolder">
+                
+              </div>
+
+          </div>
+          <b class="pb-2">Assign Folder</b><br>
+          <select class="form-control select2 pt-2" id="assignFolder" name="assignFolder" required autocomplete="assignFolder">
+              <option ></option>
+              @foreach (explode(",", env('FOLDERS')) as $folder)
+                  <option value="{{ $folder }}">{{ $folder }}</option>
+              @endforeach
+          </select>
           
         </div>
         <div class="col-sm-6 invoice-col">
@@ -138,6 +149,7 @@
     </div>
 </div>
 <script type="text/javascript">
+  
   $("#shippingMethod").select2({
       placeholder: "Select Shipping Method",
       allowClear: false
@@ -212,6 +224,49 @@
       }, function (dismiss) {
           return false;
       })
+  }); 
+
+
+  $("#assignFolder").select2({
+      placeholder: "Assign Folder"
+  });
+
+  $( "#assignFolder" ).change(function() {
+      swal({
+          title: "Assign?",
+          text: "Are you sure you want to assign folder?",
+          type: "warning",
+          showCancelButton: !0,
+          confirmButtonText: "Yes, assign it!",
+          cancelButtonText: "No, cancel!",
+          reverseButtons: !0
+      }).then(function (r) {
+          if (r.value === true) {
+              $("#pageloader").fadeIn();
+              var assignFolder = $("#assignFolder").val();
+              var OrderId="{{$record['OrderId']}}";
+
+              $.ajax({
+                  method: "POST",
+                  url: "{{ url('admin/packlist/ajax/assignFolder') }}",
+                  headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                  data: {OrderId: OrderId,
+                          assignFolder: assignFolder},
+                  success: function(message){
+                      alert_message(message);
+                      $("#no_folder").hide();
+                      $("#assignNewFolder").append('<div class="pl-3"><i class="fa fa-folder-open"></i> '+assignFolder+'</div>');
+                      setTimeout(function() {   //calls click event after a certain time
+                          $("#pageloader").hide();
+                      }, 1000);
+                  }
+              }); 
+          } else {
+              r.dismiss;
+          }
+      }, function (dismiss) {
+          return false;
+      }) 
   }); 
 </script>
 @endsection

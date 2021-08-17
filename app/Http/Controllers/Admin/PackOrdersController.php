@@ -258,7 +258,7 @@ class PackOrdersController extends Controller
                             <div class="col-12">
                               <div class="card '.$labelPrintedBGClass.'" style="margin-bottom: 0px;">
                                 <div class="card-header border-bottom-0">
-                                  <b>SKU: '.$Item['ChannelSKU'].'</b></span>
+                                  <span class="btn btn-sm bg-secondary mt-1" tooltip="SKU: '.$Item['SKU'].'" flow="up">'.$Item['SKU'].'</span>
                                 </div>
                                 <div class="card-body pt-0 pb-1 ml-2">
                                   <div class="row">
@@ -630,6 +630,37 @@ class PackOrdersController extends Controller
                 ]);
             }
             
+        } catch (\Exception $exception) {
+
+            DB::rollBack();
+
+            return response()->json([
+                'error' => $exception->getMessage() . ' ' . $exception->getLine() // for status 200
+            ]);
+        }
+    }
+
+    /**
+     * Assign Folder by order id - Ajax Data
+     *
+     * @return mixed
+     * @throws \Exception
+     */
+    public function assignFolder(Request $request)
+    {
+        try {
+            $orderIds[] = $request->OrderId;
+            $folder = $request->assignFolder;
+            $linnworks = Linnworks_API::make([
+                    'applicationId' => env('LINNWORKS_APP_ID'),
+                    'applicationSecret' => env('LINNWORKS_SECRET'),
+                    'token' => auth()->user()->linnworks_token()->token,
+                ], $this->client);
+
+            $records = $linnworks->Orders()->AssignToFolder($orderIds,$folder);
+            return response()->json([
+                'success' => 'Assign folder successfully.' // for status 200
+            ]); 
         } catch (\Exception $exception) {
 
             DB::rollBack();

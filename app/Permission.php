@@ -25,10 +25,10 @@ class Permission extends ModelsPermission
             'edit Print Buttons',
             'delete Print Buttons',
 
-            'view company',
-            'create company',
-            'edit company',
-            'delete company',
+            'view folders setting',
+            'create folders setting',
+            'edit folders setting',
+            'delete folders setting',
         ];
     }
 

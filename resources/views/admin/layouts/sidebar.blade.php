@@ -105,6 +105,16 @@
                                 </li>
                                 @endcan
 
+                                @can('view folders setting')
+                                <li class="nav-item">
+                                    <a href="{{ route('admin.setting.folders') }}" class="nav-link {{ Route::is('admin.setting.folders') ? 'active' : '' }}" id="popup-modal-button">
+                                        <i class="fas fa-folder-open nav-icon"></i>
+                                        <p>Folder Setting</p>
+                                    </a>
+                                </li>
+                                @endcan
+
+
                                 <li class="nav-item">
                                     <a href="{{ route('admin.profile.printers_zone') }}" class="nav-link {{ Route::is('admin.profile.printers_zone') ? 'active' : '' }}" id="popup-modal-buttonUserRole">
                                         <i class="fas fa-print nav-icon"></i>
