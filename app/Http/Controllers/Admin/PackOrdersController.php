@@ -259,6 +259,8 @@ class PackOrdersController extends Controller
                               <div class="card '.$labelPrintedBGClass.'" style="margin-bottom: 0px;">
                                 <div class="card-header border-bottom-0">
                                   <span class="btn btn-sm bg-secondary mt-1" tooltip="SKU: '.$Item['SKU'].'" flow="up">'.$Item['SKU'].'</span>
+
+                                  <span class="btn btn-sm bg-secondary mt-1" tooltip="Shipping: '.$record['ShippingInfo']['PostalServiceName'].'" flow="up">'.$record['ShippingInfo']['PostalServiceName'].'</span>
                                 </div>
                                 <div class="card-body pt-0 pb-1 ml-2">
                                   <div class="row">

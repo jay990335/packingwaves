@@ -311,8 +311,13 @@ class PrintButtonsController extends Controller
                 ]);   
             }
 
+            if($request->status==0){
+                $status='No';
+            }else{
+                $status='Yes';
+            }
             $old_status = $printButtons->status;
-            $printButtons->status = $request->status;
+            $printButtons->status = $status;
             $printButtons->save();
 
             //Session::flash('success', 'A print buttons updated successfully.');
