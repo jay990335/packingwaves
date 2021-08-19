@@ -15,10 +15,10 @@ class LinnworksController extends Controller
      */
     public function index(Request $request)
     {
-        $validated = $request->validate([
+        /*$validated = $request->validate([
             'token' => 'required',
             'tracking' => 'required|unique:linnworks,passportAccessToken',
-        ]);
+        ]);*/
 
         $user = auth()->user()->id;
         $linnworks = new Linnworks();

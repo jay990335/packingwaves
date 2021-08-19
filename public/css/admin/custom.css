@@ -80,6 +80,7 @@ div.dataTables_wrapper div.dataTables_paginate {
   /* START TOOLTIP STYLES */
   [tooltip] {
     position: relative; /* opinion 1 */
+    font-size: 15px !important;
   }
 
   /* Applies to all tooltips */
@@ -98,6 +99,7 @@ div.dataTables_wrapper div.dataTables_paginate {
     content: '';
     border: 5px solid transparent; /* opinion 4 */
     z-index: 1001; /* absurdity 1 */
+    margin-bottom: 10px;
   }
   [tooltip]::after {
     content: attr(tooltip); /* magic! */

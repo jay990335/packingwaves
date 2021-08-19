@@ -258,9 +258,11 @@ class PackOrdersController extends Controller
                             <div class="col-12">
                               <div class="card '.$labelPrintedBGClass.'" style="margin-bottom: 0px;">
                                 <div class="card-header border-bottom-0">
-                                  <span class="btn btn-sm bg-secondary mt-1" tooltip="SKU: '.$Item['SKU'].'" flow="up">'.$Item['SKU'].'</span>
+                                  <span class="btn btn-sm bg-success mt-1" tooltip="SKU: '.$Item['SKU'].'" flow="up">'.$Item['SKU'].'</span>
 
-                                  <span class="btn btn-sm bg-secondary mt-1" tooltip="Shipping: '.$record['ShippingInfo']['PostalServiceName'].'" flow="up">'.$record['ShippingInfo']['PostalServiceName'].'</span>
+                                  <span class="btn btn-sm bg-success mt-1" tooltip="Shipping: '.$record['ShippingInfo']['PostalServiceName'].'" flow="up">'.$record['ShippingInfo']['PostalServiceName'].'</span>
+
+                                  <span class="btn btn-sm bg-success mt-1" tooltip="Customer Name: '.$record['CustomerInfo']['Address']['FullName'].'" flow="up">'.$record['CustomerInfo']['Address']['FullName'].'</span>
                                 </div>
                                 <div class="card-body pt-0 pb-1 ml-2">
                                   <div class="row">
@@ -316,7 +318,10 @@ class PackOrdersController extends Controller
                     $ItemDetais= '<div class="row ">
                         <div class="col-12">
                           <div class="card '.$labelPrintedBGClass.'" style="margin-bottom: 0px;">
-                            <div class="card-header border-bottom-0"></div>
+                            <div class="card-header border-bottom-0">
+                                  <span class="btn btn-sm bg-success mt-1" tooltip="Shipping: '.$record['ShippingInfo']['PostalServiceName'].'" flow="up">'.$record['ShippingInfo']['PostalServiceName'].'</span>
+                                  <span class="btn btn-sm bg-success mt-1" tooltip="Customer Name: '.$record['CustomerInfo']['Address']['FullName'].'" flow="up">'.$record['CustomerInfo']['Address']['FullName'].'</span>
+                                </div>
                             <div class="card-body pt-0 pb-0">
                                 <div class="container">
                                     <div class="row">

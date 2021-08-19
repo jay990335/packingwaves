@@ -18,6 +18,7 @@ class AddHeaderAccessToken
         if ($request->has('tracking')) {
             $request->headers->set('Authorization', 'Bearer ' . $request->get('tracking'));
         }
+        
         return $next($request);
     }
 }
