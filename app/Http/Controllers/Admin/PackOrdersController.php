@@ -267,9 +267,13 @@ class PackOrdersController extends Controller
                                 <div class="card-body pt-0 pb-1 ml-2">
                                   <div class="row">
                                     <ul class="list-unstyled">
-                                      <li class="media">
-                                        <img class="mr-3" src="'.env('LINNWORKS_IMG_URL','https://s3-eu-west-1.amazonaws.com/images.linnlive.com/81232bb2fe781fc9e8ff26f6218f7bb6/').'tumbnail_'.$Item['ImageId'].'.jpg" >
-                                        <div class="media-body">
+                                      <li class="media">';
+                                        if(isset($Item['ImageId'])){
+                                        $ItemDetais.= '<img class="mr-3" src="'.env('LINNWORKS_IMG_URL','https://s3-eu-west-1.amazonaws.com/images.linnlive.com/81232bb2fe781fc9e8ff26f6218f7bb6/').'tumbnail_'.$Item['ImageId'].'.jpg" >';
+                                        }else{
+                                            $ItemDetais.= '<img class="mr-3" src="'.asset("/public/image/no_image.jpg").'" style="height: 85px;">';
+                                        }
+                                        $ItemDetais.= '<div class="media-body">
                                           <p class= "text-sm crop-text-3">'.$Item['Title'].'</p>
                                         </div>
                                       </li>
@@ -299,7 +303,11 @@ class PackOrdersController extends Controller
                     $item2_title = '';
                     if(isset($record['Items'][2])){
                         $Item2 = $record['Items'][2];
-                        $item2_image = '<img class="mr-3 mb-3" src="'.env('LINNWORKS_IMG_URL','https://s3-eu-west-1.amazonaws.com/images.linnlive.com/81232bb2fe781fc9e8ff26f6218f7bb6/').'tumbnail_'.$Item2['ImageId'].'.jpg" style="width: 40px;">';
+                        if(isset($Item2['ImageId'])){
+                            $item2_image = '<img class="mr-3 mb-3" src="'.env('LINNWORKS_IMG_URL','https://s3-eu-west-1.amazonaws.com/images.linnlive.com/81232bb2fe781fc9e8ff26f6218f7bb6/').'tumbnail_'.$Item2['ImageId'].'.jpg" style="width: 40px;">';
+                        }else{
+                            $item2_image = '<img class="mr-3" src="'.asset("/public/image/no_image.jpg").'" style="height: 85px;">';
+                        }
                         $item2_title = '<p class="mb-1 crop-text-1">'.$Item2['Title'].'</p><hr style="margin:0 0 0 0px;border-top: 1px solid #eeeeee;" >';
                     }
 
@@ -307,7 +315,11 @@ class PackOrdersController extends Controller
                     $item3_title = '';
                     if(isset($record['Items'][3])){
                         $Item3 = $record['Items'][3];
-                        $item3_image = '<img class="mr-3 mb-3" src="'.env('LINNWORKS_IMG_URL','https://s3-eu-west-1.amazonaws.com/images.linnlive.com/81232bb2fe781fc9e8ff26f6218f7bb6/').'tumbnail_'.$Item3['ImageId'].'.jpg" style="width: 40px;">';
+                        if(isset($Item3['ImageId'])){
+                            $item3_image = '<img class="mr-3 mb-3" src="'.env('LINNWORKS_IMG_URL','https://s3-eu-west-1.amazonaws.com/images.linnlive.com/81232bb2fe781fc9e8ff26f6218f7bb6/').'tumbnail_'.$Item3['ImageId'].'.jpg" style="width: 40px;">';
+                        }else{
+                            $item3_image = '<img class="mr-3" src="'.asset("/public/image/no_image.jpg").'" style="height: 85px;">';
+                        }
                         $item3_title = '<p class="mb-1 crop-text-1">'.$Item3['Title'].'</p><hr style="margin:0 0 0 0px;border-top: 1px solid #eeeeee;">';
                     }
 
@@ -327,12 +339,20 @@ class PackOrdersController extends Controller
                                     <div class="row">
                                         <div style="width:90px">
                                           <div class="row">
-                                           <div class="col-6">
-                                             <img class="mr-3 mb-3" src="'.env('LINNWORKS_IMG_URL','https://s3-eu-west-1.amazonaws.com/images.linnlive.com/81232bb2fe781fc9e8ff26f6218f7bb6/').'tumbnail_'.$Item['ImageId'].'.jpg" style="width: 40px;">
-                                           </div>
-                                            <div class="col-6">
-                                                <img class="mr-3 mb-3" src="'.env('LINNWORKS_IMG_URL','https://s3-eu-west-1.amazonaws.com/images.linnlive.com/81232bb2fe781fc9e8ff26f6218f7bb6/').'tumbnail_'.$Item1['ImageId'].'.jpg" style="width: 40px;">
-                                           </div>
+                                           <div class="col-6">';
+                                            if(isset($Item['ImageId'])){
+                                                $ItemDetais.= '<img class="mr-3 mb-3" src="'.env('LINNWORKS_IMG_URL','https://s3-eu-west-1.amazonaws.com/images.linnlive.com/81232bb2fe781fc9e8ff26f6218f7bb6/').'tumbnail_'.$Item['ImageId'].'.jpg" style="width: 40px;">';
+                                            }else{
+                                                $ItemDetais.= '<img class="mr-3" src="'.asset("/public/image/no_image.jpg").'" style="height: 85px;">';
+                                            }
+                                           $ItemDetais.= '</div>
+                                            <div class="col-6">';
+                                            if(isset($Item1['ImageId'])){
+                                                $ItemDetais.= '<img class="mr-3 mb-3" src="'.env('LINNWORKS_IMG_URL','https://s3-eu-west-1.amazonaws.com/images.linnlive.com/81232bb2fe781fc9e8ff26f6218f7bb6/').'tumbnail_'.$Item1['ImageId'].'.jpg" style="width: 40px;">';
+                                            }else{
+                                                $ItemDetais.= '<img class="mr-3" src="'.asset("/public/image/no_image.jpg").'" style="height: 85px;">';
+                                            }
+                                           $ItemDetais.= '</div>
                                            <div class="col-6">
                                                 '.$item2_image.'
                                            </div>

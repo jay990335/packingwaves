@@ -103,7 +103,7 @@
             @foreach($record['Items'] as $item)
             <tr>
               <td>@if($item['Quantity']==1)<span class="btn btn-success">{{$item['Quantity']}}</span> @else <span class="btn btn-danger">{{$item['Quantity']}}</span> @endif </td>
-              <td><img class="mr-3" src="{{env('LINNWORKS_IMG_URL','https://s3-eu-west-1.amazonaws.com/images.linnlive.com/81232bb2fe781fc9e8ff26f6218f7bb6/')}}tumbnail_{{$item['ImageId']}}.jpg" ></td>
+              <td>@if(isset($item['ImageId']))<img class="mr-3" src="{{env('LINNWORKS_IMG_URL','https://s3-eu-west-1.amazonaws.com/images.linnlive.com/81232bb2fe781fc9e8ff26f6218f7bb6/')}}tumbnail_{{$item['ImageId']}}.jpg" >@else <img class="mr-3" src="{{asset('/public/image/no_image.jpg')}}" style="height: 85px;"> @endif</td>
               <td>{{$item['SKU']}}</td>
               <td>{{$item['Title']}}</td>
               <td>{{$record['TotalsInfo']['Currency']}} {{round($item['CostIncTax'], 2)}}</td>
@@ -129,10 +129,6 @@
                 <th>Tax</th>
                 <td>{{$record['TotalsInfo']['Currency']}} {{round($record['TotalsInfo']['Tax'], 2)}}</td>
               </tr>
-              <!-- <tr>
-                <th>Shipping:</th>
-                <td>{{$record['TotalsInfo']['Currency']}} {{$record['TotalsInfo']['Subtotal']}}</td>
-              </tr> -->
               <tr>
                 <th>Total:</th>
                 <td>{{$record['TotalsInfo']['Currency']}} {{round($record['TotalsInfo']['TotalCharge'], 2)}}</td>
@@ -144,7 +140,6 @@
 
     <div class="row no-print">
         <div class="col-12">
-          <!-- <a href="invoice-print.html" target="_blank" class="btn btn-default"><i class="fas fa-print"></i> Print</a> -->
         </div>
     </div>
 </div>
