@@ -45,6 +45,57 @@
                             <a href="javascript:void(0)" onclick="multiple_orders_printlabels({{$print_button->templateID}},'{{$print_button->templateType}}')"  class="{{$print_button->style}} btn-sm mt-1"><span tooltip="{{$print_button->name}}" flow="up"><i class="fas fa-print"></i> {{$print_button->name}}</span></a>
                             @endforeach
                         @endif
+
+                        <button type="button" class="btn btn-primary btn-sm mt-1" id="search_btn" tooltip="Search By" flow="up" data-toggle="modal" data-target="#popup_modal_search"><i class="fas fa-search"></i></button>
+                        <!-- .model-popup [START] -->
+                        <div class="modal fade text-center" id="popup_modal_search" tabindex="-1" role="dialog">
+                            <div class="modal-dialog modal-sm">
+                                <div class="modal-content">
+                                    <div class="modal-body">
+                                        <div class="container-fluid">
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <div class="card">
+                                                        <div class="card-header" style="color: black;">
+                                                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                                            <h3 class="card-title">Search By</h3>
+                                                        </div>
+                                                        <!-- /.card-header -->
+                                                        <div class="card-body">
+                                                            <div class="form-group mt-2 mb-2">
+                                                                <select class="form-control form-control-sm" id='search_field' name="search_field">
+                                                                    <option value="" selected="selected">Order Id</option>
+                                                                    <option value="SKU:">Item SKU / Barcode</option>
+                                                                    <option value="Title:">Item Title</option>
+                                                                    <option value="Qty:">Quantity</option>
+                                                                    <option value="Name:">Customer Name</option>
+                                                                    <option value="Country:">Country</option>
+                                                                    <option value="Postcode:">Postcode</option>
+                                                                    <option value="Source:">Source</option>
+                                                                    <option value="Subsource:">Subsource</option>
+                                                                    <option value="Vendor:">Shipping Vendor</option>
+                                                                    <option value="Service:">Shipping Service</option>
+                                                                    <option value="Job:">Workflow Job</option>
+                                                                </select>
+                                                            </div>
+                                                            <div class="form-group mb-2">
+                                                                <input class="form-control form-control-sm" type="text" name="search_value" id="search_value">
+                                                            </div>
+                                                            <button type="submit" onclick="datatables();" class="btn btn-primary mb-2" data-dismiss="modal">Search</button>
+                                                            <button type="submit" onclick="clear_serch();" class="btn btn-primary mb-2" data-dismiss="modal">Clear</button>
+                                                        </div>
+                                                        <!-- /.card-body -->
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- .model-popup [END] -->
+
+
                         <button type="button" class="btn btn-primary btn-sm mt-1" id="sortby_btn" tooltip="Sort By" flow="up" data-toggle="modal" data-target="#popup_modal_sortby"><i class="fas fa-sort"></i></button>
                         <!-- .model-popup [START] -->
                         <div class="modal fade text-center" id="popup_modal_sortby" tabindex="-1" role="dialog">
@@ -106,6 +157,8 @@
                             </div>
                         </div>
                         <!-- .model-popup [END] -->
+
+                        
                     </div>
                     <div class="table-responsive list-table-wrapper">
                         <table class="table table-hover dataTable no-footer" id="table" width="100%">
@@ -127,9 +180,12 @@
 </div>
 
 <script>
+
 function datatables() {
     var sortby_field = $('#sortby_field').val();
     var sortby_type = $('#sortby_type').val();
+    var search_field = $('#search_field').val();
+    var search_value = $('#search_value').val();
     var table = $('#table').DataTable({
         dom: 'RBfrtip',
         buttons: [],
@@ -149,7 +205,9 @@ function datatables() {
             data: {
                 "PickingWaveId": {{$PickingWaveId}},
                 "sortby_field": sortby_field,
-                "sortby_type": sortby_type
+                "sortby_type": sortby_type,
+                "search_field": search_field,
+                "search_value": search_value
             },
         },
         columns       : [
@@ -360,6 +418,17 @@ $(function() {
 $( "#sortby_btn" ).click(function() {
   $('#popup_modal_sortby').modal('show');
 });
+
+$( "#search_btn" ).click(function() {
+  $('#popup_modal_search').modal('show');
+});
+
+function clear_serch() {
+    $('#search_value').val('');
+    setTimeout(function() {   //calls click event after a certain time
+        datatables();
+    }, 1000);
+}
 </script>
 
 @endsection

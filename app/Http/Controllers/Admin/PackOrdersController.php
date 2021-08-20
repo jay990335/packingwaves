@@ -183,12 +183,20 @@ class PackOrdersController extends Controller
 
             $records_all = $linnworks->Orders()->getOpenOrders('',$rowperpage,$page,$filter,$sorting,'');
 
+            if($request->search_value!=''){
+                $additionalFilters = $request->search_field.$request->search_value;
+            }elseif($request->search['value']!=''){
+                $additionalFilters = $request->search['value'];
+            }else{
+                $additionalFilters = '';
+            }
+
             $records = $linnworks->Orders()->getOpenOrders('',
                                                         $rowperpage,
                                                         $page,
                                                         $filter,
                                                         $sorting,
-                                                        $request->search['value']?$request->search['value']:'');
+                                                        $additionalFilters);
             //dd($records);
             $data_arr = array();
 
