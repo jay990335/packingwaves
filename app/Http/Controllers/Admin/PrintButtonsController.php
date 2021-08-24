@@ -73,10 +73,10 @@ class PrintButtonsController extends Controller
         if ($request->ajax() == true) {
 
             $model = printButtons::with('users','creator','editor');
-            if(!auth()->user()->hasRole('admin')){
+            if(!auth()->user()->hasRole('superadmin')){
                 $user_id = auth()->user()->id;
                 $model->whereHas('users', function($q) use ($user_id) { 
-                                            $q->whereIn('user_id', $user_id); });
+                                            $q->where('user_id', $user_id); });
             }
 
             return Datatables::eloquent($model)
@@ -131,11 +131,15 @@ class PrintButtonsController extends Controller
      */
     public function create()
     {
-        if(!auth()->user()->hasRole('admin')){
+        /*if(!auth()->user()->hasRole('admin')){
             $users = User::select('id', 'name')->where('id', auth()->user()->id)->get();
         }else{
             $users = User::all('id', 'name');
-        }
+        }*/
+
+        $user_id = auth()->user()->id;
+
+        $users = User::select('id', 'name')->whereHas('linnworks', function($q) use ($user_id) { $q->where('created_by', $user_id); })->get();
 
         $linnworks = Linnworks_API::make([
                 'applicationId' => env('LINNWORKS_APP_ID'),
@@ -208,11 +212,14 @@ class PrintButtonsController extends Controller
      */
     public function edit(printButtons $print_button)
     {
-        if(!auth()->user()->hasRole('admin')){
+        /*if(!auth()->user()->hasRole('admin')){
             $users = User::select('id', 'name')->where('id', auth()->user()->id)->get();
         }else{
             $users = User::all('id', 'name');
-        }
+        }*/
+
+        $user_id = auth()->user()->id;
+        $users = User::select('id', 'name')->whereHas('linnworks', function($q) use ($user_id) { $q->where('created_by', $user_id); })->get();
 
         $linnworks = Linnworks_API::make([
                 'applicationId' => env('LINNWORKS_APP_ID'),

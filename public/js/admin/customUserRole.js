@@ -38,6 +38,7 @@ $(document).ready(function () {
                 $("#popup-modalUserRole").modal('hide');
                 alert_message(message);
                 $(".table-responsive").load(location.href + " #datatableUserRole");
+                window.location.reload();
                 setTimeout(function() {   //calls click event after a certain time
                     datatablesUserRole();
                     $("#pageloader").hide();
@@ -72,6 +73,7 @@ $(document).ready(function () {
         return confirm_delete;
     }); 
 });
+
 
 
 

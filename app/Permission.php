@@ -20,6 +20,11 @@ class Permission extends ModelsPermission
             'edit user',
             'delete user',
 
+            'view linnworks user',
+            'create linnworks user',
+            'edit linnworks user',
+            'delete linnworks user',
+
             'view Print Buttons',
             'create Print Buttons',
             'edit Print Buttons',

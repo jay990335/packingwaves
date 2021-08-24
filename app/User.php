@@ -21,7 +21,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 'biography', 'dateOfBirth', 'printer_name', 'printer_zone', 'email', 'password',
+        'name', 'biography', 'dateOfBirth', 'printer_name', 'printer_zone', 'status', 'email', 'password',
     ];
 
     /**
@@ -86,8 +86,16 @@ class User extends Authenticatable
     public function linnworks_token()
     {
         $id = auth()->user()->id;
-        $linnworks_token = Linnworks::where('created_by', $id)->latest()->first();
+        $linnworks_token = Linnworks::where('user_id', $id)->latest()->first();
         return $linnworks_token;
+    }
+
+    /**
+     * Get the linnworks that owns the user.
+     */
+    public function linnworks()
+    {
+        return $this->belongsTo(Linnworks::class,'id','user_id');   
     }
 
     /**
@@ -97,4 +105,5 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(printButtons::class, 'user_has_print_buttons');
     }
+
 }

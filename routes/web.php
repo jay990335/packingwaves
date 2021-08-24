@@ -32,6 +32,11 @@ Route::group([
     // User Routes
     
     Route::resource('/user', 'UserController');
+    Route::get('user/ajax/change_status', 'UserController@change_status')->name('user.ajax.change_status'); // For change status
+
+    Route::get('linnworks-user', 'UserController@linnworks_user')->name('linnworks-user');
+    Route::get('linnworks-user/create', 'UserController@linnworks_user_create')->name('linnworks-user.create');
+    Route::post('linnworks-user/store', 'UserController@linnworks_user_store')->name('linnworks-user.store');
 
     // Role Routes
     Route::put('role/{id}/update', 'RoleController@update');

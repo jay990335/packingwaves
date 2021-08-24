@@ -145,3 +145,23 @@ $(document).ready(function () {
 });
 
 
+$(document).ready(function () {
+    $('body').on('click', '#popup-modal-form', function(event) {
+        $('#popup-modal-body').html('Loading..');
+        event.preventDefault();
+        var url = $(this).attr('action');
+        $.ajax({
+            url: url,
+            dataType: 'html',
+            data:$(this).serialize(),
+            success: function(response) {
+                $('#popup-modal-body').html(response);
+            },
+            error: function (data){
+                    console.log(data);
+            }
+        });
+        $('#sticky').removeClass('stick');
+        $('#popup-modal').modal('show');
+    });
+});

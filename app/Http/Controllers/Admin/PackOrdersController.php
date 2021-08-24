@@ -97,7 +97,12 @@ class PackOrdersController extends Controller
         if ($request->ajax() == true) {
             $user_id = auth()->user()->id;
             $draw = $request->get('draw');
-            $start = $request->get("start");
+            if($request->search_value!=''){
+                $start = 1;  
+            }else{
+                $start = $request->get("start");
+            }
+            
             $rowperpage = $request->get("length"); // Rows display per page
             $page = ($start/$rowperpage)+1;
             
@@ -383,7 +388,6 @@ class PackOrdersController extends Controller
                               <div class="text-left">
                                 '.$print_buttons_html.'
                                 <span class="btn btn-sm bg-secondary mt-1" tooltip="Order Id: #'.$record['NumOrderId'].'" flow="up">#'.$record['NumOrderId'].'</span>
-                                <span class="btn btn-sm bg-danger mt-1" tooltip="QTY: x '.array_sum(array_column($record['Items'],'Quantity')).'" flow="up">x '.array_sum(array_column($record['Items'],'Quantity')).'</span>
                                 <a href="'.route("admin.packlist.order_details",$record["OrderId"]).'" id="popup-modal-button" class="btn btn-sm bg-info mt-1">
                                   <i class="fas fa-info"></i>
                                 </a>

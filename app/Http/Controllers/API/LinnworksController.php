@@ -6,8 +6,35 @@ use App\Linnworks;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
+
+use Onfuro\Linnworks\Api\Auth;
+use Onfuro\Linnworks\Linnworks as Linnworks_API;
+
 class LinnworksController extends Controller
 {
+    /** @var Client  */
+    protected $client;
+
+    /** @var MockHandler  */
+    protected $mock;
+
+    /** @var array  */
+    //protected $config;
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->mock = new MockHandler([]);
+
+        $this->mock->append(new Response(200, [],
+            file_get_contents(__DIR__.'/stubs/AuthorizeByApplication.json')));
+
+        $handlerStack = HandlerStack::create($this->mock);
+
+        $this->client = new Client(['handler' => $handlerStack]);
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -20,12 +47,21 @@ class LinnworksController extends Controller
             'tracking' => 'required|unique:linnworks,passportAccessToken',
         ]);*/
 
+        $linnworks_api = Linnworks_API::make([
+                            'applicationId' => env('LINNWORKS_APP_ID'),
+                            'applicationSecret' => env('LINNWORKS_SECRET'),
+                            'token' => $request->token,
+                        ], $this->client);
+
         $user = auth()->user()->id;
         $linnworks = new Linnworks();
         $linnworks->token = $request->token;
         $linnworks->passportAccessToken = $request->tracking;
         $linnworks->applicationId = env('LINNWORKS_APP_ID');
         $linnworks->applicationSecret = env('LINNWORKS_SECRET');
+        $linnworks->user_id = $user;
+        $linnworks->linnworks_user_id = $linnworks_api->response()['UserId'];
+        $linnworks->linnworks_email = $linnworks_api->response()['Email'];
         $linnworks->created_by = $user;
         $linnworks->updated_by = $user;
         $linnworks->save();

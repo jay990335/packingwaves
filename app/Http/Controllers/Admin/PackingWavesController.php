@@ -80,149 +80,154 @@ class PackingWavesController extends Controller
                 'token' => auth()->user()->linnworks_token()->token,
             ], $this->client);
 
-            $records = $linnworks->Picking()->GetMyPickingWaves(null,'','OnlyPickWave');
+            //$records = $linnworks->Picking()->GetMyPickingWaves(null,'','OnlyPickWave');
+            $records = $linnworks->Picking()->GetAllPickingWaves(null,'','All');
 
             $data_arr = array();
-
+            $iTotalRecords = 0;
             foreach($records['PickingWaves'] as $record){
 
-                $PickingWaveId = $record['PickingWaveId'];
-                $picked_order = 0;
-                $filter = '{
-                    "BooleanFields":[
-                      {
-                         "FieldCode":"GENERAL_INFO_LOCKED",
-                         "Name":"Locked",
-                         "FieldType":"Boolean",
-                         "Value":"false"
-                      },
-                      {
-                         "FieldCode":"GENERAL_INFO_PARKED",
-                         "Name":"Parked",
-                         "FieldType":"Boolean",
-                         "Value":"false"
-                      }
-                   ],
-                   "ListFields":[
-                      /*{
-                         "FieldCode":"GENERAL_INFO_IDENTIFIER",
-                         "Name":"Identifiers",
-                         "FieldType":"List",
-                         "Value":"Pickwave Complete",
-                         "Type":0
-                      },*/
+                if($record['EmailAddress']==auth()->user()->linnworks_token()->linnworks_email){
 
-                      {
-                         "FieldCode":"GENERAL_INFO_STATUS",
-                         "Name":"Status",
-                         "FieldType":"List",
-                         "Type":0,
-                         "Value":1
-                      }
-                    ],
-                   "TextFields":[';
-                        foreach ($record['Orders'] as $Order) {
-                            if($Order['PickState']=='Picked' || $Order['PickState']=='PartialPicked'){
-                                $picked_order++;
+                    $PickingWaveId = $record['PickingWaveId'];
+                    $picked_order = 0;
+                    $filter = '{
+                        "BooleanFields":[
+                          {
+                             "FieldCode":"GENERAL_INFO_LOCKED",
+                             "Name":"Locked",
+                             "FieldType":"Boolean",
+                             "Value":"false"
+                          },
+                          {
+                             "FieldCode":"GENERAL_INFO_PARKED",
+                             "Name":"Parked",
+                             "FieldType":"Boolean",
+                             "Value":"false"
+                          }
+                       ],
+                       "ListFields":[
+                          /*{
+                             "FieldCode":"GENERAL_INFO_IDENTIFIER",
+                             "Name":"Identifiers",
+                             "FieldType":"List",
+                             "Value":"Pickwave Complete",
+                             "Type":0
+                          },*/
+
+                          {
+                             "FieldCode":"GENERAL_INFO_STATUS",
+                             "Name":"Status",
+                             "FieldType":"List",
+                             "Type":0,
+                             "Value":1
+                          }
+                        ],
+                       "TextFields":[';
+                            foreach ($record['Orders'] as $Order) {
+                                if($Order['PickState']=='Picked' || $Order['PickState']=='PartialPicked'){
+                                    $picked_order++;
+                                }
+                                $filter .= '{
+                                    "FieldCode":"GENERAL_INFO_ORDER_ID",
+                                    "Name":"Order Id",
+                                    "FieldType":"Text",
+                                    "Type":0,
+                                    "Text":"'.$Order['OrderId'].'"
+                                },';
                             }
-                            $filter .= '{
-                                "FieldCode":"GENERAL_INFO_ORDER_ID",
-                                "Name":"Order Id",
-                                "FieldType":"Text",
-                                "Type":0,
-                                "Text":"'.$Order['OrderId'].'"
-                            },';
+                       $filter .= '],
+                    }';
+
+                    $orders_pickwave_complete = $linnworks->Orders()->getOpenOrders('',100,$page,$filter,'[]','');
+                    
+                    /*if($PickingWaveId == 35){
+                        //echo $filter;
+                        //dd($orders_pickwave_complete);
+                        //dd($record);
+                    }*/
+                    
+                    $orders_not_printed_count = 0;
+                    foreach ($orders_pickwave_complete['Data'] as $order_pickwave_complete) {
+                        if($order_pickwave_complete['GeneralInfo']['LabelPrinted']==false){
+                            $orders_not_printed_count++;
                         }
-                   $filter .= '],
-                }';
-
-                $orders_pickwave_complete = $linnworks->Orders()->getOpenOrders('',100,$page,$filter,'[]','');
-                
-                /*if($PickingWaveId == 35){
-                    //echo $filter;
-                    //dd($orders_pickwave_complete);
-                    //dd($record);
-                }*/
-                
-                $orders_not_printed_count = 0;
-                foreach ($orders_pickwave_complete['Data'] as $order_pickwave_complete) {
-                    if($order_pickwave_complete['GeneralInfo']['LabelPrinted']==false){
-                        $orders_not_printed_count++;
                     }
-                }
 
 
-                if($record['State']=='Complete' && $orders_not_printed_count==0 && $picked_order!=0){
-                    $pickingWaveBGClass = 'bg-dark';
-                    $btnBGClass = 'btn-success';
-                    $pickingWaveState = 'Complete';
-                    $href = route("admin.packlist.packorderslist",$PickingWaveId);
-                }elseif($record['State']!='Complete' && $orders_pickwave_complete['TotalEntries']!=0 && $orders_not_printed_count==0 && $picked_order!=0){
-                    $pickingWaveBGClass = 'bg-white';
-                    $btnBGClass = 'btn-purple';
-                    $pickingWaveState = 'Partial Complete';
-                    $href = route("admin.packlist.packorderslist",$PickingWaveId);
-                }elseif($orders_not_printed_count!=0 && $picked_order!=0){
-                    $pickingWaveBGClass = 'bg-white';
-                    $btnBGClass = 'btn-purple';
-                    $pickingWaveState = 'Partial Complete';
-                    $href = route("admin.packlist.packorderslist",$PickingWaveId);
-                }else{
-                    $pickingWaveBGClass = 'bg-danger';
-                    $btnBGClass = 'btn-warning';
-                    $pickingWaveState = 'In Picklist';
-                    $href = 'javascript:pickingAlert();';
-                    //$href = route("admin.packlist.packorderslist",$PickingWaveId);
-                }
+                    if($record['State']=='Complete' && $orders_not_printed_count==0 && $picked_order!=0){
+                        $pickingWaveBGClass = 'bg-dark';
+                        $btnBGClass = 'btn-success';
+                        $pickingWaveState = 'Complete';
+                        $href = route("admin.packlist.packorderslist",$PickingWaveId);
+                    }elseif($record['State']!='Complete' && $orders_pickwave_complete['TotalEntries']!=0 && $orders_not_printed_count==0 && $picked_order!=0){
+                        $pickingWaveBGClass = 'bg-white';
+                        $btnBGClass = 'btn-purple';
+                        $pickingWaveState = 'Partial Complete';
+                        $href = route("admin.packlist.packorderslist",$PickingWaveId);
+                    }elseif($orders_not_printed_count!=0 && $picked_order!=0){
+                        $pickingWaveBGClass = 'bg-white';
+                        $btnBGClass = 'btn-purple';
+                        $pickingWaveState = 'Partial Complete';
+                        $href = route("admin.packlist.packorderslist",$PickingWaveId);
+                    }else{
+                        $pickingWaveBGClass = 'bg-danger';
+                        $btnBGClass = 'btn-warning';
+                        $pickingWaveState = 'In Picklist';
+                        $href = 'javascript:pickingAlert();';
+                        //$href = route("admin.packlist.packorderslist",$PickingWaveId);
+                    }
 
-                $picked_order_html = '';
-                if($picked_order!=0){
-                    $picked_order_html .= '<span class="btn btn-sm bg-secondary mt-1" tooltip="Picked Orders: '.$picked_order.'" flow="up">Picked Orders: '.$picked_order.'</span>';                 
-                }
-                
-                $Detais= '<a href="'.$href.'"><div class="row ">
-                            <div class="col-12">
-                              <div class="card '.$pickingWaveBGClass.'" style="margin-bottom: 0px;">
-                                <div class="card-header border-bottom-0">
-                                    <div class="container">
-                                        <div class="row">
-                                            <div class="col-4 text-left">
-                                                <span><b>ID: '.$PickingWaveId.'</b></span>
-                                            </div>
-                                            <div class="col-8 text-right">
-                                                <span class="btn btn-rounded '.$btnBGClass.' btn-sm">'.$pickingWaveState.'</span>
+                    $picked_order_html = '';
+                    if($picked_order!=0){
+                        $picked_order_html .= '<span class="btn btn-sm bg-secondary mt-1" tooltip="Picked Orders: '.$picked_order.'" flow="up">Picked Orders: '.$picked_order.'</span>';                 
+                    }
+                    
+                    $Detais= '<a href="'.$href.'"><div class="row ">
+                                <div class="col-12">
+                                  <div class="card '.$pickingWaveBGClass.'" style="margin-bottom: 0px;">
+                                    <div class="card-header border-bottom-0">
+                                        <div class="container">
+                                            <div class="row">
+                                                <div class="col-4 text-left">
+                                                    <span><b>ID: '.$PickingWaveId.'</b></span>
+                                                </div>
+                                                <div class="col-8 text-right">
+                                                    <span class="btn btn-rounded '.$btnBGClass.' btn-sm">'.$pickingWaveState.'</span>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="card-footer">
-                                  <div class="text-left">
-                                    <span class="btn btn-sm bg-secondary mt-1" tooltip="Orders: '.count($record['Orders']).'" flow="up">Orders: '.count($record['Orders']).'</span>
+                                    <div class="card-footer">
+                                      <div class="text-left">
+                                        <span class="btn btn-sm bg-secondary mt-1" tooltip="Orders: '.count($record['Orders']).'" flow="up">Orders: '.count($record['Orders']).'</span>
 
-                                    <span class="btn btn-sm bg-secondary mt-1" tooltip="Items: '.array_sum(array_column($record['Orders'],'ItemCount')).'" flow="up">Items: '.array_sum(array_column($record['Orders'],'ItemCount')).'</span>
-                                    
-                                    <span class="btn btn-sm bg-secondary mt-1" tooltip="Picked Orders: '.$picked_order.'" flow="up">Picked Orders: '.$picked_order.'</span>
+                                        <span class="btn btn-sm bg-secondary mt-1" tooltip="Items: '.array_sum(array_column($record['Orders'],'ItemCount')).'" flow="up">Items: '.array_sum(array_column($record['Orders'],'ItemCount')).'</span>
+                                        
+                                        <span class="btn btn-sm bg-secondary mt-1" tooltip="Picked Orders: '.$picked_order.'" flow="up">Picked Orders: '.$picked_order.'</span>
 
-                                    <span class="btn btn-sm bg-secondary mt-1" tooltip="Printed Orders: '.(count($record['Orders']) - $orders_not_printed_count).'" flow="up">Printed Orders: '.(count($record['Orders']) - $orders_not_printed_count).'</span>
+                                        <span class="btn btn-sm bg-secondary mt-1" tooltip="Printed Orders: '.(count($record['Orders']) - $orders_not_printed_count).'" flow="up">Printed Orders: '.(count($record['Orders']) - $orders_not_printed_count).'</span>
 
+                                      </div>
+                                    </div>
                                   </div>
                                 </div>
-                              </div>
-                            </div>
-                          </div></a>';
-                
-                $data_arr[] = array(
-                    "PickingWaveId" => $PickingWaveId,
-                    "pickingWaveState" => $pickingWaveState,
-                    "Detais" => $Detais,
-                    "pickingWaveBGClass" => $pickingWaveBGClass
-                );
+                              </div></a>';
+                    
+                    $data_arr[] = array(
+                        "PickingWaveId" => $PickingWaveId,
+                        "pickingWaveState" => $pickingWaveState,
+                        "Detais" => $Detais,
+                        "pickingWaveBGClass" => $pickingWaveBGClass
+                    );
+                    $iTotalRecords++;
+                }
             }
 
             $response = array(
                 "draw" => intval($draw),
-                "iTotalRecords" => count($records['PickingWaves']),
-                "iTotalDisplayRecords" => count($records['PickingWaves']),
+                "iTotalRecords" => $iTotalRecords,
+                "iTotalDisplayRecords" => $iTotalRecords,
                 "aaData" => $data_arr
             );
 

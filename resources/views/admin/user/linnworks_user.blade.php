@@ -12,11 +12,11 @@
             <div class="col-lg-5 p-b-9 align-self-center text-left  " id="list-page-actions-container">
                 <div id="list-page-actions">
                     <!--ADD NEW ITEM-->
-                    @can('create user')
+                    <!-- @can('create user')
                     <a href="{{ route('admin.user.create') }}" class="btn btn-danger btn-add-circle edit-add-modal-button js-ajax-ux-request reset-target-modal-form" id="popup-modal-buttonUserRole">
                         <span tooltip="Create new team member." flow="right"><i class="fas fa-plus"></i></span>
                     </a>
-                    @endcan
+                    @endcan -->
                     <!--ADD NEW BUTTON (link)-->
                 </div>
             </div>
@@ -42,49 +42,33 @@
                         <table class="table table-hover" id="datatableUser">
                             <thead>
                                 <tr>
-                                    <th>Name</th>
+                                    <th>Linnworks UserId</th>
                                     <th>Email</th>
-                                    <th>Role</th>
-                                    <th>Date</th>
-                                    <th>Status</th>
-                                    @canany(['edit user', 'delete user'])
+                                    <th>Super Admin</th>
                                     <th>Actions</th>
-                                    @endcanany
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse ($users as $user)
+                                @forelse ($linnworks_users as $user)
                                 <tr>
-                                    <td><img src="{{ $user->getImageUrlAttribute($user->id) }}" alt="Admin" class="profile-user-img-small img-circle"> {{ $user->name }}</td>
-                                    <td>{{ $user->email }}</td>
-                                    <td>{{ $user->getRoleNames()->first() }}</td>
-                                    <td>{{ $user->date }}</td>
+                                    <td>{{ $user['fkUserId'] }}</td>
+                                    <td>{{ $user['EmailAddress'] }}</td>
+                                    <td>@if($user['SuperAdmin']==1) Super Admin @else Staff @endif</td>
                                     <td>
-                                        <div class="dropdown action-label">
-                                            <a class="btn btn-white btn-sm btn-rounded dropdown-toggle" href="#" data-toggle="dropdown" aria-expanded="false"><i class="fa fa-dot-circle-o @if($user->status=='1') text-success @else text-danger @endif "></i> @if($user->status=='1') Active @else Inactive @endif </a>
-                                            <div class="dropdown-menu dropdown-menu-right" style="">
-                                                <a class="dropdown-item" href="#" onclick="funChangeStatus({{$user->id}},1); return false;"><i class="fa fa-dot-circle-o text-success"></i> Active</a>
-                                                <a class="dropdown-item" href="#" onclick="funChangeStatus({{$user->id}},0); return false;"><i class="fa fa-dot-circle-o text-danger"></i> Inactive</a>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        @can('edit user')
-                                        <a href="{{ route('admin.user.edit', ['user' => $user->id]) }}" 
-                                            class="btn btn-success btn-sm float-left mr-3"  id="popup-modal-buttonUserRole">
-                                            <span tooltip="Edit" flow="left"><i class="fas fa-edit"></i></span>
-                                        </a>
-                                        @endcan 
-                                        @can('delete user')
-                                        <form method="post" class="float-left delete-formUserRole"
-                                            action="{{ route('admin.user.destroy', ['user' => $user->id ]) }}">
-                                            @csrf
-                                            @method('delete')
-                                            <button type="submit" class="btn btn-danger btn-sm">
-                                                <span tooltip="Delete" flow="right"><i class="fas fa-trash-alt"></i></span>
-                                            </button>
-                                        </form>
-                                        @endcan
+                                        @if(in_array($user['EmailAddress'], $users))
+                                            
+                                        @else
+                                            <form method="post" class="float-left"
+                                            action="{{ route('admin.linnworks-user.create') }}" id="popup-modal-form">
+                                                @csrf
+                                                @method('post')
+                                                <input type="hidden" name="email" value="{{ $user['EmailAddress'] }}">
+                                                <input type="hidden" name="user_id" value="{{ $user['fkUserId'] }}">
+                                                <button type="submit" class="btn btn-danger btn-sm">
+                                                    <span tooltip="Create User" flow="right"><i class="fas fa-plus"></i></span>
+                                                </button>
+                                            </form>
+                                        @endif
                                     </td>
                                 </tr>
                                 @empty

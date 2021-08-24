@@ -10,12 +10,12 @@ class Role extends ModelsRole
 {
     public function isDisabled()
     {
-        return $this->name === 'admin' ? 'disabled' : null;
+        return $this->name === 'superadmin' ? 'disabled' : null;
     }
 
     public function isAdmin()
     {
-        return $this->name === 'admin';
+        return $this->name === 'superadmin';
     }
 
     public function isChecked($permission)

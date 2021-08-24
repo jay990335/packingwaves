@@ -25,6 +25,14 @@ class Linnworks extends Model
     ];
 
     /**
+     * Get the linnworks that owns the user.
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class,'user_id');   
+    }
+
+    /**
      * Get the creator for the company.
      */
     public function creator(){

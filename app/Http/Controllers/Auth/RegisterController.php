@@ -105,7 +105,7 @@ class RegisterController extends Controller
             exit;
         }
 
-        $user->assignRole('user');
+        $user->assignRole('admin');
 
         return $user;
     }

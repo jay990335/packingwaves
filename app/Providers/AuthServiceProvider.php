@@ -29,7 +29,7 @@ class AuthServiceProvider extends ServiceProvider
         Passport::routes(); // Add this
 
         Gate::before(function ($user, $ability) {
-            return $user->hasRole('admin') ? true : null;
+            return $user->hasRole('superadmin') ? true : null;
         });
     }
 }
