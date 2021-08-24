@@ -154,6 +154,7 @@ $(document).ready(function () {
             url: url,
             dataType: 'html',
             data:$(this).serialize(),
+            type: "POST",
             success: function(response) {
                 $('#popup-modal-body').html(response);
             },

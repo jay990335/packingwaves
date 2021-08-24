@@ -75,8 +75,7 @@ class PrintButtonsController extends Controller
             $model = printButtons::with('users','creator','editor');
             if(!auth()->user()->hasRole('superadmin')){
                 $user_id = auth()->user()->id;
-                $model->whereHas('users', function($q) use ($user_id) { 
-                                            $q->where('user_id', $user_id); });
+                $model->where('created_by', $user_id);
             }
 
             return Datatables::eloquent($model)
@@ -346,4 +345,105 @@ class PrintButtonsController extends Controller
             ]);
         }
     }
+
+    /*---- Dynamic Print Button For USER [Start] ----*/ 
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function user()
+    {
+        return view('admin.print_buttons.user');
+    }
+
+    /**
+     * Datatables Ajax Data
+     *
+     * @return mixed
+     * @throws \Exception
+     */
+    public function datatables_user(Request $request)
+    {
+
+        if ($request->ajax() == true) {
+
+            $model = printButtons::with('users','creator','editor');
+            $user_id = auth()->user()->linnworks_token()->created_by; //Parent User ID
+            $model->where('created_by', $user_id);
+
+            return Datatables::eloquent($model)
+                    
+                    ->addColumn('print_button_status', function ($data) {
+                        $users_id = [];
+                        foreach ($data->users as $key => $value) {
+                            $users_id[]= $value->id;
+                        }
+                        if(in_array(auth()->user()->id,$users_id)){ $class= 'text-success';$status= 'Active';}else{$class ='text-danger';$status= 'Inactive';}
+                        return '<div class="dropdown action-label">
+                                <a class="btn btn-white btn-sm btn-rounded dropdown-toggle" href="#" data-toggle="dropdown" aria-expanded="false"><i class="fa fa-dot-circle-o '.$class.'"></i> '.$status.' </a>
+                                <div class="dropdown-menu dropdown-menu-right" style="">
+                                    <a class="dropdown-item" href="#" onclick="funChangeStatus('.$data->id.',1); return false;"><i class="fa fa-dot-circle-o text-success"></i> Active</a>
+                                    <a class="dropdown-item" href="#" onclick="funChangeStatus('.$data->id.',0); return false;"><i class="fa fa-dot-circle-o text-danger"></i> Inactive</a>
+                                </div>
+                            </div>';
+                    })
+
+                    ->addColumn('preview_button', function (printButtons $data) {
+                        return '<span class="'.$data->style.'"><i class="fas fa-print"></i> '.$data->name.'</span>';
+                    })
+
+                    ->rawColumns(['print_button_status','preview_button','action'])
+
+                    ->make(true);
+        }
+    }
+
+    /**
+     * Datatables Ajax Data
+     *
+     * @return mixed
+     * @throws \Exception
+     */
+    public function change_status_user(Request $request)
+    {
+        try {
+
+            $printButtons = printButtons::find($request->id);
+            if (empty($printButtons)) {
+                //Session::flash('failed', 'Print Button Update Denied');
+                //return redirect()->back();
+                return response()->json([
+                    'error' => 'Print Button update denied.' // for status 200
+                ]);   
+            }
+
+            if($request->status==0){
+                $printButtons->users()->detach(auth()->user()->id);
+            }else{
+                $printButtons->users()->attach(auth()->user()->id);
+            }
+            
+            //Session::flash('success', 'A print buttons updated successfully.');
+            //return redirect('admin/print_buttons');
+
+            return response()->json([
+                'success' => 'Print Button update successfully.' // for status 200
+            ]);
+
+        } catch (\Exception $exception) {
+
+            DB::rollBack();
+
+            //Session::flash('failed', $exception->getMessage() . ' ' . $exception->getLine());
+            /*return redirect()->back()->withInput($request->all());*/
+
+            return response()->json([
+                'error' => $exception->getMessage() . ' ' . $exception->getLine() // for status 200
+            ]);
+        }
+    }
+
+    /*----Dynamic Print Button For USER [END]----*/ 
 }

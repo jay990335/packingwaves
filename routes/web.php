@@ -35,7 +35,7 @@ Route::group([
     Route::get('user/ajax/change_status', 'UserController@change_status')->name('user.ajax.change_status'); // For change status
 
     Route::get('linnworks-user', 'UserController@linnworks_user')->name('linnworks-user');
-    Route::get('linnworks-user/create', 'UserController@linnworks_user_create')->name('linnworks-user.create');
+    Route::post('linnworks-user/create', 'UserController@linnworks_user_create')->name('linnworks-user.create');
     Route::post('linnworks-user/store', 'UserController@linnworks_user_store')->name('linnworks-user.store');
 
     // Role Routes
@@ -65,9 +65,15 @@ Route::group([
 
 
     // Branch Routes
+    Route::get('print_buttons/user', 'PrintButtonsController@user')->name('print_buttons.user');
+    Route::get('print_buttons/ajax/data_user', 'PrintButtonsController@datatables_user'); // For Datatables
+    Route::get('print_buttons/ajax/change_status_user', 'PrintButtonsController@change_status_user')->name('print_buttons.ajax.change_status_user'); // For change status
+
     Route::resource('print_buttons', 'PrintButtonsController');
     Route::get('print_buttons/ajax/data', 'PrintButtonsController@datatables'); // For Datatables
     Route::get('print_buttons/ajax/change_status', 'PrintButtonsController@change_status')->name('print_buttons.ajax.change_status'); // For change status
+
+
 
 
     // Setting Routes
