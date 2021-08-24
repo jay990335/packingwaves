@@ -50,10 +50,19 @@ class UserController extends Controller
     public function index()
     {
         $search = request('search', null);
-        $users = User::when($search, function($user) use($search) {
-            return $user->where("name", 'like', '%' . $search . '%')
-            ->orWhere('id', $search);
-        })->paginate();
+        $user_id = auth()->user()->id;
+        if(!auth()->user()->hasRole('superadmin')){
+            $users = User::whereHas('linnworks', function($q) use ($user_id) { $q->where('created_by', $user_id); })->when($search, function($user) use($search) {
+                return $user->where("name", 'like', '%' . $search . '%')
+                ->orWhere('id', $search);
+            })->get();
+        }else{
+            $users = User::when($search, function($user) use($search) {
+                return $user->where("name", 'like', '%' . $search . '%')
+                ->orWhere('id', $search);
+            })->get();
+        }
+        
         $users->load('roles');
         return view('admin.user.index', compact('users'));
     }
@@ -66,7 +75,8 @@ class UserController extends Controller
                 'token' => auth()->user()->linnworks_token()->token,
             ], $this->client);
         $linnworks_users = $linnworks->Permissions()->getUsers();
-        $users = Linnworks::where('created_by',auth()->user()->id)->pluck('linnworks_email')->toArray();
+        //$users = Linnworks::where('created_by',auth()->user()->id)->pluck('linnworks_email')->toArray();
+        $users = Linnworks::pluck('linnworks_email')->toArray();
         
         return view('admin.user.linnworks_user', compact('linnworks_users','users'));
     }

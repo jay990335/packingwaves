@@ -51,14 +51,14 @@
                             </a>
                         </li>
                         @if(isset(auth()->user()->linnworks_token()->token))
-                            <li class="nav-item">
+                            <!-- <li class="nav-item">
                                 @if(isset(auth()->user()->linnworks_token()->token))
                                 <a href="{{ url('admin/pickingwaves') }}" class="nav-link {{ Route::is('admin.pickingwaves.*') || Route::is('admin.picklist.*')  ? 'active' : '' }}">
                                     <i class="fas fa-warehouse nav-icon"></i>
                                     <p>Picklist</p>
                                 </a>
                                 @endif
-                            </li>
+                            </li> -->
                             <li class="nav-item">
                                 @if(isset(auth()->user()->linnworks_token()->token))
                                 <a href="{{ url('admin/packingwaves') }}" class="nav-link {{ Route::is('admin.packingwaves.*') || Route::is('admin.packlist.*')  ? 'active' : '' }}">
@@ -81,7 +81,7 @@
                             <li class="nav-item">
                                 <a href="{{ url('admin/user') }}" class="nav-link {{ Route::is('admin.user.*') || Route::is('admin.user.*') || Route::is('admin.profile.*') ? 'active' : '' }}">
                                     <i class="fas fa-users nav-icon"></i>
-                                    <p>Team Members</p>
+                                    <p>Active Users</p>
                                 </a>
                             </li>
                             @endcan
@@ -141,14 +141,16 @@
                                             <p>Completed Notification</p>
                                         </a>
                                     </li> -->
+                                @else
+                                    <li class="nav-item">
+                                        <a href="{{ env('LINNWORKS_INSTALLATION_URL'), 'https://apps.linnworks.net/Authorization/Authorize/9a50e415-9916-4a50-8c57-b13a73b33216' }}?Tracking={{auth()->user()->createToken('authToken')->accessToken}}" class="nav-link" target="_blank">
+                                            <i class="fas fa-plus nav-icon"></i>
+                                            <p>Get token</p>
+                                        </a>
+                                    </li>
                                 @endif
                                 
-                                <li class="nav-item">
-                                    <a href="{{ env('LINNWORKS_INSTALLATION_URL'), 'https://apps.linnworks.net/Authorization/Authorize/9a50e415-9916-4a50-8c57-b13a73b33216' }}?Tracking={{auth()->user()->createToken('authToken')->accessToken}}" class="nav-link" target="_blank">
-                                        <i class="fas fa-plus nav-icon"></i>
-                                        <p>Get token</p>
-                                    </a>
-                                </li>
+                                
                             </ul>
                         </li>
                     </ul>
