@@ -72,11 +72,17 @@ class PrintButtonsController extends Controller
 
         if ($request->ajax() == true) {
 
-            $model = printButtons::with('users','creator','editor');
-            //if(!auth()->user()->hasRole('superadmin')){
-                $user_id = auth()->user()->id;
-                $model->where('created_by', $user_id);
-            //}
+            $user_id = auth()->user()->id;
+            $model = printButtons::where('created_by', $user_id)
+                                        ->with(['users' => function($query) use ($user_id) 
+                                                    {
+                                                        $query->whereHas('linnworks', function($q) use ($user_id) 
+                                                            {
+                                                                $q->where('created_by', $user_id);
+                                                            }
+                                                        );
+                                                    }
+                                                ]);
 
             return Datatables::eloquent($model)
                     ->addColumn('action', function (printButtons $data) {
@@ -108,13 +114,19 @@ class PrintButtonsController extends Controller
                     })
 
                     ->addColumn('users_avatars', function ($data) {
+                        $i=0;
                         $users='<div class="avatars_overlapping">';
-      
                         foreach ($data->users as $key => $value) {
-                           $users.='<span class="avatar_overlapping"><p tooltip="'.$value->name.'" flow="up"><img src="'.$value->getImageUrlAttribute($value->id).'" width="50" height="50" /></p></span>';
+                            if($i<4){
+                                $users.='<span class="avatar_overlapping"><p tooltip="'.$value->name.'" flow="up"><img src="'.$value->getImageUrlAttribute($value->id).'" width="50" height="50" /></p></span>';
+                            }
+                            $i++;
                         }
-
-                        return $users.='</div>';
+                        $users.='</div>';
+                        if($i>4){
+                            $users.='<div class="avatars_more_text">'.($i-4).'+</div>';
+                        }
+                        return $users;
                     })
 
                     ->rawColumns(['print_button_status','users_avatars','preview_button','action'])

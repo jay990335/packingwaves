@@ -50,19 +50,19 @@
                         </div>
 
                         <div class="form-group">
-                            <label>Folder</label>
+                            <label>Folder &nbsp;</label><input type="checkbox" id="checkbox_folder" > &nbsp;Select All
                             <select class="form-control" name="FolderName[]" id="FolderName" multiple>
                                 @foreach ($folders as $folder)
-                                    <option value="{{ $folder->id }}" selected>{{ $folder->name }}</option>
+                                    <option value="{{ $folder->id }}">{{ $folder->name }}</option>
                                 @endforeach
                             </select>
                         </div>
 
                         <div class="form-group">
-                            <label>Shipment Setting</label>
+                            <label>Shipment Setting &nbsp;</label><input type="checkbox" id="checkbox_shipment" > &nbsp;Select All
                             <select class="form-control" name="ShipmentName[]" id="ShipmentName" multiple>
                                 @foreach ($shipmentSettings as $shipmentSetting)
-                                    <option value="{{ $shipmentSetting->id }}" selected>{{ $shipmentSetting->name }}</option>
+                                    <option value="{{ $shipmentSetting->id }}">{{ $shipmentSetting->name }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -88,11 +88,25 @@
     }); //function end
 
     $("#FolderName").select2({
-        placeholder: "Folder Settings"
+        placeholder: "Select Folder Settings"
+    });
+    $("#checkbox_folder").click(function(){
+        if($("#checkbox_folder").is(':checked') ){
+            $('#FolderName').select2('destroy').find('option').prop('selected', 'selected').end().select2({placeholder: "Select Folder Settings",allowClear: true});
+        }else{
+            $('#FolderName').select2('destroy').find('option').prop('selected', false).end().select2({placeholder: "Select Folder Settings",allowClear: true});
+        }
     });
 
     $("#ShipmentName").select2({
-        placeholder: "Shipment Settings"
+        placeholder: "Select Shipment Name"
+    });
+    $("#checkbox_shipment").click(function(){
+        if($("#checkbox_shipment").is(':checked') ){
+            $('#ShipmentName').select2('destroy').find('option').prop('selected', 'selected').end().select2({placeholder: "Select Shipment Name",allowClear: true});
+        }else{
+            $('#ShipmentName').select2('destroy').find('option').prop('selected', false).end().select2({placeholder: "Select Shipment Name",allowClear: true});
+        }
     });
 </script>
 @endsection

@@ -72,11 +72,17 @@ class FolderSettingsController extends Controller
 
         if ($request->ajax() == true) {
 
-            $model = folderSettings::with('users','creator','editor');
-            //if(!auth()->user()->hasRole('superadmin')){
-                $user_id = auth()->user()->id;
-                $model->where('created_by', $user_id);
-            //}
+            $user_id = auth()->user()->id;
+            $model = folderSettings::where('created_by', $user_id)
+                                        ->with(['users' => function($query) use ($user_id) 
+                                                    {
+                                                        $query->whereHas('linnworks', function($q) use ($user_id) 
+                                                            {
+                                                                $q->where('created_by', $user_id);
+                                                            }
+                                                        );
+                                                    }
+                                                ]);
 
             return Datatables::eloquent($model)
                     ->addColumn('action', function (folderSettings $data) {
