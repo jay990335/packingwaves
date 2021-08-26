@@ -67,25 +67,6 @@
                                 </a>
                                 @endif
                             </li>
-                            
-                            @can('view linnworks user')
-                            <li class="nav-item">
-                                <a href="{{ url('admin/linnworks-user') }}" class="nav-link {{ Route::is('admin.linnworks-user') ? 'active' : '' }}">
-                                    <i class="fas fa-users nav-icon"></i>
-                                    <p>Linnworks User Manager</p>
-                                </a>
-                            </li>
-                            @endcan
-
-                            @can('view user')
-                            <li class="nav-item">
-                                <a href="{{ url('admin/user') }}" class="nav-link {{ Route::is('admin.user.*') || Route::is('admin.user.*') || Route::is('admin.profile.*') ? 'active' : '' }}">
-                                    <i class="fas fa-users nav-icon"></i>
-                                    <p>Active Users</p>
-                                </a>
-                            </li>
-                            @endcan
-
                         @endif
 
                         <li class="nav-item has-treeview {{ Route::is('admin.print_buttons.user') || Route::is('admin.folder_settings.user') || Route::is('admin.shipment_settings.user') ? 'menu-open' : '' }}">
@@ -204,6 +185,38 @@
                                 @endif
                                 
                                 
+                            </ul>
+                        </li>
+                        @endif
+
+                        @if(isset(auth()->user()->linnworks_token()->token))
+                        <li class="nav-item has-treeview {{ Route::is('admin.linnworks-user') || Route::is('admin.user.*') || Route::is('admin.profile.*') ? 'menu-open' : '' }}">
+                            <a href="#" class="nav-link {{ 
+                                Route::is('admin.linnworks-user') || Route::is('admin.user.*') || Route::is('admin.profile.*') ? 'active-parent' : '' }}">
+                                <i class="fas fa-users nav-icon"></i>
+                                <p>
+                                    User Manager
+                                    <i class="right fas fa-angle-left"></i>
+                                </p>
+                            </a>
+                            <ul class="nav nav-treeview" style="background-color: black;">
+                                @can('view linnworks user')
+                                <li class="nav-item">
+                                    <a href="{{ url('admin/linnworks-user') }}" class="nav-link {{ Route::is('admin.linnworks-user') ? 'active' : '' }}">
+                                        <i class="fas fa-users nav-icon"></i>
+                                        <p>Linnworks User Manager</p>
+                                    </a>
+                                </li>
+                                @endcan
+
+                                @can('view user')
+                                <li class="nav-item">
+                                    <a href="{{ url('admin/user') }}" class="nav-link {{ Route::is('admin.user.*') || Route::is('admin.user.*') || Route::is('admin.profile.*') ? 'active' : '' }}">
+                                        <i class="fas fa-users nav-icon"></i>
+                                        <p>Active Users</p>
+                                    </a>
+                                </li>
+                                @endcan
                             </ul>
                         </li>
                         @endif
