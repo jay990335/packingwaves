@@ -83,7 +83,9 @@
           <b class="pb-2">Shipping Service</b><br>
           <select class="form-control select2 pt-2" id="shippingMethod" name="shippingMethod" required autocomplete="shippingMethod">
               @foreach ($PostalServices as $PostalService)
-                  <option value="{{ $PostalService['PostalServiceName'] }}" @if($PostalService['PostalServiceName'] == $record['ShippingInfo']['PostalServiceName']) selected @endif>{{ $PostalService['PostalServiceName'] }}</option>
+                  @if(in_array($PostalService['PostalServiceName'],$shipmentSettings) || ($PostalService['PostalServiceName'] == $record['ShippingInfo']['PostalServiceName']))
+                      <option value="{{ $PostalService['PostalServiceName'] }}" @if($PostalService['PostalServiceName'] == $record['ShippingInfo']['PostalServiceName']) selected @endif>{{ $PostalService['PostalServiceName'] }}</option>
+                  @endif
               @endforeach
           </select>
         </div>

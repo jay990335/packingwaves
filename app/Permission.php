@@ -34,6 +34,11 @@ class Permission extends ModelsPermission
             'create folders setting',
             'edit folders setting',
             'delete folders setting',
+
+            'view shipment setting',
+            'create shipment setting',
+            'edit shipment setting',
+            'delete shipment setting',
         ];
     }
 

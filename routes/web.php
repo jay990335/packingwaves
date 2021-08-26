@@ -83,6 +83,16 @@ Route::group([
     Route::get('folder_settings/ajax/data', 'FolderSettingsController@datatables'); // For Datatables
     Route::get('folder_settings/ajax/change_status', 'FolderSettingsController@change_status')->name('folder_settings.ajax.change_status'); // For change status
 
+
+    // Shipment Setting Routes
+    Route::get('shipment_settings/user', 'ShipmentSettingsController@user')->name('shipment_settings.user');
+    Route::get('shipment_settings/ajax/data_user', 'ShipmentSettingsController@datatables_user'); // For Datatables
+    Route::get('shipment_settings/ajax/change_status_user', 'ShipmentSettingsController@change_status_user')->name('shipment_settings.ajax.change_status_user'); // For change status
+
+    Route::resource('shipment_settings', 'ShipmentSettingsController');
+    Route::get('shipment_settings/ajax/data', 'ShipmentSettingsController@datatables'); // For Datatables
+    Route::get('shipment_settings/ajax/change_status', 'ShipmentSettingsController@change_status')->name('shipment_settings.ajax.change_status'); // For change status
+
     // Setting Routes
     Route::get('setting/folders', 'SettingController@folders')->name('setting.folders');
     Route::put('setting/updateFolder', 'SettingController@updateFolder')->name('setting.updateFolder');

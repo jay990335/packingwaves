@@ -9,6 +9,7 @@ use App\Image;
 use App\Linnworks;
 use App\printButtons;
 use App\folderSettings;
+use App\shipmentSettings;
 
 use App\Http\Controllers\Controller;
 use App\Traits\UploadTrait;
@@ -609,7 +610,8 @@ class PackOrdersController extends Controller
         $folderSettings = folderSettings::where('status','Yes')->whereHas('users', function($q) use ($user_id) { $q->where('user_id', $user_id); })->pluck('name')->toArray();
 
         $PostalServices = $linnworks->PostalServices()->getPostalServices();
-        return view('admin.packlist.order_details', compact('record','PostalServices','folders','folderSettings'));
+        $shipmentSettings = shipmentSettings::where('status','Yes')->whereHas('users', function($q) use ($user_id) { $q->where('user_id', $user_id); })->pluck('name')->toArray();
+        return view('admin.packlist.order_details', compact('record','PostalServices','shipmentSettings','folders','folderSettings'));
     }
 
     /**

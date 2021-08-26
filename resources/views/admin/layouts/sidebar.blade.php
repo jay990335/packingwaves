@@ -88,9 +88,9 @@
 
                         @endif
 
-                        <li class="nav-item has-treeview {{ Route::is('admin.print_buttons.user') || Route::is('admin.folder_settings.user') ? 'menu-open' : '' }}">
+                        <li class="nav-item has-treeview {{ Route::is('admin.print_buttons.user') || Route::is('admin.folder_settings.user') || Route::is('admin.shipment_settings.user') ? 'menu-open' : '' }}">
                             <a href="#" class="nav-link {{ 
-                                Route::is('admin.print_buttons.user') || Route::is('admin.folder_settings.user') ? 'active-parent' : '' }}">
+                                Route::is('admin.print_buttons.user') || Route::is('admin.folder_settings.user') || Route::is('admin.shipment_settings.user') ? 'active-parent' : '' }}">
                                 <i class="nav-icon fas fa-cogs"></i>
                                 <p>
                                     Settings
@@ -121,6 +121,13 @@
                                         </a>
                                     </li>
 
+                                    <li class="nav-item">
+                                        <a href="{{ route('admin.shipment_settings.user') }}" class="nav-link {{ Route::is('admin.shipment_settings.user') ? 'active' : '' }}">
+                                            <i class="fas fa-shipping-fast nav-icon"></i>
+                                            <p>Shipment Setting</p>
+                                        </a>
+                                    </li>
+
                                 @else
                                     <li class="nav-item">
                                         <a href="{{ env('LINNWORKS_INSTALLATION_URL'), 'https://apps.linnworks.net/Authorization/Authorize/9a50e415-9916-4a50-8c57-b13a73b33216' }}?Tracking={{auth()->user()->createToken('authToken')->accessToken}}" class="nav-link" target="_blank">
@@ -133,9 +140,9 @@
                         </li>
 
                         @if(auth()->user()->hasRole('superadmin')||auth()->user()->hasRole('admin'))
-                        <li class="nav-item has-treeview {{ Route::is('admin.role.*') || Route::is('admin.print_buttons.index')|| Route::is('admin.folder_settings.index') ? 'menu-open' : '' }}">
+                        <li class="nav-item has-treeview {{ Route::is('admin.role.*') || Route::is('admin.print_buttons.index')|| Route::is('admin.folder_settings.index') || Route::is('admin.shipment_settings.index') ? 'menu-open' : '' }}">
                             <a href="#" class="nav-link {{ 
-                                Route::is('admin.role.*') || Route::is('admin.print_buttons.index') || Route::is('admin.folder_settings.index')? 'active-parent' : '' }}">
+                                Route::is('admin.role.*') || Route::is('admin.print_buttons.index') || Route::is('admin.folder_settings.index') || Route::is('admin.shipment_settings.index') ? 'active-parent' : '' }}">
                                 <i class="nav-icon fas fa-cogs"></i>
                                 <p>
                                     Admin Settings
@@ -167,6 +174,15 @@
                                         <a href="{{ route('admin.folder_settings.index') }}" class="nav-link {{ Route::is('admin.folder_settings.index') ? 'active' : '' }}">
                                             <i class="fas fa-folder-open nav-icon"></i>
                                             <p>Folder Setting</p>
+                                        </a>
+                                    </li>
+                                    @endcan
+
+                                    @can('view shipment setting')
+                                    <li class="nav-item">
+                                        <a href="{{ route('admin.shipment_settings.index') }}" class="nav-link {{ Route::is('admin.shipment_settings.index') ? 'active' : '' }}">
+                                            <i class="fas fa-shipping-fast nav-icon"></i>
+                                            <p>Shipment Setting</p>
                                         </a>
                                     </li>
                                     @endcan

@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Http\Controllers\admin;
+namespace App\Http\Controllers\Admin;
 
-use App\folderSettings;
+use App\shipmentSettings;
 use App\User;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\folderSettingStoreRequest;
-use App\Http\Requests\folderSettingUpdateRequest;
+use App\Http\Requests\shipmentSettingsStoreRequest;
+use App\Http\Requests\shipmentSettingsUpdateRequest;
 use App\Traits\UploadTrait;
 
 use Illuminate\Support\Str;
@@ -19,7 +19,7 @@ use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Http\Request;
 use Onfuro\Linnworks\Linnworks as Linnworks_API;
 
-class FolderSettingsController extends Controller
+class ShipmentSettingsController extends Controller
 {
     /** @var Client  */
     protected $client;
@@ -46,9 +46,9 @@ class FolderSettingsController extends Controller
 
     function __construct()
     {
-        $this->middleware('can:create folders setting', ['only' => ['create', 'store']]);
-        $this->middleware('can:edit folders setting', ['only' => ['edit', 'update']]);
-        $this->middleware('can:delete folders setting', ['only' => ['destroy']]);
+        $this->middleware('can:create shipment setting', ['only' => ['create', 'store']]);
+        $this->middleware('can:edit shipment setting', ['only' => ['edit', 'update']]);
+        $this->middleware('can:delete shipment setting', ['only' => ['destroy']]);
     }
 
     /**
@@ -58,7 +58,7 @@ class FolderSettingsController extends Controller
      */
     public function index()
     {
-        return view('admin.folder_settings.index');
+        return view('admin.shipment_settings.index');
     }
 
     /**
@@ -72,27 +72,27 @@ class FolderSettingsController extends Controller
 
         if ($request->ajax() == true) {
 
-            $model = folderSettings::with('users','creator','editor');
+            $model = shipmentSettings::with('users','creator','editor');
             //if(!auth()->user()->hasRole('superadmin')){
                 $user_id = auth()->user()->id;
                 $model->where('created_by', $user_id);
             //}
 
             return Datatables::eloquent($model)
-                    ->addColumn('action', function (folderSettings $data) {
+                    ->addColumn('action', function (shipmentSettings $data) {
                         $html='';
-                        if (auth()->user()->can('edit folders setting')){
-                            $html.= '<a href="'.  route('admin.folder_settings.edit', ['folder_setting' => $data->id]) .'" class="btn btn-success btn-sm float-left mr-3"  id="popup-modal-button"><span tooltip="Edit" flow="left"><i class="fas fa-edit"></i></span></a>';
+                        if (auth()->user()->can('edit shipment setting')){
+                            $html.= '<a href="'.  route('admin.shipment_settings.edit', ['shipment_setting' => $data->id]) .'" class="btn btn-success btn-sm float-left mr-3"  id="popup-modal-button"><span tooltip="Edit" flow="left"><i class="fas fa-edit"></i></span></a>';
                         }
 
-                        if (auth()->user()->can('delete folders setting')){
-                            $html.= '<form method="post" class="float-left delete-form" action="'.  route('admin.folder_settings.destroy', ['folder_setting' => $data->id ]) .'"><input type="hidden" name="_token" value="'. Session::token() .'"><input type="hidden" name="_method" value="delete"><button type="submit" class="btn btn-danger btn-sm"><span tooltip="Delete" flow="up"><i class="fas fa-trash"></i></span></button></form>';
+                        if (auth()->user()->can('delete shipment setting')){
+                            $html.= '<form method="post" class="float-left delete-form" action="'.  route('admin.shipment_settings.destroy', ['shipment_setting' => $data->id ]) .'"><input type="hidden" name="_token" value="'. Session::token() .'"><input type="hidden" name="_method" value="delete"><button type="submit" class="btn btn-danger btn-sm"><span tooltip="Delete" flow="up"><i class="fas fa-trash"></i></span></button></form>';
                         }
 
                         return $html; 
                     })
 
-                    ->addColumn('folder_setting_status', function ($data) {
+                    ->addColumn('shipment_setting_status', function ($data) {
                         if($data->status=='Yes'){ $class= 'text-success';$status= 'Active';}else{$class ='text-danger';$status= 'Inactive';}
                         return '<div class="dropdown action-label">
                                 <a class="btn btn-white btn-sm btn-rounded dropdown-toggle" href="#" data-toggle="dropdown" aria-expanded="false"><i class="fa fa-dot-circle-o '.$class.'"></i> '.$status.' </a>
@@ -113,7 +113,7 @@ class FolderSettingsController extends Controller
                         return $users.='</div>';
                     })
 
-                    ->rawColumns(['folder_setting_status','users_avatars','action'])
+                    ->rawColumns(['shipment_setting_status','users_avatars','action'])
 
                     ->make(true);
         }
@@ -140,11 +140,11 @@ class FolderSettingsController extends Controller
                 'applicationSecret' => env('LINNWORKS_SECRET'),
                 'token' => auth()->user()->linnworks_token()->token,
             ], $this->client);
-        $folders = $linnworks->Orders()->GetAvailableFolders();
+        $PostalServices = $linnworks->PostalServices()->getPostalServices();
 
-        $exit_folder = folderSettings::where('created_by', $user_id)->pluck('name')->toArray();
+        $exit_PostalServices = shipmentSettings::where('created_by', $user_id)->pluck('name')->toArray();
 
-        return view('admin.folder_settings.create', compact("users","folders","exit_folder"));
+        return view('admin.shipment_settings.create', compact("users","PostalServices","exit_PostalServices"));
     }
 
     /**
@@ -153,23 +153,23 @@ class FolderSettingsController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(folderSettingStoreRequest $request)
+    public function store(shipmentSettingsStoreRequest $request)
     {
         try {
 
-            $folderSettings = new folderSettings();
-            $folderSettings->name = $request->name;
-            $folderSettings->status = 'Yes';
-            $folderSettings->created_by = auth()->user()->id;
-            $folderSettings->updated_by = auth()->user()->id;
-            $folderSettings->save();
+            $shipmentSettings = new shipmentSettings();
+            $shipmentSettings->name = $request->name;
+            $shipmentSettings->status = 'Yes';
+            $shipmentSettings->created_by = auth()->user()->id;
+            $shipmentSettings->updated_by = auth()->user()->id;
+            $shipmentSettings->save();
 
-            $folderSettings->users()->attach($request->user_id);
-            //Session::flash('success', 'folder settings was created successfully.');
+            $shipmentSettings->users()->attach($request->user_id);
+            //Session::flash('success', 'shipment settings was created successfully.');
             //return redirect()->route('print_buttons.index');
 
             return response()->json([
-                'success' => 'folder settings was created successfully.' // for status 200
+                'success' => 'shipment settings was created successfully.' // for status 200
             ]);
 
         } catch (\Exception $exception) {
@@ -188,21 +188,21 @@ class FolderSettingsController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\folderSettings  $folder_setting
+     * @param  \App\shipmentSettings  $shipment_setting
      * @return \Illuminate\Http\Response
      */
-    public function show(folderSettings $folder_setting)
+    public function show(shipmentSettings $shipment_setting)
     {
-        return view('admin.folder_settings.show', compact('folder_setting'));
+        return view('admin.shipment_settings.show', compact('shipment_setting'));
     }
 
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\folderSettings  $folder_setting
+     * @param  \App\shipmentSettings  $shipment_setting
      * @return \Illuminate\Http\Response
      */
-    public function edit(folderSettings $folder_setting)
+    public function edit(shipmentSettings $shipment_setting)
     {
         /*if(!auth()->user()->hasRole('admin')){
             $users = User::select('id', 'name')->where('id', auth()->user()->id)->get();
@@ -218,43 +218,42 @@ class FolderSettingsController extends Controller
                 'applicationSecret' => env('LINNWORKS_SECRET'),
                 'token' => auth()->user()->linnworks_token()->token,
             ], $this->client);
-        $folders = $linnworks->Orders()->GetAvailableFolders();
-
-        $folder_setting_users = $folder_setting->users->pluck('id')->toArray();
-        $exit_folder = folderSettings::where('created_by', $user_id)->pluck('name')->toArray();
-        return view('admin.folder_settings.edit', compact("folder_setting","users","folders","folder_setting_users","exit_folder"));
+        $PostalServices = $linnworks->PostalServices()->getPostalServices();
+        $shipment_setting_users = $shipment_setting->users->pluck('id')->toArray();
+        $exit_PostalServices = shipmentSettings::where('created_by', $user_id)->pluck('name')->toArray();
+        return view('admin.shipment_settings.edit', compact("shipment_setting","users","PostalServices","shipment_setting_users","exit_PostalServices"));
     }
 
     /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\folderSettings  $folder_setting
+     * @param  \App\shipmentSettings  $shipment_setting
      * @return \Illuminate\Http\Response
      */
-    public function update(folderSettingUpdateRequest $request, folderSettings $folder_setting)
+    public function update(shipmentSettingsUpdateRequest $request, shipmentSettings $shipment_setting)
     {
         try {
 
-            if (empty($folder_setting)) {
+            if (empty($shipment_setting)) {
                 //Session::flash('failed', 'branch Update Denied');
                 //return redirect()->back();
                 return response()->json([
-                    'error' => 'folder settings update denied.' // for status 200
+                    'error' => 'shipment settings update denied.' // for status 200
                 ]);   
             }
 
-            $folder_setting->name = $request->name;
-            $folder_setting->updated_by = auth()->user()->id;
-            $folder_setting->save();
+            $shipment_setting->name = $request->name;
+            $shipment_setting->updated_by = auth()->user()->id;
+            $shipment_setting->save();
 
-            $folder_setting->users()->sync($request->user_id);
+            $shipment_setting->users()->sync($request->user_id);
 
             //Session::flash('success', 'A branch updated successfully.');
             //return redirect('admin/branch');
 
             return response()->json([
-                'success' => 'folder setting update successfully.' // for status 200
+                'success' => 'shipment setting update successfully.' // for status 200
             ]);
 
         } catch (\Exception $exception) {
@@ -273,18 +272,18 @@ class FolderSettingsController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\folderSettings  $folder_setting
+     * @param  \App\shipmentSettings  $shipment_setting
      * @return \Illuminate\Http\Response
      */
-    public function destroy(folderSettings $folder_setting)
+    public function destroy(shipmentSettings $shipment_setting)
     {
-        $folder_setting->users()->detach();
+        $shipment_setting->users()->detach();
 
-        // delete folder Settings
-        $folder_setting->delete();
+        // delete shipment Settings
+        $shipment_setting->delete();
 
         return response()->json([
-            'delete' => 'folder settings deleted successfully.' // for status 200
+            'delete' => 'shipment settings deleted successfully.' // for status 200
         ]);
     }
 
@@ -299,12 +298,12 @@ class FolderSettingsController extends Controller
     {
         try {
 
-            $folderSettings = folderSettings::find($request->id);
-            if (empty($folderSettings)) {
+            $shipment_setting = shipmentSettings::find($request->id);
+            if (empty($shipment_setting)) {
                 //Session::flash('failed', 'Print Button Update Denied');
                 //return redirect()->back();
                 return response()->json([
-                    'error' => 'folder settings update denied.' // for status 200
+                    'error' => 'shipment settings update denied.' // for status 200
                 ]);   
             }
 
@@ -313,15 +312,15 @@ class FolderSettingsController extends Controller
             }else{
                 $status='Yes';
             }
-            $old_status = $folderSettings->status;
-            $folderSettings->status = $status;
-            $folderSettings->save();
+            $old_status = $shipment_setting->status;
+            $shipment_setting->status = $status;
+            $shipment_setting->save();
 
             //Session::flash('success', 'A print buttons updated successfully.');
             //return redirect('admin/print_buttons');
 
             return response()->json([
-                'success' => 'folder settings update successfully.' // for status 200
+                'success' => 'shipment settings update successfully.' // for status 200
             ]);
 
         } catch (\Exception $exception) {
@@ -337,7 +336,7 @@ class FolderSettingsController extends Controller
         }
     }
 
-    /*---- Folder Settings For USER [Start] ----*/ 
+    /*---- Shipment Setting For USER [Start] ----*/ 
 
     /**
      * Display a listing of the resource.
@@ -346,7 +345,7 @@ class FolderSettingsController extends Controller
      */
     public function user()
     {
-        return view('admin.folder_settings.user');
+        return view('admin.shipment_settings.user');
     }
 
     /**
@@ -360,13 +359,13 @@ class FolderSettingsController extends Controller
 
         if ($request->ajax() == true) {
 
-            $model = folderSettings::with('users','creator','editor');
+            $model = shipmentSettings::with('users','creator','editor');
             $user_id = auth()->user()->linnworks_token()->created_by; //Parent User ID
             $model->where('created_by', $user_id)->where('status','Yes');
 
             return Datatables::eloquent($model)
                     
-                    ->addColumn('folder_setting_status', function ($data) {
+                    ->addColumn('shipment_setting_status', function ($data) {
                         $users_id = [];
                         foreach ($data->users as $key => $value) {
                             $users_id[]= $value->id;
@@ -382,7 +381,7 @@ class FolderSettingsController extends Controller
                             </div>';
                     })
 
-                    ->rawColumns(['folder_setting_status','action'])
+                    ->rawColumns(['shipment_setting_status','action'])
 
                     ->make(true);
         }
@@ -398,26 +397,26 @@ class FolderSettingsController extends Controller
     {
         try {
 
-            $folderSettings = folderSettings::find($request->id);
-            if (empty($folderSettings)) {
+            $shipmentSettings = shipmentSettings::find($request->id);
+            if (empty($shipmentSettings)) {
                 //Session::flash('failed', 'Print Button Update Denied');
                 //return redirect()->back();
                 return response()->json([
-                    'error' => 'folder settings update denied.' // for status 200
+                    'error' => 'shipment settings update denied.' // for status 200
                 ]);   
             }
 
             if($request->status==0){
-                $folderSettings->users()->detach(auth()->user()->id);
+                $shipmentSettings->users()->detach(auth()->user()->id);
             }else{
-                $folderSettings->users()->attach(auth()->user()->id);
+                $shipmentSettings->users()->attach(auth()->user()->id);
             }
             
             //Session::flash('success', 'A print buttons updated successfully.');
             //return redirect('admin/print_buttons');
 
             return response()->json([
-                'success' => 'folder settings update successfully.' // for status 200
+                'success' => 'shipment settings update successfully.' // for status 200
             ]);
 
         } catch (\Exception $exception) {
@@ -433,5 +432,5 @@ class FolderSettingsController extends Controller
         }
     }
 
-    /*----Folder Settings For USER [END]----*/ 
+    /*----Shipment Setting For USER [END]----*/ 
 }
