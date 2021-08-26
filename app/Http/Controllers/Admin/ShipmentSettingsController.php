@@ -72,15 +72,23 @@ class ShipmentSettingsController extends Controller
 
         if ($request->ajax() == true) {
 
-            $model = shipmentSettings::with('users','creator','editor');
-            //if(!auth()->user()->hasRole('superadmin')){
-                $user_id = auth()->user()->id;
-                $model->where('created_by', $user_id);
-            //}
+
+            $user_id = auth()->user()->id;
+            $model = shipmentSettings::where('created_by', $user_id)
+                                        ->with(['users' => function($query) use ($user_id) 
+                                                    {
+                                                        $query->whereHas('linnworks', function($q) use ($user_id) 
+                                                            {
+                                                                $q->where('created_by', $user_id);
+                                                            }
+                                                        );
+                                                    }
+                                                ]);
 
             return Datatables::eloquent($model)
                     ->addColumn('action', function (shipmentSettings $data) {
                         $html='';
+                        //dd($data);
                         if (auth()->user()->can('edit shipment setting')){
                             $html.= '<a href="'.  route('admin.shipment_settings.edit', ['shipment_setting' => $data->id]) .'" class="btn btn-success btn-sm float-left mr-3"  id="popup-modal-button"><span tooltip="Edit" flow="left"><i class="fas fa-edit"></i></span></a>';
                         }
@@ -104,13 +112,19 @@ class ShipmentSettingsController extends Controller
                     })
 
                     ->addColumn('users_avatars', function ($data) {
+                        $i=0;
                         $users='<div class="avatars_overlapping">';
-      
                         foreach ($data->users as $key => $value) {
-                           $users.='<span class="avatar_overlapping"><p tooltip="'.$value->name.'" flow="up"><img src="'.$value->getImageUrlAttribute($value->id).'" width="50" height="50" /></p></span>';
+                            if($i<4){
+                                $users.='<span class="avatar_overlapping"><p tooltip="'.$value->name.'" flow="up"><img src="'.$value->getImageUrlAttribute($value->id).'" width="50" height="50" /></p></span>';
+                            }
+                            $i++;
                         }
-
-                        return $users.='</div>';
+                        $users.='</div>';
+                        if($i>4){
+                            $users.='<div class="avatars_more_text">'.($i-4).'+</div>';
+                        }
+                        return $users;
                     })
 
                     ->rawColumns(['shipment_setting_status','users_avatars','action'])

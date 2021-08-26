@@ -416,7 +416,13 @@ ol li {
     font-size: 13px !important;
 }
 
-
+.avatars_more_text{
+    direction: rtl;
+    display: inline-flex;
+    position: relative;
+    width: auto;
+    margin-bottom: -20px;
+}
 .avatar_overlapping {
   margin-left: -25px;
 }

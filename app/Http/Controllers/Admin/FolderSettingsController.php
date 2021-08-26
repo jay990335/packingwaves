@@ -104,13 +104,19 @@ class FolderSettingsController extends Controller
                     })
 
                     ->addColumn('users_avatars', function ($data) {
+                        $i=0;
                         $users='<div class="avatars_overlapping">';
-      
                         foreach ($data->users as $key => $value) {
-                           $users.='<span class="avatar_overlapping"><p tooltip="'.$value->name.'" flow="up"><img src="'.$value->getImageUrlAttribute($value->id).'" width="50" height="50" /></p></span>';
+                            if($i<4){
+                                $users.='<span class="avatar_overlapping"><p tooltip="'.$value->name.'" flow="up"><img src="'.$value->getImageUrlAttribute($value->id).'" width="50" height="50" /></p></span>';
+                            }
+                            $i++;
                         }
-
-                        return $users.='</div>';
+                        $users.='</div>';
+                        if($i>4){
+                            $users.='<div class="avatars_more_text">'.($i-4).'+</div>';
+                        }
+                        return $users;
                     })
 
                     ->rawColumns(['folder_setting_status','users_avatars','action'])

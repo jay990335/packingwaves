@@ -114,4 +114,12 @@ class User extends Authenticatable
         return $this->belongsToMany(folderSettings::class, 'user_has_folder_settings');
     }
 
+    /**
+     * The shipmentSettings that belong to the user.
+     */
+    public function shipmentSettings()
+    {
+        return $this->belongsToMany(shipmentSettings::class, 'user_has_shipment_settings');
+    }
+
 }

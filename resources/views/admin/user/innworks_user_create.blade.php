@@ -58,6 +58,15 @@
                             </select>
                         </div>
 
+                        <div class="form-group">
+                            <label>Shipment Setting</label>
+                            <select class="form-control" name="ShipmentName[]" id="ShipmentName" multiple>
+                                @foreach ($shipmentSettings as $shipmentSetting)
+                                    <option value="{{ $shipmentSetting->id }}" selected>{{ $shipmentSetting->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
                         <button type="submit" class="btn btn-primary">Create</button>
                         <a href="" class="btn btn-secondary"  data-dismiss="modal">Close</a>
                     </form>
@@ -80,6 +89,10 @@
 
     $("#FolderName").select2({
         placeholder: "Folder Settings"
+    });
+
+    $("#ShipmentName").select2({
+        placeholder: "Shipment Settings"
     });
 </script>
 @endsection

@@ -21,7 +21,7 @@
                             <label>Users</label>
                             <select class="form-control select2" id="user_id" name="user_id[]" required autocomplete="user_id" multiple>
                                 @foreach ($users as $user)
-                                    <option value="{{ $user->id }}">{{ $user->name }}</option>
+                                    <option value="{{ $user->id }}" selected>{{ $user->name }}</option>
                                 @endforeach
                             </select>
                         </div>

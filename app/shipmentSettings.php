@@ -41,4 +41,6 @@ class shipmentSettings extends Model
     {
         return $this->belongsToMany(User::class, 'user_has_shipment_settings');
     }
+
+    
 }

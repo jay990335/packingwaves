@@ -7,6 +7,7 @@ use App\User;
 use App\Image;
 use App\Linnworks;
 use App\folderSettings;
+use App\shipmentSettings;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Role;
 
@@ -90,7 +91,9 @@ class UserController extends Controller
         $parent_user_id = auth()->user()->id; //Parent User ID
         $folders = folderSettings::where('status','Yes')->where('created_by',$parent_user_id)->get();
 
-        return view('admin.user.create', compact('roles','folders'));
+        $shipmentSettings = shipmentSettings::where('status','Yes')->where('created_by',$parent_user_id)->get();
+
+        return view('admin.user.create', compact('roles','folders', 'shipmentSettings'));
     }
 
     public function linnworks_user_create(Request $request)
@@ -102,7 +105,9 @@ class UserController extends Controller
         $parent_user_id = auth()->user()->id; //Parent User ID
         $folders = folderSettings::where('status','Yes')->where('created_by',$parent_user_id)->get();
 
-        return view('admin.user.innworks_user_create', compact('roles','linnworks_email','linnworks_user_id','folders'));
+        $shipmentSettings = shipmentSettings::where('status','Yes')->where('created_by',$parent_user_id)->get();
+
+        return view('admin.user.innworks_user_create', compact('roles','linnworks_email','linnworks_user_id','folders', 'shipmentSettings'));
     }
 
     public function store(Request $request)
@@ -113,6 +118,8 @@ class UserController extends Controller
         $user->assignRole($request->role);
 
         $user->folderSettings()->sync($request->FolderName);
+
+        $user->shipmentSettings()->sync($request->ShipmentName);
         //return redirect()->route('admin.user.index')->with('success', 'A user was created.');
         return response()->json([
             'success' => 'A team member was created successfully.' // for status 200
@@ -126,6 +133,7 @@ class UserController extends Controller
         $user = User::create($input);
         $user->assignRole($request->role);
         $user->folderSettings()->sync($request->FolderName);
+        $user->shipmentSettings()->sync($request->ShipmentName);
         
         $user = $user->id;
         $linnworks = new Linnworks();
@@ -163,7 +171,10 @@ class UserController extends Controller
         $folderSettings = folderSettings::where('status','Yes')->whereHas('users', function($q) use ($user_id) { $q->where('user_id', $user_id); })->pluck('name')->toArray();
         $parent_user_id = auth()->user()->linnworks_token()->created_by; //Parent User ID
         $folders = folderSettings::where('status','Yes')->where('created_by',$parent_user_id)->get();
-        return view('admin.user.edit', compact('user', 'roles', 'userRole', 'linnworks', 'folders', 'folderSettings'));
+
+        $shipmentSettingsUser = shipmentSettings::where('status','Yes')->whereHas('users', function($q) use ($user_id) { $q->where('user_id', $user_id); })->pluck('name')->toArray();
+        $shipmentSettings = shipmentSettings::where('status','Yes')->where('created_by',$parent_user_id)->get();
+        return view('admin.user.edit', compact('user', 'roles', 'userRole', 'linnworks', 'folders', 'folderSettings','shipmentSettings','shipmentSettingsUser'));
     }
 
     public function update(Request $request, User $user)
@@ -176,6 +187,7 @@ class UserController extends Controller
         $user->syncRoles($request->role);
 
         $user->folderSettings()->sync($request->FolderName);
+        $user->shipmentSettings()->sync($request->ShipmentName);
         //return redirect()->route('admin.user.index')->with('success', 'A user was updated.');
         return response()->json([
             'success' => 'A team member was updated successfully.' // for status 200
