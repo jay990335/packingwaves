@@ -60,8 +60,10 @@
           <b class="pb-2">Assign Folder</b><br>
           <select class="form-control select2 pt-2" id="assignFolder" name="assignFolder" required autocomplete="assignFolder">
               <option ></option>
-              @foreach (explode(",", env('FOLDERS')) as $folder)
-                  <option value="{{ $folder }}">{{ $folder }}</option>
+              @foreach ($folders as $folder)
+                  @if(in_array($folder['FolderName'],$folderSettings))
+                  <option value="{{ $folder['FolderName'] }}">{{ $folder['FolderName'] }}</option>
+                  @endif
               @endforeach
           </select>
           

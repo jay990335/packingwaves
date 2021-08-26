@@ -33,10 +33,22 @@
                             <label>Role</label>
                             <select class="form-control" name="role">
                                 @foreach ($roles as $id => $name)
-                                <option value="{{ $id }}">{{ $name }}</option>
+                                    @if($name!='superadmin')
+                                        <option value="{{ $id }}">{{ $name }}</option>
+                                    @endif
                                 @endforeach
                             </select>
                         </div>
+
+                        <div class="form-group">
+                            <label>Folder</label>
+                            <select class="form-control" name="FolderName[]" id="FolderName" multiple>
+                                @foreach ($folders as $folder)
+                                    <option value="{{ $folder->id }}" selected>{{ $folder->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
                         <button type="submit" class="btn btn-primary">Create</button>
                         <a href="" class="btn btn-secondary"  data-dismiss="modal">Close</a>
                     </form>
@@ -56,5 +68,9 @@
             }
         }); //valdate end
     }); //function end
+
+    $("#FolderName").select2({
+        placeholder: "Folder Settings"
+    });
 </script>
 @endsection

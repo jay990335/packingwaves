@@ -64,7 +64,7 @@ Route::group([
     Route::get('pickingwaves/ajax/data', 'PickingWavesController@datatables'); // For Datatables
 
 
-    // Branch Routes
+    // Print Button Routes
     Route::get('print_buttons/user', 'PrintButtonsController@user')->name('print_buttons.user');
     Route::get('print_buttons/ajax/data_user', 'PrintButtonsController@datatables_user'); // For Datatables
     Route::get('print_buttons/ajax/change_status_user', 'PrintButtonsController@change_status_user')->name('print_buttons.ajax.change_status_user'); // For change status
@@ -74,7 +74,14 @@ Route::group([
     Route::get('print_buttons/ajax/change_status', 'PrintButtonsController@change_status')->name('print_buttons.ajax.change_status'); // For change status
 
 
+    // Folder Setting Routes
+    Route::get('folder_settings/user', 'FolderSettingsController@user')->name('folder_settings.user');
+    Route::get('folder_settings/ajax/data_user', 'FolderSettingsController@datatables_user'); // For Datatables
+    Route::get('folder_settings/ajax/change_status_user', 'FolderSettingsController@change_status_user')->name('folder_settings.ajax.change_status_user'); // For change status
 
+    Route::resource('folder_settings', 'FolderSettingsController');
+    Route::get('folder_settings/ajax/data', 'FolderSettingsController@datatables'); // For Datatables
+    Route::get('folder_settings/ajax/change_status', 'FolderSettingsController@change_status')->name('folder_settings.ajax.change_status'); // For change status
 
     // Setting Routes
     Route::get('setting/folders', 'SettingController@folders')->name('setting.folders');

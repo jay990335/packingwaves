@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\admin;
 
-use App\printButtons;
+use App\folderSettings;
 use App\User;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\printButtonStoreRequest;
-use App\Http\Requests\printButtonUpdateRequest;
+use App\Http\Requests\folderSettingStoreRequest;
+use App\Http\Requests\folderSettingUpdateRequest;
 use App\Traits\UploadTrait;
 
 use Illuminate\Support\Str;
@@ -19,7 +19,7 @@ use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Http\Request;
 use Onfuro\Linnworks\Linnworks as Linnworks_API;
 
-class PrintButtonsController extends Controller
+class FolderSettingsController extends Controller
 {
     /** @var Client  */
     protected $client;
@@ -46,11 +46,11 @@ class PrintButtonsController extends Controller
 
     function __construct()
     {
-        $this->middleware('can:create Print Buttons', ['only' => ['create', 'store']]);
-        $this->middleware('can:edit Print Buttons', ['only' => ['edit', 'update']]);
-        $this->middleware('can:delete Print Buttons', ['only' => ['destroy']]);
+        $this->middleware('can:create folders setting', ['only' => ['create', 'store']]);
+        $this->middleware('can:edit folders setting', ['only' => ['edit', 'update']]);
+        $this->middleware('can:delete folders setting', ['only' => ['destroy']]);
     }
-    
+
     /**
      * Display a listing of the resource.
      *
@@ -58,7 +58,7 @@ class PrintButtonsController extends Controller
      */
     public function index()
     {
-        return view('admin.print_buttons.index');
+        return view('admin.folder_settings.index');
     }
 
     /**
@@ -72,27 +72,27 @@ class PrintButtonsController extends Controller
 
         if ($request->ajax() == true) {
 
-            $model = printButtons::with('users','creator','editor');
+            $model = folderSettings::with('users','creator','editor');
             //if(!auth()->user()->hasRole('superadmin')){
                 $user_id = auth()->user()->id;
                 $model->where('created_by', $user_id);
             //}
 
             return Datatables::eloquent($model)
-                    ->addColumn('action', function (printButtons $data) {
+                    ->addColumn('action', function (folderSettings $data) {
                         $html='';
-                        if (auth()->user()->can('edit Print Buttons')){
-                            $html.= '<a href="'.  route('admin.print_buttons.edit', ['print_button' => $data->id]) .'" class="btn btn-success btn-sm float-left mr-3"  id="popup-modal-button"><span tooltip="Edit" flow="left"><i class="fas fa-edit"></i></span></a>';
+                        if (auth()->user()->can('edit folders setting')){
+                            $html.= '<a href="'.  route('admin.folder_settings.edit', ['folder_setting' => $data->id]) .'" class="btn btn-success btn-sm float-left mr-3"  id="popup-modal-button"><span tooltip="Edit" flow="left"><i class="fas fa-edit"></i></span></a>';
                         }
 
-                        if (auth()->user()->can('delete Print Buttons')){
-                            $html.= '<form method="post" class="float-left delete-form" action="'.  route('admin.print_buttons.destroy', ['print_button' => $data->id ]) .'"><input type="hidden" name="_token" value="'. Session::token() .'"><input type="hidden" name="_method" value="delete"><button type="submit" class="btn btn-danger btn-sm"><span tooltip="Delete" flow="up"><i class="fas fa-trash"></i></span></button></form>';
+                        if (auth()->user()->can('delete folders setting')){
+                            $html.= '<form method="post" class="float-left delete-form" action="'.  route('admin.folder_settings.destroy', ['folder_setting' => $data->id ]) .'"><input type="hidden" name="_token" value="'. Session::token() .'"><input type="hidden" name="_method" value="delete"><button type="submit" class="btn btn-danger btn-sm"><span tooltip="Delete" flow="up"><i class="fas fa-trash"></i></span></button></form>';
                         }
 
                         return $html; 
                     })
 
-                    ->addColumn('print_button_status', function ($data) {
+                    ->addColumn('folder_setting_status', function ($data) {
                         if($data->status=='Yes'){ $class= 'text-success';$status= 'Active';}else{$class ='text-danger';$status= 'Inactive';}
                         return '<div class="dropdown action-label">
                                 <a class="btn btn-white btn-sm btn-rounded dropdown-toggle" href="#" data-toggle="dropdown" aria-expanded="false"><i class="fa fa-dot-circle-o '.$class.'"></i> '.$status.' </a>
@@ -101,10 +101,6 @@ class PrintButtonsController extends Controller
                                     <a class="dropdown-item" href="#" onclick="funChangeStatus('.$data->id.',0); return false;"><i class="fa fa-dot-circle-o text-danger"></i> Inactive</a>
                                 </div>
                             </div>';
-                    })
-
-                    ->addColumn('preview_button', function (printButtons $data) {
-                        return '<span class="'.$data->style.'"><i class="fas fa-print"></i> '.$data->name.'</span>';
                     })
 
                     ->addColumn('users_avatars', function ($data) {
@@ -117,7 +113,7 @@ class PrintButtonsController extends Controller
                         return $users.='</div>';
                     })
 
-                    ->rawColumns(['print_button_status','users_avatars','preview_button','action'])
+                    ->rawColumns(['folder_setting_status','users_avatars','action'])
 
                     ->make(true);
         }
@@ -137,7 +133,6 @@ class PrintButtonsController extends Controller
         }*/
 
         $user_id = auth()->user()->id;
-
         $users = User::select('id', 'name')->whereHas('linnworks', function($q) use ($user_id) { $q->where('created_by', $user_id); })->get();
 
         $linnworks = Linnworks_API::make([
@@ -145,9 +140,11 @@ class PrintButtonsController extends Controller
                 'applicationSecret' => env('LINNWORKS_SECRET'),
                 'token' => auth()->user()->linnworks_token()->token,
             ], $this->client);
-        $templates = $linnworks->PrintService()->GetTemplateList();
+        $folders = $linnworks->Orders()->GetAvailableFolders();
 
-        return view('admin.print_buttons.create', compact("users","templates"));
+        $exit_folder = folderSettings::where('created_by', $user_id)->pluck('name')->toArray();
+
+        return view('admin.folder_settings.create', compact("users","folders","exit_folder"));
     }
 
     /**
@@ -156,27 +153,23 @@ class PrintButtonsController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(printButtonStoreRequest $request)
+    public function store(folderSettingStoreRequest $request)
     {
         try {
 
-            $printButtons = new printButtons();
-            $printButtons->name = $request->name;
-            $template = explode(' ~ ',$request->template);
-            $printButtons->templateID = $template[0];
-            $printButtons->templateType = $template[1];
-            $printButtons->style = $request->style;
-            $printButtons->status = 'Yes';
-            $printButtons->created_by = auth()->user()->id;
-            $printButtons->updated_by = auth()->user()->id;
-            $printButtons->save();
+            $folderSettings = new folderSettings();
+            $folderSettings->name = $request->name;
+            $folderSettings->status = 'Yes';
+            $folderSettings->created_by = auth()->user()->id;
+            $folderSettings->updated_by = auth()->user()->id;
+            $folderSettings->save();
 
-            $printButtons->users()->attach($request->user_id);
-            //Session::flash('success', 'printButtons was created successfully.');
+            $folderSettings->users()->attach($request->user_id);
+            //Session::flash('success', 'folder settings was created successfully.');
             //return redirect()->route('print_buttons.index');
 
             return response()->json([
-                'success' => 'Print Button was created successfully.' // for status 200
+                'success' => 'folder settings was created successfully.' // for status 200
             ]);
 
         } catch (\Exception $exception) {
@@ -195,21 +188,21 @@ class PrintButtonsController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\printButtons  $printButtons
+     * @param  \App\folderSettings  $folder_setting
      * @return \Illuminate\Http\Response
      */
-    public function show(printButtons $print_button)
+    public function show(folderSettings $folder_setting)
     {
-        return view('admin.print_buttons.show', compact('printButtons'));
+        return view('admin.folder_settings.show', compact('folder_setting'));
     }
 
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\printButtons  $printButtons
+     * @param  \App\folderSettings  $folder_setting
      * @return \Illuminate\Http\Response
      */
-    public function edit(printButtons $print_button)
+    public function edit(folderSettings $folder_setting)
     {
         /*if(!auth()->user()->hasRole('admin')){
             $users = User::select('id', 'name')->where('id', auth()->user()->id)->get();
@@ -225,46 +218,43 @@ class PrintButtonsController extends Controller
                 'applicationSecret' => env('LINNWORKS_SECRET'),
                 'token' => auth()->user()->linnworks_token()->token,
             ], $this->client);
-        $templates = $linnworks->PrintService()->GetTemplateList();
+        $folders = $linnworks->Orders()->GetAvailableFolders();
 
-        $print_button_users = $print_button->users->pluck('id')->toArray();
-        return view('admin.print_buttons.edit', compact("print_button","users","templates","print_button_users"));
+        $folder_setting_users = $folder_setting->users->pluck('id')->toArray();
+        $exit_folder = folderSettings::where('created_by', $user_id)->pluck('name')->toArray();
+        return view('admin.folder_settings.edit', compact("folder_setting","users","folders","folder_setting_users","exit_folder"));
     }
 
     /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\printButtons  $printButtons
+     * @param  \App\folderSettings  $folder_setting
      * @return \Illuminate\Http\Response
      */
-    public function update(printButtonUpdateRequest $request, printButtons $print_button)
+    public function update(folderSettingUpdateRequest $request, folderSettings $folder_setting)
     {
         try {
 
-            if (empty($print_button)) {
+            if (empty($folder_setting)) {
                 //Session::flash('failed', 'branch Update Denied');
                 //return redirect()->back();
                 return response()->json([
-                    'error' => 'print button update denied.' // for status 200
+                    'error' => 'folder settings update denied.' // for status 200
                 ]);   
             }
 
-            $print_button->name = $request->name;
-            $template = explode(' ~ ',$request->template);
-            $print_button->templateID = $template[0];
-            $print_button->templateType = $template[1];
-            $print_button->style = $request->style;
-            $print_button->updated_by = auth()->user()->id;
-            $print_button->save();
+            $folder_setting->name = $request->name;
+            $folder_setting->updated_by = auth()->user()->id;
+            $folder_setting->save();
 
-            $print_button->users()->sync($request->user_id);
+            $folder_setting->users()->sync($request->user_id);
 
             //Session::flash('success', 'A branch updated successfully.');
             //return redirect('admin/branch');
 
             return response()->json([
-                'success' => 'print button update successfully.' // for status 200
+                'success' => 'folder setting update successfully.' // for status 200
             ]);
 
         } catch (\Exception $exception) {
@@ -283,20 +273,21 @@ class PrintButtonsController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\printButtons  $printButtons
+     * @param  \App\folderSettings  $folder_setting
      * @return \Illuminate\Http\Response
      */
-    public function destroy(printButtons $print_button)
+    public function destroy(folderSettings $folder_setting)
     {
-        $print_button->users()->detach();
+        $folder_setting->users()->detach();
 
-        // delete print_button
-        $print_button->delete();
+        // delete folder Settings
+        $folder_setting->delete();
 
         return response()->json([
-            'delete' => 'Print button deleted successfully.' // for status 200
+            'delete' => 'folder settings deleted successfully.' // for status 200
         ]);
     }
+
 
     /**
      * Datatables Ajax Data
@@ -308,12 +299,12 @@ class PrintButtonsController extends Controller
     {
         try {
 
-            $printButtons = printButtons::find($request->id);
-            if (empty($printButtons)) {
+            $folderSettings = folderSettings::find($request->id);
+            if (empty($folderSettings)) {
                 //Session::flash('failed', 'Print Button Update Denied');
                 //return redirect()->back();
                 return response()->json([
-                    'error' => 'Print Button update denied.' // for status 200
+                    'error' => 'folder settings update denied.' // for status 200
                 ]);   
             }
 
@@ -322,15 +313,15 @@ class PrintButtonsController extends Controller
             }else{
                 $status='Yes';
             }
-            $old_status = $printButtons->status;
-            $printButtons->status = $status;
-            $printButtons->save();
+            $old_status = $folderSettings->status;
+            $folderSettings->status = $status;
+            $folderSettings->save();
 
             //Session::flash('success', 'A print buttons updated successfully.');
             //return redirect('admin/print_buttons');
 
             return response()->json([
-                'success' => 'Print Button update successfully.' // for status 200
+                'success' => 'folder settings update successfully.' // for status 200
             ]);
 
         } catch (\Exception $exception) {
@@ -355,7 +346,7 @@ class PrintButtonsController extends Controller
      */
     public function user()
     {
-        return view('admin.print_buttons.user');
+        return view('admin.folder_settings.user');
     }
 
     /**
@@ -369,17 +360,18 @@ class PrintButtonsController extends Controller
 
         if ($request->ajax() == true) {
 
-            $model = printButtons::with('users','creator','editor');
+            $model = folderSettings::with('users','creator','editor');
             $user_id = auth()->user()->linnworks_token()->created_by; //Parent User ID
             $model->where('created_by', $user_id)->where('status','Yes');
 
             return Datatables::eloquent($model)
                     
-                    ->addColumn('print_button_status', function ($data) {
+                    ->addColumn('folder_setting_status', function ($data) {
                         $users_id = [];
                         foreach ($data->users as $key => $value) {
                             $users_id[]= $value->id;
                         }
+
                         if(in_array(auth()->user()->id,$users_id)){ $class= 'text-success';$status= 'Active';}else{$class ='text-danger';$status= 'Inactive';}
                         return '<div class="dropdown action-label">
                                 <a class="btn btn-white btn-sm btn-rounded dropdown-toggle" href="#" data-toggle="dropdown" aria-expanded="false"><i class="fa fa-dot-circle-o '.$class.'"></i> '.$status.' </a>
@@ -390,11 +382,7 @@ class PrintButtonsController extends Controller
                             </div>';
                     })
 
-                    ->addColumn('preview_button', function (printButtons $data) {
-                        return '<span class="'.$data->style.'"><i class="fas fa-print"></i> '.$data->name.'</span>';
-                    })
-
-                    ->rawColumns(['print_button_status','preview_button','action'])
+                    ->rawColumns(['folder_setting_status','action'])
 
                     ->make(true);
         }
@@ -410,26 +398,26 @@ class PrintButtonsController extends Controller
     {
         try {
 
-            $printButtons = printButtons::find($request->id);
-            if (empty($printButtons)) {
+            $folderSettings = folderSettings::find($request->id);
+            if (empty($folderSettings)) {
                 //Session::flash('failed', 'Print Button Update Denied');
                 //return redirect()->back();
                 return response()->json([
-                    'error' => 'Print Button update denied.' // for status 200
+                    'error' => 'folder settings update denied.' // for status 200
                 ]);   
             }
 
             if($request->status==0){
-                $printButtons->users()->detach(auth()->user()->id);
+                $folderSettings->users()->detach(auth()->user()->id);
             }else{
-                $printButtons->users()->attach(auth()->user()->id);
+                $folderSettings->users()->attach(auth()->user()->id);
             }
             
             //Session::flash('success', 'A print buttons updated successfully.');
             //return redirect('admin/print_buttons');
 
             return response()->json([
-                'success' => 'Print Button update successfully.' // for status 200
+                'success' => 'folder settings update successfully.' // for status 200
             ]);
 
         } catch (\Exception $exception) {

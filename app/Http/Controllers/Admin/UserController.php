@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\User;
 use App\Image;
 use App\Linnworks;
+use App\folderSettings;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Role;
 
@@ -85,7 +86,11 @@ class UserController extends Controller
     public function create()
     {
         $roles = Role::pluck('name', 'id');
-        return view('admin.user.create', compact('roles'));
+
+        $parent_user_id = auth()->user()->id; //Parent User ID
+        $folders = folderSettings::where('status','Yes')->where('created_by',$parent_user_id)->get();
+
+        return view('admin.user.create', compact('roles','folders'));
     }
 
     public function linnworks_user_create(Request $request)
@@ -93,7 +98,11 @@ class UserController extends Controller
         $roles = Role::pluck('name', 'id');
         $linnworks_email = $request->email;
         $linnworks_user_id = $request->user_id;
-        return view('admin.user.innworks_user_create', compact('roles','linnworks_email','linnworks_user_id'));
+
+        $parent_user_id = auth()->user()->id; //Parent User ID
+        $folders = folderSettings::where('status','Yes')->where('created_by',$parent_user_id)->get();
+
+        return view('admin.user.innworks_user_create', compact('roles','linnworks_email','linnworks_user_id','folders'));
     }
 
     public function store(Request $request)
@@ -102,6 +111,8 @@ class UserController extends Controller
         $input['password'] = bcrypt($request->password);
         $user = User::create($input);
         $user->assignRole($request->role);
+
+        $user->folderSettings()->sync($request->FolderName);
         //return redirect()->route('admin.user.index')->with('success', 'A user was created.');
         return response()->json([
             'success' => 'A team member was created successfully.' // for status 200
@@ -114,7 +125,8 @@ class UserController extends Controller
         $input['password'] = bcrypt($request->password);
         $user = User::create($input);
         $user->assignRole($request->role);
-
+        $user->folderSettings()->sync($request->FolderName);
+        
         $user = $user->id;
         $linnworks = new Linnworks();
         $linnworks->token = auth()->user()->linnworks_token()->token;
@@ -127,6 +139,8 @@ class UserController extends Controller
         $linnworks->created_by = auth()->user()->id;
         $linnworks->updated_by = auth()->user()->id;
         $linnworks->save();
+
+        
         //return redirect()->route('admin.user.index')->with('success', 'A user was created.');
         return response()->json([
             'success' => 'A team member was created successfully.' // for status 200
@@ -139,10 +153,17 @@ class UserController extends Controller
     }
 
     public function edit(User $user)
-    {
+    {   
+        $user_id = $user->id;
         $roles = Role::pluck('name', 'id');
         $userRole = $user->getRoleNames()->first();
-        return view('admin.user.edit', compact('user', 'roles', 'userRole'));
+
+        $linnworks = Linnworks::where('user_id',$user_id)->first();
+
+        $folderSettings = folderSettings::where('status','Yes')->whereHas('users', function($q) use ($user_id) { $q->where('user_id', $user_id); })->pluck('name')->toArray();
+        $parent_user_id = auth()->user()->linnworks_token()->created_by; //Parent User ID
+        $folders = folderSettings::where('status','Yes')->where('created_by',$parent_user_id)->get();
+        return view('admin.user.edit', compact('user', 'roles', 'userRole', 'linnworks', 'folders', 'folderSettings'));
     }
 
     public function update(Request $request, User $user)
@@ -153,6 +174,8 @@ class UserController extends Controller
         }
         $user->update($input);
         $user->syncRoles($request->role);
+
+        $user->folderSettings()->sync($request->FolderName);
         //return redirect()->route('admin.user.index')->with('success', 'A user was updated.');
         return response()->json([
             'success' => 'A team member was updated successfully.' // for status 200

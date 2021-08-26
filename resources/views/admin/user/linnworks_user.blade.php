@@ -56,7 +56,26 @@
                                     <td>@if($user['SuperAdmin']==1) Super Admin @else Staff @endif</td>
                                     <td>
                                         @if(in_array($user['EmailAddress'], $users))
-                                            
+                                            @php
+                                                $linnworks_email = $user['EmailAddress'];
+                                                $user_details = App\User::whereHas('linnworks', function($q) use ($linnworks_email) { $q->where('linnworks_email', $linnworks_email); })->first();
+                                            @endphp
+                                            @can('edit user')
+                                            <a href="{{ route('admin.user.edit', ['user' => $user_details->id]) }}" 
+                                                class="btn btn-success btn-sm float-left mr-3"  id="popup-modal-buttonUserRole">
+                                                <span tooltip="Edit" flow="left"><i class="fas fa-edit"></i></span>
+                                            </a>
+                                            @endcan 
+                                            @can('delete user')
+                                            <form method="post" class="float-left delete-formUserRole"
+                                                action="{{ route('admin.user.destroy', ['user' => $user_details->id ]) }}">
+                                                @csrf
+                                                @method('delete')
+                                                <button type="submit" class="btn btn-danger btn-sm">
+                                                    <span tooltip="Delete" flow="right"><i class="fas fa-trash-alt"></i></span>
+                                                </button>
+                                            </form>
+                                            @endcan 
                                         @else
                                             <form method="post" class="float-left"
                                             action="{{ route('admin.linnworks-user.create') }}" id="popup-modal-form">

@@ -501,6 +501,11 @@ ol li {
     margin-left: 8%;
 }
 
+.active-parent{
+    background-color: rgba(255,255,255,.1);
+    color: #fff;
+}
+
 @media screen and (max-width: 767px)
 {
     #sticky.stick {

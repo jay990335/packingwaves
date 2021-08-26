@@ -81,7 +81,7 @@
                                                             <div class="form-group mb-2">
                                                                 <input class="form-control form-control-sm" type="text" name="search_value" id="search_value">
                                                             </div>
-                                                            <button type="submit" onclick="datatables();" class="btn btn-primary mb-2" data-dismiss="modal">Search</button>
+                                                            <button type="submit" onclick="datatables(1);" class="btn btn-primary mb-2" data-dismiss="modal">Search</button>
                                                             <button type="submit" onclick="clear_serch();" class="btn btn-primary mb-2" data-dismiss="modal">Clear</button>
                                                         </div>
                                                         <!-- /.card-body -->
@@ -145,7 +145,7 @@
                                                                   <option value="1">Descending</option>
                                                                 </select>
                                                             </div>
-                                                            <button type="submit" onclick="datatables(1);" class="btn btn-primary mb-2" data-dismiss="modal">Sort By</button>
+                                                            <button type="submit" onclick="datatables();" class="btn btn-primary mb-2" data-dismiss="modal">Sort By</button>
                                                         </div>
                                                         <!-- /.card-body -->
                                                     </div>
@@ -181,7 +181,7 @@
 
 <script>
 
-function datatables(i=0) {
+function datatables() {
     var sortby_field = $('#sortby_field').val();
     var sortby_type = $('#sortby_type').val();
     var search_field = $('#search_field').val();
@@ -224,6 +224,7 @@ function datatables(i=0) {
         table.rows().deselect();
     });
 
+    table.page('first').draw('page');
 }
 
 $('#table tbody').on( 'click', 'tr', function () {

@@ -88,9 +88,9 @@
 
                         @endif
 
-                        <li class="nav-item has-treeview {{ Route::is('admin.print_buttons.user') ? 'menu-open' : '' }}">
+                        <li class="nav-item has-treeview {{ Route::is('admin.print_buttons.user') || Route::is('admin.folder_settings.user') ? 'menu-open' : '' }}">
                             <a href="#" class="nav-link {{ 
-                                Route::is('admin.print_buttons.user') ? 'active' : '' }}">
+                                Route::is('admin.print_buttons.user') || Route::is('admin.folder_settings.user') ? 'active-parent' : '' }}">
                                 <i class="nav-icon fas fa-cogs"></i>
                                 <p>
                                     Settings
@@ -114,6 +114,13 @@
                                         </a>
                                     </li>
 
+                                    <li class="nav-item">
+                                        <a href="{{ route('admin.folder_settings.user') }}" class="nav-link {{ Route::is('admin.folder_settings.user') ? 'active' : '' }}">
+                                            <i class="fas fa-folder-open nav-icon"></i>
+                                            <p>Folder Setting</p>
+                                        </a>
+                                    </li>
+
                                 @else
                                     <li class="nav-item">
                                         <a href="{{ env('LINNWORKS_INSTALLATION_URL'), 'https://apps.linnworks.net/Authorization/Authorize/9a50e415-9916-4a50-8c57-b13a73b33216' }}?Tracking={{auth()->user()->createToken('authToken')->accessToken}}" class="nav-link" target="_blank">
@@ -125,9 +132,10 @@
                             </ul>
                         </li>
 
-                        <li class="nav-item has-treeview {{ Route::is('admin.role.*') || Route::is('admin.print_buttons.index') ? 'menu-open' : '' }}">
+                        @if(auth()->user()->hasRole('superadmin')||auth()->user()->hasRole('admin'))
+                        <li class="nav-item has-treeview {{ Route::is('admin.role.*') || Route::is('admin.print_buttons.index')|| Route::is('admin.folder_settings.index') ? 'menu-open' : '' }}">
                             <a href="#" class="nav-link {{ 
-                                Route::is('admin.role.*') || Route::is('admin.print_buttons.index')? 'active' : '' }}">
+                                Route::is('admin.role.*') || Route::is('admin.print_buttons.index') || Route::is('admin.folder_settings.index')? 'active-parent' : '' }}">
                                 <i class="nav-icon fas fa-cogs"></i>
                                 <p>
                                     Admin Settings
@@ -156,7 +164,7 @@
 
                                     @can('view folders setting')
                                     <li class="nav-item">
-                                        <a href="{{ route('admin.setting.folders') }}" class="nav-link {{ Route::is('admin.setting.folders') ? 'active' : '' }}" id="popup-modal-button">
+                                        <a href="{{ route('admin.folder_settings.index') }}" class="nav-link {{ Route::is('admin.folder_settings.index') ? 'active' : '' }}">
                                             <i class="fas fa-folder-open nav-icon"></i>
                                             <p>Folder Setting</p>
                                         </a>
@@ -182,6 +190,7 @@
                                 
                             </ul>
                         </li>
+                        @endif
                     </ul>
                 </li>
                 

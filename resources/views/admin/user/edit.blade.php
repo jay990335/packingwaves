@@ -34,12 +34,34 @@
                             <label>Role</label>
                             <select class="form-control" name="role">
                                 @foreach ($roles as $id => $name)
-                                <option value="{{ $id }}" 
-                                {{ $name === $userRole ? 'selected' : null }}
-                                >{{ $name }}</option>
+                                    @if($name === $userRole || $name!='superadmin')
+                                        <option value="{{ $id }}" 
+                                        {{ $name === $userRole ? 'selected' : null }}
+                                        >{{ $name }}</option>
+                                    @endif
                                 @endforeach
                             </select>
                         </div>
+        
+                        <div class="form-group">
+                            <label>Linnworks Username</label>
+                            <input type="text" readonly name="linnworks_email" class="form-control" value="{{$linnworks->linnworks_email}}" required autocomplete="email">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Linnworks User Id</label>
+                            <input type="text" readonly name="linnworks_user_id" class="form-control" value="{{$linnworks->linnworks_user_id}}" required autocomplete="email">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Folder</label>
+                            <select class="form-control" name="FolderName[]" id="FolderName" multiple>
+                                @foreach ($folders as $folder)
+                                    <option value="{{ $folder->id }}" @if(in_array($folder->name,$folderSettings)) selected @endif>{{ $folder->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
                         <button type="submit" class="btn btn-primary">Update</button>
                         <a href="" class="btn btn-secondary"  data-dismiss="modal">Close</a>
                     </form>
@@ -59,5 +81,9 @@
             }
         }); //valdate end
     }); //function end
+
+    $("#FolderName").select2({
+        placeholder: "Folder Settings"
+    });
 </script>
 @endsection

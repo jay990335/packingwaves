@@ -86,7 +86,7 @@ class User extends Authenticatable
     public function linnworks_token()
     {
         $id = auth()->user()->id;
-        $linnworks_token = Linnworks::where('user_id', $id)->latest()->first();
+        $linnworks_token = Linnworks::with('user')->where('user_id', $id)->latest()->first();
         return $linnworks_token;
     }
 
@@ -95,7 +95,7 @@ class User extends Authenticatable
      */
     public function linnworks()
     {
-        return $this->belongsTo(Linnworks::class,'id','user_id');   
+        return $this->hasMany(Linnworks::class);   
     }
 
     /**
@@ -104,6 +104,14 @@ class User extends Authenticatable
     public function print_buttons()
     {
         return $this->belongsToMany(printButtons::class, 'user_has_print_buttons');
+    }
+
+    /**
+     * The branches that belong to the user.
+     */
+    public function folderSettings()
+    {
+        return $this->belongsToMany(folderSettings::class, 'user_has_folder_settings');
     }
 
 }

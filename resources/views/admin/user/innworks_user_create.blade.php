@@ -48,6 +48,16 @@
                             <label>Linnworks User Id</label>
                             <input type="text" readonly name="linnworks_user_id" class="form-control" value="{{$linnworks_user_id}}" required autocomplete="email">
                         </div>
+
+                        <div class="form-group">
+                            <label>Folder</label>
+                            <select class="form-control" name="FolderName[]" id="FolderName" multiple>
+                                @foreach ($folders as $folder)
+                                    <option value="{{ $folder->id }}" selected>{{ $folder->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
                         <button type="submit" class="btn btn-primary">Create</button>
                         <a href="" class="btn btn-secondary"  data-dismiss="modal">Close</a>
                     </form>
@@ -67,5 +77,9 @@
             }
         }); //valdate end
     }); //function end
+
+    $("#FolderName").select2({
+        placeholder: "Folder Settings"
+    });
 </script>
 @endsection

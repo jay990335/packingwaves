@@ -8,6 +8,7 @@ use App\Company;
 use App\Image;
 use App\Linnworks;
 use App\printButtons;
+use App\folderSettings;
 
 use App\Http\Controllers\Controller;
 use App\Traits\UploadTrait;
@@ -97,11 +98,7 @@ class PackOrdersController extends Controller
         if ($request->ajax() == true) {
             $user_id = auth()->user()->id;
             $draw = $request->get('draw');
-            if($request->search_value!=''){
-                $start = 1;  
-            }else{
-                $start = $request->get("start");
-            }
+            $start = $request->get("start");
             
             $rowperpage = $request->get("length"); // Rows display per page
             $page = ($start/$rowperpage)+1;
@@ -141,6 +138,7 @@ class PackOrdersController extends Controller
                         }
                     }
                 }
+
                 $filter_order .= ']';
                 $check_identifier = '';
                 
@@ -606,8 +604,12 @@ class PackOrdersController extends Controller
         $records = $linnworks->Orders()->GetOrdersById($OrderIds);
         $record = $records[0];
 
+        $folders = $linnworks->Orders()->GetAvailableFolders();
+        $user_id = auth()->user()->id;
+        $folderSettings = folderSettings::where('status','Yes')->whereHas('users', function($q) use ($user_id) { $q->where('user_id', $user_id); })->pluck('name')->toArray();
+
         $PostalServices = $linnworks->PostalServices()->getPostalServices();
-        return view('admin.packlist.order_details', compact('record','PostalServices'));
+        return view('admin.packlist.order_details', compact('record','PostalServices','folders','folderSettings'));
     }
 
     /**
