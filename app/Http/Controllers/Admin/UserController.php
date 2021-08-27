@@ -54,7 +54,7 @@ class UserController extends Controller
     {
         $search = request('search', null);
         $user_id = auth()->user()->id;
-        if(!auth()->user()->hasRole('superadmin')){
+        /*if(!auth()->user()->hasRole('superadmin')){
             $users = User::whereHas('linnworks', function($q) use ($user_id) { $q->where('created_by', $user_id); })->when($search, function($user) use($search) {
                 return $user->where("name", 'like', '%' . $search . '%')
                 ->orWhere('id', $search);
@@ -64,25 +64,18 @@ class UserController extends Controller
                 return $user->where("name", 'like', '%' . $search . '%')
                 ->orWhere('id', $search);
             })->get();
-        }
+        }*/
+
+        $users = User::whereHas('linnworks', function($q) use ($user_id) { $q->where('created_by', $user_id); })->when($search, function($user) use($search) {
+                return $user->where("name", 'like', '%' . $search . '%')
+                ->orWhere('id', $search);
+            })->get();
         
         $users->load('roles');
         return view('admin.user.index', compact('users'));
     }
 
-    public function linnworks_user()
-    {
-        $linnworks = Linnworks_API::make([
-                'applicationId' => env('LINNWORKS_APP_ID'),
-                'applicationSecret' => env('LINNWORKS_SECRET'),
-                'token' => auth()->user()->linnworks_token()->token,
-            ], $this->client);
-        $linnworks_users = $linnworks->Permissions()->getUsers();
-        //$users = Linnworks::where('created_by',auth()->user()->id)->pluck('linnworks_email')->toArray();
-        $users = Linnworks::pluck('linnworks_email')->toArray();
-        
-        return view('admin.user.linnworks_user', compact('linnworks_users','users'));
-    }
+    
 
 
     public function create()
@@ -99,22 +92,6 @@ class UserController extends Controller
         return view('admin.user.create', compact('roles','folders', 'shipmentSettings','printButtons'));
     }
 
-    public function linnworks_user_create(Request $request)
-    {
-        $roles = Role::pluck('name', 'id');
-        $linnworks_email = $request->email;
-        $linnworks_user_id = $request->user_id;
-
-        $parent_user_id = auth()->user()->id; //Parent User ID
-        $folders = folderSettings::where('status','Yes')->where('created_by',$parent_user_id)->get();
-
-        $shipmentSettings = shipmentSettings::where('status','Yes')->where('created_by',$parent_user_id)->get();
-
-        $printButtons = printButtons::where('status','Yes')->where('created_by',$parent_user_id)->get();
-
-        return view('admin.user.innworks_user_create', compact('roles','linnworks_email','linnworks_user_id','folders', 'shipmentSettings','printButtons'));
-    }
-
     public function store(Request $request)
     {
         $input = $request->only('name', 'email', 'password');
@@ -128,36 +105,6 @@ class UserController extends Controller
 
         $user->print_buttons()->sync($request->printButtonsName);
 
-        //return redirect()->route('admin.user.index')->with('success', 'A user was created.');
-        return response()->json([
-            'success' => 'A team member was created successfully.' // for status 200
-        ]);
-    }
-
-    public function linnworks_user_store(Request $request)
-    {
-        $input = $request->only('name', 'email', 'password');
-        $input['password'] = bcrypt($request->password);
-        $user = User::create($input);
-        $user->assignRole($request->role);
-        $user->folderSettings()->sync($request->FolderName);
-        $user->shipmentSettings()->sync($request->ShipmentName);
-        $user->print_buttons()->sync($request->printButtonsName);
-        
-        $user = $user->id;
-        $linnworks = new Linnworks();
-        $linnworks->token = auth()->user()->linnworks_token()->token;
-        $linnworks->passportAccessToken = auth()->user()->linnworks_token()->passportAccessToken;
-        $linnworks->applicationId = env('LINNWORKS_APP_ID');
-        $linnworks->applicationSecret = env('LINNWORKS_SECRET');
-        $linnworks->user_id = $user;
-        $linnworks->linnworks_user_id = $request->linnworks_user_id;
-        $linnworks->linnworks_email = $request->linnworks_email;
-        $linnworks->created_by = auth()->user()->id;
-        $linnworks->updated_by = auth()->user()->id;
-        $linnworks->save();
-
-        
         //return redirect()->route('admin.user.index')->with('success', 'A user was created.');
         return response()->json([
             'success' => 'A team member was created successfully.' // for status 200
@@ -272,5 +219,70 @@ class UserController extends Controller
                 'error' => $exception->getMessage() . ' ' . $exception->getLine() // for status 200
             ]);
         }
+    }
+
+
+    public function linnworks_user()
+    {
+        $linnworks = Linnworks_API::make([
+                'applicationId' => env('LINNWORKS_APP_ID'),
+                'applicationSecret' => env('LINNWORKS_SECRET'),
+                'token' => auth()->user()->linnworks_token()->token,
+            ], $this->client);
+        $linnworks_users = $linnworks->Permissions()->getUsers();
+        
+        if(!auth()->user()->hasRole('superadmin')){
+            $users = Linnworks::where('created_by',auth()->user()->id)->pluck('linnworks_email')->toArray();
+        }else{
+            $users = Linnworks::pluck('linnworks_email')->toArray();
+        }
+        
+        return view('admin.user.linnworks_user', compact('linnworks_users','users'));
+    }
+    
+    public function linnworks_user_create(Request $request)
+    {
+        $roles = Role::pluck('name', 'id');
+        $linnworks_email = $request->email;
+        $linnworks_user_id = $request->user_id;
+
+        $parent_user_id = auth()->user()->id; //Parent User ID
+        $folders = folderSettings::where('status','Yes')->where('created_by',$parent_user_id)->get();
+
+        $shipmentSettings = shipmentSettings::where('status','Yes')->where('created_by',$parent_user_id)->get();
+
+        $printButtons = printButtons::where('status','Yes')->where('created_by',$parent_user_id)->get();
+
+        return view('admin.user.innworks_user_create', compact('roles','linnworks_email','linnworks_user_id','folders', 'shipmentSettings','printButtons'));
+    }
+    
+    public function linnworks_user_store(Request $request)
+    {
+        $input = $request->only('name', 'email', 'password');
+        $input['password'] = bcrypt($request->password);
+        $user = User::create($input);
+        $user->assignRole($request->role);
+        $user->folderSettings()->sync($request->FolderName);
+        $user->shipmentSettings()->sync($request->ShipmentName);
+        $user->print_buttons()->sync($request->printButtonsName);
+        
+        $user = $user->id;
+        $linnworks = new Linnworks();
+        $linnworks->token = auth()->user()->linnworks_token()->token;
+        $linnworks->passportAccessToken = auth()->user()->linnworks_token()->passportAccessToken;
+        $linnworks->applicationId = env('LINNWORKS_APP_ID');
+        $linnworks->applicationSecret = env('LINNWORKS_SECRET');
+        $linnworks->user_id = $user;
+        $linnworks->linnworks_user_id = $request->linnworks_user_id;
+        $linnworks->linnworks_email = $request->linnworks_email;
+        $linnworks->created_by = auth()->user()->id;
+        $linnworks->updated_by = auth()->user()->id;
+        $linnworks->save();
+
+        
+        //return redirect()->route('admin.user.index')->with('success', 'A user was created.');
+        return response()->json([
+            'success' => 'A team member was created successfully.' // for status 200
+        ]);
     }
 }

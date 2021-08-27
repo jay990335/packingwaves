@@ -99,7 +99,7 @@ class User extends Authenticatable
     }
 
     /**
-     * The branches that belong to the user.
+     * The print buttons that belong to the user.
      */
     public function print_buttons()
     {
@@ -107,7 +107,7 @@ class User extends Authenticatable
     }
 
     /**
-     * The branches that belong to the user.
+     * The folder Settings that belong to the user.
      */
     public function folderSettings()
     {
@@ -115,7 +115,7 @@ class User extends Authenticatable
     }
 
     /**
-     * The shipmentSettings that belong to the user.
+     * The shipment Settings that belong to the user.
      */
     public function shipmentSettings()
     {
