@@ -41,7 +41,7 @@
                         </div>
 
                         <div class="form-group">
-                            <label>Folder &nbsp;</label><input type="checkbox" id="checkbox_folder" > &nbsp;Select All
+                            <label>Folder &nbsp;</label><input type="checkbox" id="checkbox_folder" ><label class="text-info" for="checkbox_folder"> &nbsp;Select All</label>
                             <select class="form-control" name="FolderName[]" id="FolderName" multiple>
                                 @foreach ($folders as $folder)
                                     <option value="{{ $folder->id }}">{{ $folder->name }}</option>
@@ -50,10 +50,19 @@
                         </div>
 
                         <div class="form-group">
-                            <label>Shipment Setting &nbsp;</label><input type="checkbox" id="checkbox_shipment" > &nbsp;Select All
+                            <label>Shipment Setting &nbsp;</label><input type="checkbox" id="checkbox_shipment" ><label class="text-info" for="checkbox_shipment"> &nbsp;Select All</label>
                             <select class="form-control" name="ShipmentName[]" id="ShipmentName" multiple>
                                 @foreach ($shipmentSettings as $shipmentSetting)
                                     <option value="{{ $shipmentSetting->id }}">{{ $shipmentSetting->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Dynamic Print Buttons &nbsp;</label><input type="checkbox" id="checkbox_printbuttons" ><label class="text-info" for="checkbox_printbuttons"> &nbsp;Select All</label>
+                            <select class="form-control" name="printButtonsName[]" id="printButtonsName" multiple>
+                                @foreach ($printButtons as $printButton)
+                                    <option value="{{ $printButton->id }}">{{ $printButton->name }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -99,5 +108,18 @@
             $('#ShipmentName').select2('destroy').find('option').prop('selected', false).end().select2({placeholder: "Select Shipment Name",allowClear: true});
         }
     });
+
+    $("#printButtonsName").select2({
+        placeholder: "Select Print Buttons Name"
+    });
+    $("#checkbox_printbuttons").click(function(){
+        if($("#checkbox_printbuttons").is(':checked') ){
+            $('#printButtonsName').select2('destroy').find('option').prop('selected', 'selected').end().select2({placeholder: "Select Print Buttons Name",allowClear: true});
+        }else{
+            $('#printButtonsName').select2('destroy').find('option').prop('selected', false).end().select2({placeholder: "Select Print Buttons Name",allowClear: true});
+        }
+    });
+
+    
 </script>
 @endsection
