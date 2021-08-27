@@ -526,6 +526,13 @@ ol li {
         margin-left: 8%;
     }
 
+    div.dataTables_info {position:absolute}
+    div.dataTables_wrapper div.dataTables_paginate {
+        float:none; 
+        text-align:center;
+        padding: 40px 0px 15px 0px;
+    }
+
 }
 
 @media only screen and (min-device-width: 481px) and (max-device-width: 1024px) and (orientation:portrait) {
@@ -540,6 +547,9 @@ ol li {
         width: 84%;
         margin-left: 8%;
     }
+
+    div.dataTables_info {position:absolute}
+    div.dataTables_wrapper div.dataTables_paginate {float:none; text-align:center}
 }
 
 @media only screen and (min-device-width: 481px) and (max-device-width: 1024px) and (orientation:landscape) {
@@ -554,5 +564,7 @@ ol li {
         width: 84%;
         margin-left: 8%;
     }
+
+    
 }
 
