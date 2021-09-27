@@ -328,8 +328,6 @@ function printLabelAjex(OrderId,templateID,templateType) {
     });
 }
 
-
-
 function multiple_orders_printlabels(templateID,templateType) {
     var table = $('#table').DataTable();
     let rows = table.rows('.selected');

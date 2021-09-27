@@ -18,7 +18,7 @@
                                 <!--crumbs-->
                                 <ol class="breadcrumb float-left">
                                     <li class="breadcrumb-item">App</li>    
-                                    <li class="breadcrumb-item  active active-bread-crumb ">Packing Waves</li>
+                                    <li class="breadcrumb-item active active-bread-crumb">Packing Waves</li>
                                 </ol>
                                 <!--crumbs-->
                             </div>
