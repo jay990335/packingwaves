@@ -568,3 +568,10 @@ ol li {
     
 }
 
+.dataTables_length{
+    padding-left: 20px;
+}
+
+.dataTables_wrapper{
+    padding-top: 15px;
+}

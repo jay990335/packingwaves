@@ -187,7 +187,7 @@ function datatables(i) {
     var search_field = $('#search_field').val();
     var search_value = $('#search_value').val();
     var table = $('#table').DataTable({
-        dom: 'RBfrtip',
+        //dom: 'RBfrtipl',
         buttons: [],
         /*select: true,*/
         aaSorting     : [],
@@ -198,6 +198,7 @@ function datatables(i) {
         processing    : true,
         serverSide    : true,
         "bDestroy"    : true,
+        "lengthMenu": [[10, 25, 50, 100], [10, 25, 50, 100]],
         pagingType    : "full_numbers",
         ajax          : {
             url     : '{{ url('admin/packlist/ajax/data') }}',
@@ -435,5 +436,4 @@ function clear_serch() {
     }, 1000);
 }
 </script>
-
 @endsection
