@@ -145,7 +145,7 @@
                                                                   <option value="1">Descending</option>
                                                                 </select>
                                                             </div>
-                                                            <button type="submit" onclick="datatables();" class="btn btn-primary mb-2" data-dismiss="modal">Sort By</button>
+                                                            <button type="submit" onclick="datatables(1);" class="btn btn-primary mb-2" data-dismiss="modal">Sort By</button>
                                                         </div>
                                                         <!-- /.card-body -->
                                                     </div>
@@ -181,7 +181,7 @@
 
 <script>
 
-function datatables() {
+function datatables(i) {
     var sortby_field = $('#sortby_field').val();
     var sortby_type = $('#sortby_type').val();
     var search_field = $('#search_field').val();
@@ -224,7 +224,9 @@ function datatables() {
         table.rows().deselect();
     });
 
-    table.page('first').draw('page');
+    if(i==1){
+      table.page('first').draw('page');  
+    }
 }
 
 $('#table tbody').on( 'click', 'tr', function () {
@@ -321,7 +323,7 @@ function printLabelAjex(OrderId,templateID,templateType) {
                 alert_message(message);
             }
             setTimeout(function() {   //calls click event after a certain time
-                datatables();
+                datatables(0);
                 $("#pageloader").hide();
             }, 1000);
         }
@@ -394,14 +396,14 @@ function multiple_orders_printlabels_ajax(OrderIds,templateID,templateType) {
                 alert_message(message);
             }
             setTimeout(function() {   //calls click event after a certain time
-                datatables();
+                datatables(0);
                 $("#pageloader").hide();
             }, 1000);
         }
     });
 }
 
-datatables();
+datatables(1);
 
 function sticky_relocate() {
   var window_top = $(window).scrollTop();
@@ -429,7 +431,7 @@ $( "#search_btn" ).click(function() {
 function clear_serch() {
     $('#search_value').val('');
     setTimeout(function() {   //calls click event after a certain time
-        datatables();
+        datatables(1);
     }, 1000);
 }
 </script>
