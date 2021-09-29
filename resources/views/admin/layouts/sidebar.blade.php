@@ -190,6 +190,7 @@
                         @endif
 
                         @if(isset(auth()->user()->linnworks_token()->token))
+                        @can('view user')
                         <li class="nav-item has-treeview {{ Route::is('admin.linnworks-user') || Route::is('admin.user.*') || Route::is('admin.profile.*') ? 'menu-open' : '' }}">
                             <a href="#" class="nav-link {{ 
                                 Route::is('admin.linnworks-user') || Route::is('admin.user.*') || Route::is('admin.profile.*') ? 'active-parent' : '' }}">
@@ -219,6 +220,7 @@
                                 @endcan
                             </ul>
                         </li>
+                        @endcan
                         @endif
                     </ul>
                 </li>

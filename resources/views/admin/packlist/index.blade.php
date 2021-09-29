@@ -365,8 +365,7 @@ function multiple_orders_printlabels(templateID,templateType) {
                             }
                             z++;
                             r.dismiss;
-                        }
-                        
+                        } 
                     }) 
                 }else{
                     OrderIds.push(OrderId);

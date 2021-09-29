@@ -102,6 +102,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
         <script src="https://cdn.datatables.net/buttons/1.7.0/js/buttons.print.min.js"></script>
         <script src="https://cdn.datatables.net/buttons/1.7.0/js/buttons.colVis.min.js"></script>
         <script src="https://cdn.datatables.net/select/1.3.3/js/dataTables.select.min.js"></script>
+       
         <script src="https://cdn.jsdelivr.net/gh/jeffreydwalter/ColReorderWithResize@9ce30c640e394282c9e0df5787d54e5887bc8ecc/ColReorderWithResize.js"></script>
 
         <!-- Select2 JS-->
