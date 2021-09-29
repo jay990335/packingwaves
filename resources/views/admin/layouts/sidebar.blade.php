@@ -96,6 +96,13 @@
                                     </li>
 
                                     <li class="nav-item">
+                                        <a href="{{ route('admin.profile.location') }}" class="nav-link {{ Route::is('admin.profile.location') ? 'active' : '' }}" id="popup-modal-buttonUserRole">
+                                            <i class="fas fa-map-marker-alt nav-icon"></i>
+                                            <p>Location</p>
+                                        </a>
+                                    </li>
+
+                                    <li class="nav-item">
                                         <a href="{{ route('admin.folder_settings.user') }}" class="nav-link {{ Route::is('admin.folder_settings.user') ? 'active' : '' }}">
                                             <i class="fas fa-folder-open nav-icon"></i>
                                             <p>Folder Setting</p>
@@ -189,8 +196,7 @@
                         </li>
                         @endif
 
-                        @if(isset(auth()->user()->linnworks_token()->token))
-                        @can('view user')
+                        @if(isset(auth()->user()->linnworks_token()->token) && (auth()->user()->can('view linnworks user') || auth()->user()->can('view user')) )
                         <li class="nav-item has-treeview {{ Route::is('admin.linnworks-user') || Route::is('admin.user.*') || Route::is('admin.profile.*') ? 'menu-open' : '' }}">
                             <a href="#" class="nav-link {{ 
                                 Route::is('admin.linnworks-user') || Route::is('admin.user.*') || Route::is('admin.profile.*') ? 'active-parent' : '' }}">
@@ -220,7 +226,6 @@
                                 @endcan
                             </ul>
                         </li>
-                        @endcan
                         @endif
                     </ul>
                 </li>

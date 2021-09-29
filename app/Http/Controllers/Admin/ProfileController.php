@@ -127,6 +127,20 @@ class ProfileController extends Controller
         ]);
     }
 
+    public function updateLocation(Request $request)
+    {
+        $id = auth()->user()->id;
+
+        $request->validate([
+            'location' => 'required',
+        ]);
+        
+        auth()->user()->update($request->only('location'));
+        return response()->json([
+            'success' => 'location was updated successfully.' // for status 200
+        ]);
+    }
+
     public function updatePassword(Request $request)
     {
         $request->validate([
@@ -172,5 +186,19 @@ class ProfileController extends Controller
         $user = User::findOrFail(auth()->id());
         
         return view('admin.profile.printer_zone', compact('user','printer_zone'));
+    }
+
+    public function location()
+    {
+        $linnworks = Linnworks_API::make([
+                'applicationId' => env('LINNWORKS_APP_ID'),
+                'applicationSecret' => env('LINNWORKS_SECRET'),
+                'token' => auth()->user()->linnworks_token()->token,
+            ], $this->client);
+        $locations = $linnworks->Inventory()->GetStockLocations();
+
+        $user = User::findOrFail(auth()->id());
+
+        return view('admin.profile.location', compact('user','locations'));
     }
 }

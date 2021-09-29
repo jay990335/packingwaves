@@ -70,6 +70,7 @@ class PackingWavesController extends Controller
 
         if ($request->ajax() == true) {
             $user_id = auth()->user()->id;
+            $LocationId = auth()->user()->location;
             $draw = $request->get('draw');
             $page = ($request->get("start")/$request->get("length"))+1;
             $start = $request->get("start");
@@ -81,7 +82,7 @@ class PackingWavesController extends Controller
             ], $this->client);
 
             //$records = $linnworks->Picking()->GetMyPickingWaves(null,'','OnlyPickWave');
-            $records = $linnworks->Picking()->GetAllPickingWaves(null,'','All');
+            $records = $linnworks->Picking()->GetAllPickingWaves(null,$LocationId,'All');
 
             $data_arr = array();
             $iTotalRecords = 0;

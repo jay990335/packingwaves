@@ -184,8 +184,8 @@ class PackOrdersController extends Controller
                         }';
 
             $sorting = '[{"Direction":'.$request->sortby_type.',"FieldCode":"'.$request->sortby_field.'","Order":1}]';
-
-            $records_all = $linnworks->Orders()->getOpenOrders('',$rowperpage,$page,$filter,$sorting,'');
+            $fulfilmentCenter = auth()->user()->location;
+            $records_all = $linnworks->Orders()->getOpenOrders($fulfilmentCenter,$rowperpage,$page,$filter,$sorting,'');
 
             if($request->search_value!=''){
                 $additionalFilters = $request->search_field.$request->search_value;
@@ -195,7 +195,7 @@ class PackOrdersController extends Controller
                 $additionalFilters = '';
             }
 
-            $records = $linnworks->Orders()->getOpenOrders('',
+            $records = $linnworks->Orders()->getOpenOrders($fulfilmentCenter,
                                                         $rowperpage,
                                                         $page,
                                                         $filter,

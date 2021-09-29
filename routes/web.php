@@ -24,10 +24,13 @@ Route::group([
     Route::put('profile/updateProfileImage', 'ProfileController@updateProfileImage')->name('profile.updateProfileImage');
     Route::put('profile/updatePrinterName', 'ProfileController@updatePrinterName')->name('profile.updatePrinterName');
     Route::put('profile/updatePrinterZone', 'ProfileController@updatePrinterZone')->name('profile.updatePrinterZone');
+    Route::put('profile/updateLocation', 'ProfileController@updateLocation')->name('profile.updateLocation');
     Route::view('profile/password', 'admin.profile.edit_password')->name('profile.edit.password');
     Route::post('profile/password', 'ProfileController@updatePassword')->name('profile.update.password');
     Route::get('profile/printers', 'ProfileController@printers')->name('profile.printers');
     Route::get('profile/printers_zone', 'ProfileController@printers_zone')->name('profile.printers_zone');
+    Route::get('profile/location', 'ProfileController@location')->name('profile.location');
+
 
     // User Routes
     
