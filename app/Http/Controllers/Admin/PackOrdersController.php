@@ -507,6 +507,7 @@ class PackOrdersController extends Controller
             /*Get Partial Picked Order List [Start] */
             $PickingWaveId = $request->PickingWaveId;
             $PartialPickedOrderArray=[];
+            $PartialPickedOrderID=[];
             if($PickingWaveId != 0){
                 $PickingWaveOrders = $linnworks->Picking()->GetPickingWave($PickingWaveId);
                 foreach($PickingWaveOrders['PickingWaves'] as $record){
