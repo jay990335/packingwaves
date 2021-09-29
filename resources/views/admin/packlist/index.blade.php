@@ -334,14 +334,16 @@ function printLabelAjex(OrderId,templateID,templateType) {
 function multiple_orders_printlabels(templateID,templateType) {
     var table = $('#table').DataTable();
     let rows = table.rows('.selected');
+    console.log(rows);
     if(rows.data().length > 0 ) {
         var OrderIds=[];
         var z=1;
-        table.rows().every(function(rowIdx, tableLoop, rowLoop){
+        table.rows('.selected').every(function(rowIdx, tableLoop, rowLoop){
+        //table.rows().every(function(rowIdx, tableLoop, rowLoop){
             var data = this.data();
             var overweight = data['overweight'];
             var OrderId = data['OrderId'];
-            var numorderid = data['numorderid']
+            var numorderid = data['numorderid'];
             if(OrderId!=''){
                 if(overweight==1){
                    swal({
