@@ -16,21 +16,24 @@
                             <div class="col-8 page-titles text-left" id="breadcrumbs">
                                 <h3 class="text-themecolor" style="padding:0px;">
                                     @if($PickingWaveId==0) 
-                                        Pack List 
+                                        Pick List 
                                     @else 
-                                        Pack List Id: {{$PickingWaveId}}
+                                        Pick List Id: {{$PickingWaveId}}
                                     @endif
                                 </h3>
                                 <!--crumbs-->
                                 <ol class="breadcrumb float-left">
                                     <li class="breadcrumb-item">App</li>    
-                                    <li class="breadcrumb-item  active active-bread-crumb ">Pack List</li>
+                                    <li class="breadcrumb-item  active active-bread-crumb ">Pick List</li>
                                 </ol>
                                 <!--crumbs-->
                             </div>
+
+                            <div class="col text-right">
                             @if($PickingWaveId!=0)
-                            <div class="col text-right"><a href="{{ url('admin/packingwaves') }}" class="btn btn-primary btn-sm mt-1">Back</a></div>
+                            <a href="{{ url('admin/pickingwaves') }}" class="btn btn-primary btn-sm mt-1">Back</a>
                             @endif
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -40,12 +43,7 @@
                     <div class="col-md-12 text-center mt-3" id="sticky">
                         <button type="button" class="btn btn-primary btn-sm mt-1" id="select_all">Select All</button>
                         <button type="button" class="btn btn-secondary btn-sm mt-1" id="unselect_all">Unselect All</button>
-                        @if(isset(auth()->user()->printer_zone))
-                            @foreach ($print_buttons as $print_button)
-                            <a href="javascript:void(0)" onclick="multiple_orders_printlabels({{$print_button->templateID}},'{{$print_button->templateType}}')"  class="{{$print_button->style}} btn-sm mt-1"><span tooltip="{{$print_button->name}}" flow="up"><i class="fas fa-print"></i> {{$print_button->name}}</span></a>
-                            @endforeach
-                        @endif
-
+                        <button type="button" class="btn btn-secondary btn-sm mt-1" id="pick" onclick="multiple_pickitems()">Pick</button>
                         <button type="button" class="btn btn-primary btn-sm mt-1" id="search_btn" tooltip="Search By" flow="up" data-toggle="modal" data-target="#popup_modal_search"><i class="fas fa-search"></i></button>
                         <!-- .model-popup [START] -->
                         <div class="modal fade text-center" id="popup_modal_search" tabindex="-1" role="dialog">
@@ -160,6 +158,7 @@
 
                         
                     </div>
+
                     <div class="table-responsive list-table-wrapper">
                         <table class="table table-hover dataTable no-footer" id="table" width="100%">
                             <thead style="display: none;">
@@ -201,7 +200,7 @@ function datatables(i) {
         "lengthMenu": [[10, 25, 50, 100], [10, 25, 50, 100]],
         pagingType    : "full_numbers",
         ajax          : {
-            url     : '{{ url('admin/packlist/ajax/data') }}',
+            url     : '{{ url('admin/picklist/ajax/data') }}',
             dataType: 'json',
             data: {
                 "PickingWaveId": {{$PickingWaveId}},
@@ -233,164 +232,50 @@ function datatables(i) {
 $('#table tbody').on( 'click', 'tr', function () {
     $(this).toggleClass('selected');
 });
-function printLabel(d) {
-    var OrderId= $(d).data('orderid');
-    var numorderid= $(d).data('numorderid');
-    var LabelPrinted= $(d).data('labelprinted');
-    var templateID= $(d).data('templateid');
-    var templateType= $(d).data('templatetype');
-    var overweight= $(d).data('overweight');
-    var table = $('#table').DataTable();
 
-    var successPrint = 0;
-    console.log(table.row().data());
-    if(LabelPrinted=="Label Printed"){
-        swal({
-            title: "Warning",
-            text: "This label already printed, So are you sure want to reprint it?",
-            type: "warning",
-            showCancelButton: !0,
-            confirmButtonText: "Yes, print it!",
-            cancelButtonText: "No, cancel!",
-            reverseButtons: !0
-        }).then(function (r) {
-            if (r.value === true) {
-                if(overweight==1){
-                    
-                   swal({
-                        title: "Warning",
-                        text: "Order #"+numorderid+" is overwight international shipping, So are you sure want to print it?",
-                        type: "warning",
-                        showCancelButton: !0,
-                        confirmButtonText: "Yes, print it!",
-                        cancelButtonText: "No, cancel!",
-                        reverseButtons: !0
-                    }).then(function (r) {
-                        if (r.value === true) {
-                            printLabelAjex(OrderId,templateID,templateType);
-                        } else {
-                            r.dismiss;
-                        }
-                    }, function (dismiss) {
-                        return false;
-                    }) 
-                }else{
-                    printLabelAjex(OrderId,templateID,templateType);
-                }
-                    
-            } else {
-                r.dismiss;
-            }
-        }, function (dismiss) {
-            return false;
-        })
-    }else{
-        if(overweight==1){
-            swal({
-                title: "Warning",
-                text: "Order #"+numorderid+" is overwight international shipping, So are you sure want to print it?",
-                type: "warning",
-                showCancelButton: !0,
-                confirmButtonText: "Yes, print it!",
-                cancelButtonText: "No, cancel!",
-                reverseButtons: !0
-            }).then(function (r) {
-                if (r.value === true) {
-                    printLabelAjex(OrderId,templateID,templateType);
-                } else {
-                    r.dismiss;
-                }
-            }, function (dismiss) {
-                return false;
-            }) 
-        }else{
-            printLabelAjex(OrderId,templateID,templateType);
-        }
-    }
-}
+datatables(1);
 
-function printLabelAjex(OrderId,templateID,templateType) {
-    $("#pageloader").fadeIn();
-    $.ajax({
-        method: "POST",
-        url: "{{ url('admin/packlist/ajax/printlabel') }}",
-        headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
-        data: { OrderId: OrderId,
-                templateID: templateID,
-                templateType: templateType,
-            },
-        success: function(message){
-            if(typeof(message.error) != "undefined" && message.error !== null){
-                alert_message(message);
-            }
-            setTimeout(function() {   //calls click event after a certain time
-                datatables(0);
-                $("#pageloader").hide();
-            }, 1000);
-        }
-    });
-}
-
-function multiple_orders_printlabels(templateID,templateType) {
+function multiple_pickitems() {
+    //$("#pageloader").fadeIn();
     var table = $('#table').DataTable();
     let rows = table.rows('.selected');
     if(rows.data().length > 0 ) {
-        var OrderIds=[];
-        var z=1;
         table.rows('.selected').every(function(rowIdx, tableLoop, rowLoop){
             var data = this.data();
-            var overweight = data['overweight'];
-            var OrderId = data['OrderId'];
-            var numorderid = data['numorderid']
-            if(OrderId!=''){
-                if(overweight==1){
-                   swal({
-                        title: "Warning",
-                        text: "Order #"+numorderid+" is overwight international shipping, So are you sure want to print it?",
-                        type: "warning",
-                        showCancelButton: !0,
-                        confirmButtonText: "Yes, print it!",
-                        cancelButtonText: "No, cancel!",
-                        reverseButtons: !0
-                    }).then(function (r) {
-                        if (r.value === true) {
-                            OrderIds.push(OrderId);
-                            if(rows.data().length==z){
-                               multiple_orders_printlabels_ajax(OrderIds,templateID,templateType);
-                            }
-                            z++;
-                        } else {
-                            if(rows.data().length==z){
-                               multiple_orders_printlabels_ajax(OrderIds,templateID,templateType); 
-                            }
-                            z++;
-                            r.dismiss;
-                        } 
-                    }) 
-                }else{
-                    OrderIds.push(OrderId);
-                    if(rows.data().length==z){
-                       multiple_orders_printlabels_ajax(OrderIds,templateID,templateType);
-                    }
-                    z++;
-                }   
-            }
+            var id = data['Id'];
+            var PickingWaveItemsRowId = $("#PickingWaveItemsRowId_"+id).val();
+            var OrderQTY = $("#OrderQTY_"+id).val();
+            $.ajax({
+                method: "POST",
+                url: "{{ url('admin/picklist/ajax/multiple_pickitems') }}",
+                headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                data: {id:id,
+                        PickingWaveItemsRowId: PickingWaveItemsRowId,
+                        OrderQTY: OrderQTY},
+                success: function(message){
+                    setTimeout(function() {   //calls click event after a certain time
+                        datatables(0);
+                        //$("#pageloader").hide();
+                    }, 1000);
+                }
+            });
 
         });
     }
 }
 
-function multiple_orders_printlabels_ajax(OrderIds,templateID,templateType) {
-    $("#pageloader").fadeIn();
-    console.log(OrderIds);
+function pickitems(d) {
+    //$("#pageloader").fadeIn();
+    var id = $(d).data('id');
+    var PickingWaveItemsRowId = $("#PickingWaveItemsRowId_"+id).val();
+    var OrderQTY = $("#OrderQTY_"+id).val();
     $.ajax({
         method: "POST",
-        url: "{{ url('admin/packlist/ajax/multiple_orders_printlabels') }}",
+        url: "{{ url('admin/picklist/ajax/multiple_pickitems') }}",
         headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
-        data: {PickingWaveId:{{$PickingWaveId}},
-                OrderIds: OrderIds,
-                templateID: templateID,
-                templateType: templateType},
+        data: {id:id,
+                PickingWaveItemsRowId: PickingWaveItemsRowId,
+                OrderQTY: OrderQTY},
         success: function(message){
             if(typeof(message.error) != "undefined" && message.error !== null){
                 alert_message(message);
@@ -403,7 +288,37 @@ function multiple_orders_printlabels_ajax(OrderIds,templateID,templateType) {
     });
 }
 
-datatables(1);
+function drop_pickitems(d) {
+    var id = $(d).data('id');
+    var PickingWaveItemsRowId = $("#PickingWaveItemsRowId_"+id).val();
+    var OrderQTY = $("#OrderQTY_"+id).val();
+    var qty = $(d).val();
+    var PickedQuantity = $("#PickedQuantity_"+id).val();
+    var ToPickQuantity = $("#ToPickQuantity_"+id).val();
+
+    //alert(qty);
+    $.ajax({
+        method: "POST",
+        url: "{{ url('admin/picklist/ajax/drop_pickitems') }}",
+        headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+        data: {id:id,
+                PickingWaveItemsRowId: PickingWaveItemsRowId,
+                OrderQTY: OrderQTY,
+                qty: qty,
+                PickedQuantity: PickedQuantity,
+                ToPickQuantity: ToPickQuantity
+            },
+        success: function(message){
+            //if(typeof(message.error) != "undefined" && message.error !== null){
+                alert_message(message);
+            //}
+            setTimeout(function() {   //calls click event after a certain time
+                datatables(0);
+                $("#pageloader").hide();
+            }, 1000);
+        }
+    });
+}
 
 function sticky_relocate() {
   var window_top = $(window).scrollTop();

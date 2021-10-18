@@ -83,7 +83,7 @@ class PackingWavesController extends Controller
 
             //$records = $linnworks->Picking()->GetMyPickingWaves(null,'','OnlyPickWave');
             $records = $linnworks->Picking()->GetAllPickingWaves(null,$LocationId,'All');
-
+            //dd($records);
             $data_arr = array();
             $iTotalRecords = 0;
             foreach($records['PickingWaves'] as $record){
@@ -155,18 +155,18 @@ class PackingWavesController extends Controller
                         }
                     }
 
-
-                    if($record['State']=='Complete' && $orders_not_printed_count==0 && $picked_order!=0){
+                
+                    if($record['State']=='Complete' && /*$orders_not_printed_count==0 &&*/ $picked_order!=0){
                         $pickingWaveBGClass = 'bg-dark';
                         $btnBGClass = 'btn-success';
                         $pickingWaveState = 'Complete';
                         $href = route("admin.packlist.packorderslist",$PickingWaveId);
-                    }elseif($record['State']!='Complete' && $orders_pickwave_complete['TotalEntries']!=0 && $orders_not_printed_count==0 && $picked_order!=0){
+                    }elseif($record['State']!='Complete' && $orders_pickwave_complete['TotalEntries']!=0 /*&& $orders_not_printed_count==0*/ && $picked_order!=0){
                         $pickingWaveBGClass = 'bg-white';
                         $btnBGClass = 'btn-purple';
                         $pickingWaveState = 'Partial Complete';
                         $href = route("admin.packlist.packorderslist",$PickingWaveId);
-                    }elseif($orders_not_printed_count!=0 && $picked_order!=0){
+                    }elseif(/*$orders_not_printed_count!=0 &&*/ $picked_order!=0){
                         $pickingWaveBGClass = 'bg-white';
                         $btnBGClass = 'btn-purple';
                         $pickingWaveState = 'Partial Complete';

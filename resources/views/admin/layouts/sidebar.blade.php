@@ -51,14 +51,14 @@
                             </a>
                         </li>
                         @if(isset(auth()->user()->linnworks_token()->token))
-                            <!-- <li class="nav-item">
+                            <li class="nav-item">
                                 @if(isset(auth()->user()->linnworks_token()->token))
                                 <a href="{{ url('admin/pickingwaves') }}" class="nav-link {{ Route::is('admin.pickingwaves.*') || Route::is('admin.picklist.*')  ? 'active' : '' }}">
                                     <i class="fas fa-warehouse nav-icon"></i>
                                     <p>Picklist</p>
                                 </a>
                                 @endif
-                            </li> -->
+                            </li>
                             <li class="nav-item">
                                 @if(isset(auth()->user()->linnworks_token()->token))
                                 <a href="{{ url('admin/packingwaves') }}" class="nav-link {{ Route::is('admin.packingwaves.*') || Route::is('admin.packlist.*')  ? 'active' : '' }}">

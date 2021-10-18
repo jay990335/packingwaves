@@ -70,6 +70,7 @@ class PickingWavesController extends Controller
 
         if ($request->ajax() == true) {
             $user_id = auth()->user()->id;
+            $LocationId = auth()->user()->location;
             $draw = $request->get('draw');
             $page = ($request->get("start")/$request->get("length"))+1;
             $start = $request->get("start");
@@ -80,27 +81,27 @@ class PickingWavesController extends Controller
                 'token' => auth()->user()->linnworks_token()->token,
             ], $this->client);
 
-            $records = $linnworks->Picking()->GetMyPickingWaves(null,'','OnlyPickWave');
-
+            $records = $linnworks->Picking()->GetMyPickingWaves(null,$LocationId,'OnlyPickWave');
+            //dd($records);
             $data_arr = array();
 
             foreach($records['PickingWaves'] as $record){
 
                 $PickingWaveId = $record['PickingWaveId']; 
-                /*if($PickingWaveId == 41){
+                /*if($PickingWaveId == 76){
                     dd($record);
                 }*/
                 
                 if($record['State']=='InProgress'){
-                    $pickingWaveBGClass = 'bg-white';
+                    $pickingWaveBGClass = 'bg-dark';
                     $btnBGClass = 'btn-purple';
                     $pickingWaveState = 'Partial Complete';
-                    $href = route("admin.packlist.packorderslist",$PickingWaveId);
+                    $href = route("admin.picklist.pickitemslist",$PickingWaveId);
                 }else{
-                    $pickingWaveBGClass = 'bg-dark';
+                    $pickingWaveBGClass = 'bg-white';
                     $btnBGClass = 'btn-success';
                     $pickingWaveState = 'Complete';
-                    $href = route("admin.packlist.packorderslist",$PickingWaveId);
+                    $href = route("admin.picklist.pickitemslist",$PickingWaveId);
                 }
                 
                 $Detais= '<a href="'.$href.'"><div class="row ">

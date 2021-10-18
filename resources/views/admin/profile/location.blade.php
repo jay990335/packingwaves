@@ -22,14 +22,16 @@
                             <label>Location</label>
                             <select class="form-control" name="location" id="location" required>
                                 @foreach ($locations as $location)
-                                <?php 
+                                    @if(!in_array($location['LocationName'],explode(",", env('HIDE_LOCATION'))))  
+                                        <?php 
 
-                                    $LocationName = $location['LocationName'];
-                                    $StockLocationId = $location['StockLocationId'];
-                                ?>
-                                <option value="{{ $StockLocationId }}" 
-                                {{ $StockLocationId === $user->location ? 'selected' : null }}
-                                >{{ $LocationName }}</option>
+                                            $LocationName = $location['LocationName'];
+                                            $StockLocationId = $location['StockLocationId'];
+                                        ?>
+                                        <option value="{{ $StockLocationId }}" 
+                                        {{ $StockLocationId === $user->location ? 'selected' : null }}
+                                        >{{ $LocationName }}</option>
+                                    @endif
                                 @endforeach
                             </select>
                         </div>

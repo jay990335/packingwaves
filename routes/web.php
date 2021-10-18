@@ -62,11 +62,18 @@ Route::group([
     Route::post('packlist/ajax/packingwavesCompletedNotificationSend', 'PackOrdersController@packingwavesCompletedNotificationSend')->name('packlist.ajax.packingwavesCompletedNotificationSend');
     
 
-    // packingwaves Routes
+    // pickingwaves Routes
     Route::resource('pickingwaves', 'PickingWavesController');
     Route::get('pickingwaves/ajax/data', 'PickingWavesController@datatables'); // For Datatables
 
-
+    // Picklist Routes
+    Route::resource('picklist', 'PickItemsController');
+    Route::get('picklist/ajax/data', 'PickItemsController@datatables'); // For Datatables
+    Route::get('picklist/pickitemslist/{PickingWaveId}', 'PickItemsController@pickitemslist')->name('picklist.pickitemslist'); 
+    Route::post('picklist/ajax/multiple_pickitems', 'PickItemsController@multiple_pickitems');
+    Route::post('picklist/ajax/drop_pickitems', 'PickItemsController@drop_pickitems');
+    
+    
     // Print Button Routes
     Route::get('print_buttons/user', 'PrintButtonsController@user')->name('print_buttons.user');
     Route::get('print_buttons/ajax/data_user', 'PrintButtonsController@datatables_user'); // For Datatables
