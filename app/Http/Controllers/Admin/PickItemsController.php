@@ -112,11 +112,12 @@ class PickItemsController extends Controller
             $filter_order = '';
             
             $PickingWaveOrders = $linnworks->Picking()->GetPickingWave($PickingWaveId);
-
             $items_arr = array();
 
             $filter_order .= '"TextFields":[';
             $PartialPickedOrderArray=[];
+            $totalorder = 0;
+            //dd($PickingWaveOrders['PickingWaves']);
             foreach($PickingWaveOrders['PickingWaves'] as $record){
                 foreach ($record['Orders'] as $Order) {
                     $filter_order .= '{
@@ -126,6 +127,7 @@ class PickItemsController extends Controller
                         "Type":0,
                         "Text":"'.$Order['OrderId'].'"
                     },';
+                    $totalorder++;
                 }
             }
 
@@ -163,8 +165,8 @@ class PickItemsController extends Controller
             }
 
             $records = $linnworks->Orders()->getOpenOrders($fulfilmentCenter,
-                                                        $rowperpage,
-                                                        $page,
+                                                        $totalorder,
+                                                        1,
                                                         $filter,
                                                         $sorting,
                                                         $additionalFilters);
@@ -177,6 +179,21 @@ class PickItemsController extends Controller
                     if(count($Item['CompositeSubItems'])>0){
                         foreach ($Item['CompositeSubItems'] as $Item) {
                             if(!array_key_exists($Item['StockItemId'], $items_arr)) {
+                                $records_all++;
+                                if($records_all>$start && $records_all<=($start+$rowperpage)){
+                                    $items_arr[$Item['StockItemId']]['Item_Detail'] = $Item;
+                                    $items_arr[$Item['StockItemId']]['ToPickQuantity'] = 0;
+                                    $items_arr[$Item['StockItemId']]['PickedQuantity'] = 0;
+                                    $items_arr[$Item['StockItemId']]['OrderId'] = '';
+                                    $items_arr[$Item['StockItemId']]['PickingWaveItemsRowId'] = '';
+                                    $items_arr[$Item['StockItemId']]['OrderQTY'] = '';
+                                }
+                            }
+                        }
+                    }else{
+                        if(!array_key_exists($Item['StockItemId'], $items_arr)) {
+                            $records_all++;
+                            if($records_all>$start && $records_all<=($start+$rowperpage)){
                                 $items_arr[$Item['StockItemId']]['Item_Detail'] = $Item;
                                 $items_arr[$Item['StockItemId']]['ToPickQuantity'] = 0;
                                 $items_arr[$Item['StockItemId']]['PickedQuantity'] = 0;
@@ -185,20 +202,10 @@ class PickItemsController extends Controller
                                 $items_arr[$Item['StockItemId']]['OrderQTY'] = '';
                             }
                         }
-                    }else{
-                        if(!array_key_exists($Item['StockItemId'], $items_arr)) {
-                            $items_arr[$Item['StockItemId']]['Item_Detail'] = $Item;
-                            $items_arr[$Item['StockItemId']]['ToPickQuantity'] = 0;
-                            $items_arr[$Item['StockItemId']]['PickedQuantity'] = 0;
-                            $items_arr[$Item['StockItemId']]['OrderId'] = '';
-                            $items_arr[$Item['StockItemId']]['PickingWaveItemsRowId'] = '';
-                            $items_arr[$Item['StockItemId']]['OrderQTY'] = '';
-                        }
                     }
-                    
                 }
             }
-
+            //dd($items_arr);
             //dd($PickingWaveOrders['PickingWaves']);
             foreach($PickingWaveOrders['PickingWaves'] as $PickingWave){
                 foreach ($PickingWave['Orders'] as $Order) {
@@ -230,9 +237,9 @@ class PickItemsController extends Controller
                     }
                 }
             }
-
+            //dd($items_arr);
             foreach ($items_arr as $key => $record) {
-                $records_all++;
+                
 
                 if($record['ToPickQuantity']==$record['PickedQuantity']){
                     $labelPrintedBGClass = 'bg-dark';   
@@ -247,7 +254,8 @@ class PickItemsController extends Controller
                     $BinRackHTML .= '<span class="btn btn-sm bg-secondary mt-1" tooltip="Item Location: '.$record['Item_Detail']['BinRack'].'" flow="up">'.$record['Item_Detail']['BinRack'].'</span>';
                 }
 
-                $ItemDetais= '<div class="row">
+                //if($records_all>=$start && $records_all<=($start+$rowperpage)){
+                   $ItemDetais= '<div class="row">
                         <div class="col-12">
                           <div class="card '.$labelPrintedBGClass.'" style="margin-bottom: 0px;">
                             <div class="card-header border-bottom-0">
@@ -265,6 +273,7 @@ class PickItemsController extends Controller
                                     $ItemDetais.= '<div class="media-body">
                                         <p class= "text-sm crop-text-3">'.$record['Item_Detail']['Title'].'</p>
                                         <span class="btn btn-sm bg-success mt-1" tooltip="SKU: '.$record['Item_Detail']['SKU'].'" flow="up">'.$record['Item_Detail']['SKU'].'</span>
+                                        <span class="btn btn-sm bg-success mt-1" tooltip="Barcode Number: '.$record['Item_Detail']['BarcodeNumber'].'" flow="up">'.$record['Item_Detail']['BarcodeNumber'].'</span>
                                         '.$BinRackHTML.'
                                         <span class="btn btn-sm bg-success mt-1" tooltip="Order ID: '.$record['OrderId'].'" flow="up" style="display:none;">'.$record['OrderId'].'</span>
                                         <input type="hidden" value="'.$record['PickingWaveItemsRowId'].'" name="PickingWaveItemsRowId" id="PickingWaveItemsRowId_'.$key.'" class="form-control input-lg">
@@ -299,8 +308,8 @@ class PickItemsController extends Controller
                             </div>
                           </div>
                         </div>
-                      </div>';
-            
+                      </div>'; 
+                //}
                 
                 $data_arr[] = array(
                     "id" => $key,

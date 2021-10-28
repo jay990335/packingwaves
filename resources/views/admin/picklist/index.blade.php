@@ -209,6 +209,12 @@ function datatables(i) {
                 "search_field": search_field,
                 "search_value": search_value
             },
+            error: function (xhr, error, code)
+            {
+                console.log(xhr);
+                console.log(code);
+                datatables(0);
+            }     
         },
         columns       : [
             {data: 'ItemDetais', name: 'ItemDetais'},
@@ -227,6 +233,7 @@ function datatables(i) {
     if(i==1){
       table.page('first').draw('page');  
     }
+    
 }
 
 $('#table tbody').on( 'click', 'tr', function () {
@@ -236,55 +243,88 @@ $('#table tbody').on( 'click', 'tr', function () {
 datatables(1);
 
 function multiple_pickitems() {
-    //$("#pageloader").fadeIn();
+    $("#pageloader").fadeIn();
     var table = $('#table').DataTable();
     let rows = table.rows('.selected');
     if(rows.data().length > 0 ) {
         table.rows('.selected').every(function(rowIdx, tableLoop, rowLoop){
             var data = this.data();
-            var id = data['Id'];
+            var id = data['id'];
             var PickingWaveItemsRowId = $("#PickingWaveItemsRowId_"+id).val();
             var OrderQTY = $("#OrderQTY_"+id).val();
-            $.ajax({
-                method: "POST",
-                url: "{{ url('admin/picklist/ajax/multiple_pickitems') }}",
-                headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
-                data: {id:id,
-                        PickingWaveItemsRowId: PickingWaveItemsRowId,
-                        OrderQTY: OrderQTY},
-                success: function(message){
-                    setTimeout(function() {   //calls click event after a certain time
+            var qty = $("#ToPickQuantity_"+id).val();
+            var PickedQuantity = $("#PickedQuantity_"+id).val();
+            var ToPickQuantity = $("#ToPickQuantity_"+id).val();
+            console.log(data);
+            if(PickedQuantity!=ToPickQuantity){
+                $.ajax({
+                    method: "POST",
+                    url: "{{ url('admin/picklist/ajax/drop_pickitems') }}",
+                    headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                    data: {id:id,
+                            PickingWaveItemsRowId: PickingWaveItemsRowId,
+                            OrderQTY: OrderQTY,
+                            qty: qty,
+                            PickedQuantity: PickedQuantity,
+                            ToPickQuantity: ToPickQuantity
+                        },
+                    success: function(message){
+                        //if(typeof(message.error) != "undefined" && message.error !== null){
+                            //alert_message(message);
+                        //}
+                        setTimeout(function() {   //calls click event after a certain time
+                            datatables(0);
+                            $("#pageloader").hide();
+                        }, 1000);
+                    }/*,
+                    error: function (error) {
+                        alert('Error!!  Please resubmit data!!');
                         datatables(0);
-                        //$("#pageloader").hide();
-                    }, 1000);
-                }
-            });
-
+                        $("#pageloader").hide();
+                    }*/
+                });
+            }
         });
+
+        setTimeout(function() {   //calls click event after a certain time
+            datatables(0);
+            $("#pageloader").hide();
+        }, 1000);
     }
 }
 
 function pickitems(d) {
-    //$("#pageloader").fadeIn();
+    $("#pageloader").fadeIn();
     var id = $(d).data('id');
     var PickingWaveItemsRowId = $("#PickingWaveItemsRowId_"+id).val();
     var OrderQTY = $("#OrderQTY_"+id).val();
+    var qty = $("#ToPickQuantity_"+id).val();
+    var PickedQuantity = $("#PickedQuantity_"+id).val();
+    var ToPickQuantity = $("#ToPickQuantity_"+id).val();
+    
     $.ajax({
         method: "POST",
-        url: "{{ url('admin/picklist/ajax/multiple_pickitems') }}",
+        url: "{{ url('admin/picklist/ajax/drop_pickitems') }}",
         headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
         data: {id:id,
                 PickingWaveItemsRowId: PickingWaveItemsRowId,
-                OrderQTY: OrderQTY},
+                OrderQTY: OrderQTY,
+                qty: qty,
+                PickedQuantity: PickedQuantity,
+                ToPickQuantity: ToPickQuantity
+            },
         success: function(message){
-            if(typeof(message.error) != "undefined" && message.error !== null){
-                alert_message(message);
-            }
+            alert_message(message);
             setTimeout(function() {   //calls click event after a certain time
                 datatables(0);
                 $("#pageloader").hide();
             }, 1000);
-        }
+        }/*,
+        error: function (error) {
+            alert('Error!!  Please resubmit data!!');
+            datatables(0);
+            $("#pageloader").hide();
+        }*/
     });
 }
 
@@ -309,14 +349,17 @@ function drop_pickitems(d) {
                 ToPickQuantity: ToPickQuantity
             },
         success: function(message){
-            //if(typeof(message.error) != "undefined" && message.error !== null){
-                alert_message(message);
-            //}
+            alert_message(message);
             setTimeout(function() {   //calls click event after a certain time
                 datatables(0);
                 $("#pageloader").hide();
             }, 1000);
-        }
+        }/*,
+        error: function (error) {
+            alert('Error!!  Please resubmit data!!');
+            datatables(0);
+            $("#pageloader").hide();
+        }*/
     });
 }
 

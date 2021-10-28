@@ -114,7 +114,7 @@ class PackOrdersController extends Controller
             $filter_order = '';
             if($PickingWaveId != 0){
                 $PickingWaveOrders = $linnworks->Picking()->GetPickingWave($PickingWaveId);
-
+                //dd($PickingWaveOrders);
                 $filter_order .= '"TextFields":[';
                 $PartialPickedOrderArray=[];
                 foreach($PickingWaveOrders['PickingWaves'] as $record){
@@ -172,13 +172,13 @@ class PackOrdersController extends Controller
                             "ListFields":[
                               '.$check_identifier.'
 
-                              {
+                              /*{
                                  "FieldCode":"GENERAL_INFO_STATUS",
                                  "Name":"Status",
                                  "FieldType":"List",
                                  "Type":0,
                                  "Value":1
-                              }
+                              }*/
                             ],
                             '.$filter_order.'
                         }';

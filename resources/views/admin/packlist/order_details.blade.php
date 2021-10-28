@@ -1,7 +1,7 @@
 @extends('admin.layouts.popup')
 
 @section('content')
-
+<?php //dd($record);?>
 <div class="invoice p-3 mb-3">
     <div class="row">
         <div class="col-12">
@@ -34,8 +34,12 @@
           <div class="mb-1">
           <b>Identifiers:</b> 
           @if(isset($record['GeneralInfo']['Identifiers']) && count($record['GeneralInfo']['Identifiers'])>0)
-              @foreach($record['GeneralInfo']['Identifiers'] as $Identifier) 
-                <span tooltip="{{$Identifier['Name']}}" flow="up" ><img tooltip="{{$Identifier['Name']}}" flow="up" src="https://linn-content.s3-eu-west-1.amazonaws.com/linn-order-identifiers/{{$Identifier['Tag']}}.svg" width="30"></span>
+              @foreach($record['GeneralInfo']['Identifiers'] as $Identifier)
+                @if(isset($Identifier['ImageId']))
+                  <span tooltip="{{$Identifier['Name']}}" flow="up" ><img tooltip="{{$Identifier['Name']}}" flow="up" src="https://linn-content.s3-eu-west-1.amazonaws.com/order-identifiers/b2b9b1d1-504f-45fa-b5b1-c13ffac63d7d/{{$Identifier['ImageId']}}.png" width="30"></span>
+                @else
+                  <span tooltip="{{$Identifier['Name']}}" flow="up" ><img tooltip="{{$Identifier['Name']}}" flow="up" src="https://linn-content.s3-eu-west-1.amazonaws.com/linn-order-identifiers/{{$Identifier['Tag']}}.svg" width="30"></span>
+                @endif
               @endforeach
           @else
               <span tooltip="No Identifiers" flow="up" >No Identifiers</span>
@@ -99,7 +103,8 @@
               <th>Qty</th>
               <th>Image</th>
               <th>SKU</th>
-              <th>Titel&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
+              <th>Barcode</th>
+              <th>Title&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
               <th>Subtotal</th>
             </tr>
             </thead>
@@ -109,6 +114,7 @@
               <td>@if($item['Quantity']==1)<span class="btn btn-success">{{$item['Quantity']}}</span> @else <span class="btn btn-danger">{{$item['Quantity']}}</span> @endif </td>
               <td>@if(isset($item['ImageId']))<img class="mr-3" src="{{env('LINNWORKS_IMG_URL','https://s3-eu-west-1.amazonaws.com/images.linnlive.com/81232bb2fe781fc9e8ff26f6218f7bb6/')}}tumbnail_{{$item['ImageId']}}.jpg" >@else <img class="mr-3" src="{{asset('/public/image/no_image.jpg')}}" style="height: 85px;"> @endif</td>
               <td>{{$item['SKU']}}</td>
+              <td>{{$item['BarcodeNumber']}}</td>
               <td>{{$item['Title']}}</td>
               <td>{{$record['TotalsInfo']['Currency']}} {{round($item['CostIncTax'], 2)}}</td>
             </tr>

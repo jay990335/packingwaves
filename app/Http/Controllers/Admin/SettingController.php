@@ -72,4 +72,75 @@ class SettingController extends Controller
         ]);
     }
 
+    public function GetTemplateOverridesForZone()
+    {
+        $linnworks = Linnworks_API::make([
+                'applicationId' => env('LINNWORKS_APP_ID'),
+                'applicationSecret' => env('LINNWORKS_SECRET'),
+                'token' => auth()->user()->linnworks_token()->token,
+            ], $this->client);
+        $PrintZoneCode = auth()->user()->printer_zone;
+        $GetTemplateOverridesForZone = $linnworks->PrintZone()->GetTemplateOverridesForZone($PrintZoneCode);
+
+        $printers = $linnworks->PrintService()->VP_GetPrinters();
+        return view('admin.setting.template_update_zone', compact('GetTemplateOverridesForZone','printers'));
+    }
+
+    /**
+     * print label Ajax Data
+     *
+     * @return mixed
+     * @throws \Exception
+     */
+    public function UpdateTemplateOverrides(Request $request)
+    {
+        
+        try {
+            $linnworks = Linnworks_API::make([
+                'applicationId' => env('LINNWORKS_APP_ID'),
+                'applicationSecret' => env('LINNWORKS_SECRET'),
+                'token' => auth()->user()->linnworks_token()->token,
+            ], $this->client);
+
+            $PrintZoneCode = $request->PrintZoneCode;
+            $Printer = $request->Printer;
+            
+            $TemplateId = $request->TemplateId;
+            $TemplateName = $request->TemplateName;
+            $TemplateType = $request->TemplateType;
+            $lastSelection = $request->lastSelection;
+            if ($lastSelection!="No override") {
+                $i = explode('\\',$lastSelection);
+                $PrinterDestination = $i[0];
+                $PrinterName = $i[1];
+            }else{
+                $PrinterDestination = "No override";
+                $PrinterName = "No override";
+            }
+            
+            $ToUpdate = array('PrintZoneCode' => $PrintZoneCode,
+                              'Printer' => $Printer,
+                              'PrinterDestination' => $PrinterDestination,
+                              'PrinterName' => $PrinterName,
+                              'TemplateId' => $TemplateId,
+                              'TemplateName' => $TemplateName,
+                              'TemplateType' => $TemplateType,
+                              'lastSelection' => $lastSelection
+            );
+            
+            $UpdateTemplateOverrides = $linnworks->PrintZone()->UpdateTemplateOverrides($ToUpdate); 
+            
+            return response()->json([
+                'success' => 'Successfully Updated'
+            ]);  
+            
+
+        } catch (\Exception $exception) {
+
+            return response()->json([
+                'error' => $exception->getMessage() . ' ' . $exception->getLine()
+            ]);
+        }
+    }
+
 }

@@ -102,19 +102,24 @@ datatables();
 function funChangeStatus(id,status) {
     $("#pageloader").fadeIn();
     $.ajax({
-      url : '{{ route('admin.folder_settings.ajax.change_status') }}',
-      data: {
-        "_token": "{{ csrf_token() }}",
-        "id": id,
-        "status": status
+        url : '{{ route('admin.folder_settings.ajax.change_status') }}',
+        data: {
+            "_token": "{{ csrf_token() }}",
+            "id": id,
+            "status": status
         },
-      type: 'get',
-      dataType: 'json',
-      success: function( result )
-      {
-        datatables();
-        $("#pageloader").hide();
-      }
+        type: 'get',
+        dataType: 'json',
+        success: function( result )
+        {
+            datatables();
+            $("#pageloader").hide();
+        }/*,
+        error: function (error) {
+            alert('Error!!  Please resubmit data!!');
+            datatables();
+            $("#pageloader").hide();
+        }*/
     });
 }
 </script>

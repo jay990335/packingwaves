@@ -81,66 +81,68 @@ class PickingWavesController extends Controller
                 'token' => auth()->user()->linnworks_token()->token,
             ], $this->client);
 
-            $records = $linnworks->Picking()->GetMyPickingWaves(null,$LocationId,'OnlyPickWave');
+            //$records = $linnworks->Picking()->GetMyPickingWaves(null,$LocationId,'All');
+            $records = $linnworks->Picking()->GetAllPickingWaves(null,$LocationId,'All');
             //dd($records);
             $data_arr = array();
 
             foreach($records['PickingWaves'] as $record){
-
-                $PickingWaveId = $record['PickingWaveId']; 
-                /*if($PickingWaveId == 76){
-                    dd($record);
-                }*/
-                
-                if($record['State']=='InProgress'){
-                    $pickingWaveBGClass = 'bg-dark';
-                    $btnBGClass = 'btn-purple';
-                    $pickingWaveState = 'Partial Complete';
-                    $href = route("admin.picklist.pickitemslist",$PickingWaveId);
-                }else{
-                    $pickingWaveBGClass = 'bg-white';
-                    $btnBGClass = 'btn-success';
-                    $pickingWaveState = 'Complete';
-                    $href = route("admin.picklist.pickitemslist",$PickingWaveId);
-                }
-                
-                $Detais= '<a href="'.$href.'"><div class="row ">
-                            <div class="col-12">
-                              <div class="card '.$pickingWaveBGClass.'" style="margin-bottom: 0px;">
-                                <div class="card-header border-bottom-0">
-                                    <div class="container">
-                                        <div class="row">
-                                            <div class="col-4 text-left">
-                                                <span><b>ID: '.$PickingWaveId.'</b></span>
-                                            </div>
-                                            <div class="col-8 text-right">
-                                                <span class="btn btn-rounded '.$btnBGClass.' btn-sm">'.$pickingWaveState.'</span>
+                if($record['EmailAddress']==auth()->user()->linnworks_token()->linnworks_email){
+                    $PickingWaveId = $record['PickingWaveId']; 
+                    /*if($PickingWaveId == 76){
+                        dd($record);
+                    }*/
+                    
+                    if($record['State']=='InProgress'){
+                        $pickingWaveBGClass = 'bg-white';
+                        $btnBGClass = 'btn-purple';
+                        $pickingWaveState = 'Partial Complete';
+                        $href = route("admin.picklist.pickitemslist",$PickingWaveId);
+                    }else{
+                        $pickingWaveBGClass = 'bg-dark';
+                        $btnBGClass = 'btn-success';
+                        $pickingWaveState = 'Complete';
+                        $href = route("admin.picklist.pickitemslist",$PickingWaveId);
+                    }
+                    
+                    $Detais= '<a href="'.$href.'"><div class="row ">
+                                <div class="col-12">
+                                  <div class="card '.$pickingWaveBGClass.'" style="margin-bottom: 0px;">
+                                    <div class="card-header border-bottom-0">
+                                        <div class="container">
+                                            <div class="row">
+                                                <div class="col-4 text-left">
+                                                    <span><b>ID: '.$PickingWaveId.'</b></span>
+                                                </div>
+                                                <div class="col-8 text-right">
+                                                    <span class="btn btn-rounded '.$btnBGClass.' btn-sm">'.$pickingWaveState.'</span>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="card-footer">
-                                  <div class="text-left">
-                                    <span class="btn btn-sm bg-secondary mt-1" tooltip="Orders: '.$record['OrderCount'].'" flow="up">Orders: '.$record['OrderCount'].'</span>
+                                    <div class="card-footer">
+                                      <div class="text-left">
+                                        <span class="btn btn-sm bg-secondary mt-1" tooltip="Orders: '.$record['OrderCount'].'" flow="up">Orders: '.$record['OrderCount'].'</span>
 
-                                    <span class="btn btn-sm bg-secondary mt-1" tooltip="Picked Orders: '.$record['OrdersPicked'].'" flow="up">Picked Orders: '.$record['OrdersPicked'].'</span>
+                                        <span class="btn btn-sm bg-secondary mt-1" tooltip="Picked Orders: '.$record['OrdersPicked'].'" flow="up">Picked Orders: '.$record['OrdersPicked'].'</span>
 
-                                    <span class="btn btn-sm bg-secondary mt-1" tooltip="Items: '.$record['ItemCount'].'" flow="up">Items: '.$record['ItemCount'].'</span>
+                                        <span class="btn btn-sm bg-secondary mt-1" tooltip="Items: '.$record['ItemCount'].'" flow="up">Items: '.$record['ItemCount'].'</span>
 
-                                    <span class="btn btn-sm bg-secondary mt-1" tooltip="Picked Items: '.$record['ItemsPicked'].'" flow="up">Picked Items: '.$record['ItemsPicked'].'</span>
+                                        <span class="btn btn-sm bg-secondary mt-1" tooltip="Picked Items: '.$record['ItemsPicked'].'" flow="up">Picked Items: '.$record['ItemsPicked'].'</span>
 
+                                      </div>
+                                    </div>
                                   </div>
                                 </div>
-                              </div>
-                            </div>
-                          </div></a>';
-                
-                $data_arr[] = array(
-                    "PickingWaveId" => $PickingWaveId,
-                    "pickingWaveState" => $pickingWaveState,
-                    "Detais" => $Detais,
-                    "pickingWaveBGClass" => $pickingWaveBGClass
-                );
+                              </div></a>';
+                    
+                    $data_arr[] = array(
+                        "PickingWaveId" => $PickingWaveId,
+                        "pickingWaveState" => $pickingWaveState,
+                        "Detais" => $Detais,
+                        "pickingWaveBGClass" => $pickingWaveBGClass
+                    );
+                }
             }
 
             $response = array(

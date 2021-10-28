@@ -107,5 +107,9 @@ Route::group([
     Route::get('setting/folders', 'SettingController@folders')->name('setting.folders');
     Route::put('setting/updateFolder', 'SettingController@updateFolder')->name('setting.updateFolder');
 
+    Route::get('setting/GetTemplateOverridesForZone', 'SettingController@GetTemplateOverridesForZone')->name('setting.GetTemplateOverridesForZone');
+    Route::put('setting/UpdateTemplateOverrides', 'SettingController@UpdateTemplateOverrides')->name('setting.UpdateTemplateOverrides');
+    
+
 });
 

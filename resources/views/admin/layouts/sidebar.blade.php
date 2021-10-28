@@ -96,6 +96,13 @@
                                     </li>
 
                                     <li class="nav-item">
+                                        <a href="{{ route('admin.setting.GetTemplateOverridesForZone') }}" class="nav-link {{ Route::is('admin.setting.GetTemplateOverridesForZone') ? 'active' : '' }}" id="popup-modal-buttonUserRole">
+                                            <i class="fas fa-print nav-icon"></i>
+                                            <p>Printer Zone Template</p>
+                                        </a>
+                                    </li>
+
+                                    <li class="nav-item">
                                         <a href="{{ route('admin.profile.location') }}" class="nav-link {{ Route::is('admin.profile.location') ? 'active' : '' }}" id="popup-modal-buttonUserRole">
                                             <i class="fas fa-map-marker-alt nav-icon"></i>
                                             <p>Location</p>
