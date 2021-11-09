@@ -55,7 +55,7 @@
 
                                             $PrinterLocationName = $printer['PrinterLocationName'];
                                             $PrinterName = $printer['PrinterName'];
-                                            $printer_name = implode('\\', array($PrinterLocationName, $PrinterName));
+                                            $printer_name = implode('&#8726;&#8726;', array($PrinterLocationName, $PrinterName));
                                         ?>
                                         @if($printer['Status']=='ONLINE')
                                         <option value="{{ $printer_name }}" 

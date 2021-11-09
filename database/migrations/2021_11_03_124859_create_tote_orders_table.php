@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateTotesTable extends Migration
+class CreateToteOrdersTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,12 +13,10 @@ class CreateTotesTable extends Migration
      */
     public function up()
     {
-        Schema::create('totes', function (Blueprint $table) {
+        Schema::create('tote_orders', function (Blueprint $table) {
             $table->id();
-            $table->integer('totes_id')->length(11);
-            $table->string('name');
-            $table->integer('PickingWaveId')->length(11);
-            $table->enum('status', ['Yes', 'No'])->default('Yes');
+            $table->string('order_id');
+            $table->unsignedBigInteger('totes_id')->index();
             $table->unsignedBigInteger('created_by')->index();
             $table->unsignedBigInteger('updated_by')->index();
             $table->timestamps();
@@ -35,11 +33,11 @@ class CreateTotesTable extends Migration
      */
     public function down()
     {
-        Schema::table('totes', function (Blueprint $table) {
+        Schema::table('tote_orders', function (Blueprint $table) {
+            $table->dropForeign(['totes_id']);
             $table->dropForeign(['created_by']);
             $table->dropForeign(['updated_by']);
         });
-
-        Schema::dropIfExists('totes');
+        Schema::dropIfExists('tote_orders');
     }
 }

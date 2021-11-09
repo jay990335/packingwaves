@@ -10,6 +10,7 @@ use App\Linnworks;
 use App\printButtons;
 use App\folderSettings;
 use App\shipmentSettings;
+use App\Totes;
 
 use App\Http\Controllers\Controller;
 use App\Traits\UploadTrait;
@@ -82,7 +83,13 @@ class PickItemsController extends Controller
     {
         $PickingWaveId = $request->PickingWaveId;
         $user_id = auth()->user()->id;
-        return view('admin.picklist.index', compact('PickingWaveId')); 
+        $Totes = Totes::where([
+                               'status' => 'Yes',
+                               'created_by' => $user_id,
+                               'PickingWaveId' => $PickingWaveId
+                        ])->first();
+        //dd($Totes);
+        return view('admin.picklist.index', compact('PickingWaveId','Totes')); 
     }
 
     /**
@@ -340,6 +347,19 @@ class PickItemsController extends Controller
     {
         
         try {
+            $user_id = auth()->user()->id;
+            $Totes = Totes::where([
+                               'status' => 'Yes',
+                               'created_by' => $user_id,
+                               'PickingWaveId' => $request->PickingWaveId
+                        ])->first();
+
+            if(isset($Totes->totes_id) && $Totes->totes_id>0){
+                $ToteId = $Totes->totes_id;
+            }else{
+                $ToteId = null;
+            }
+
             $linnworks = Linnworks_API::make([
                 'applicationId' => env('LINNWORKS_APP_ID'),
                 'applicationSecret' => env('LINNWORKS_SECRET'),
@@ -355,7 +375,7 @@ class PickItemsController extends Controller
             $i=0;
             foreach ($PickingWaveItemsRowIds as $PickingWaveItemsRowId) {
                 $OrderQTY = $OrderQTYs[$i];
-                $deltas = '[{"PickingWaveItemsRowId":'.$PickingWaveItemsRowId.',"ToteId":null,"TrayTag":null,"PickedQuantityDelta":'.$OrderQTY.'}]';
+                $deltas = '[{"PickingWaveItemsRowId":'.$PickingWaveItemsRowId.',"ToteId":'.$ToteId.',"TrayTag":null,"PickedQuantityDelta":'.$OrderQTY.'}]';
                 $PickingWaveOrders = $linnworks->Picking()->UpdatePickedItemDelta($deltas);
                 $i++;
             }
@@ -385,6 +405,19 @@ class PickItemsController extends Controller
     {
         
         try {
+            $user_id = auth()->user()->id;
+            $Totes = Totes::where([
+                               'status' => 'Yes',
+                               'created_by' => $user_id,
+                               'PickingWaveId' => $request->PickingWaveId
+                        ])->first();
+
+            if(isset($Totes->totes_id) && $Totes->totes_id>0){
+                $ToteId = $Totes->totes_id;
+            }else{
+                $ToteId = null;
+            }
+            
             $linnworks = Linnworks_API::make([
                 'applicationId' => env('LINNWORKS_APP_ID'),
                 'applicationSecret' => env('LINNWORKS_SECRET'),
@@ -410,7 +443,7 @@ class PickItemsController extends Controller
                         $OrderQTY = $qty - $PickedQuantity;
                     }
                     
-                    $deltas = '[{"PickingWaveItemsRowId":'.$PickingWaveItemsRowId.',"ToteId":null,"TrayTag":null,"PickedQuantityDelta":'.$OrderQTY.'}]';
+                    $deltas = '[{"PickingWaveItemsRowId":'.$PickingWaveItemsRowId.',"ToteId":'.$ToteId.',"TrayTag":null,"PickedQuantityDelta":'.$OrderQTY.'}]';
                     $PickingWaveOrders = $linnworks->Picking()->UpdatePickedItemDelta($deltas);  
                 }
                 $i++;

@@ -2,17 +2,10 @@
 
 namespace App;
 
-use Spatie\Permission\Traits\HasRoles;
-use Illuminate\Notifications\Notifiable;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use App\Image;
-use Illuminate\Support\Facades\Storage;
-use Laravel\Passport\HasApiTokens;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Totes extends Model
+class toteOrders extends Model
 {
     use HasFactory;
 
@@ -24,7 +17,7 @@ class Totes extends Model
      * @var array
      */
     protected $fillable = [
-        'totes_id','name', 'PickingWaveId', 'status', 'created_at', 'updated_at', 'created_by', 'updated_by'
+        'totes_id','order_id', 'created_at', 'updated_at', 'created_by', 'updated_by'
     ];
 
     /**
@@ -39,13 +32,5 @@ class Totes extends Model
      */
     public function editor(){
         return $this->belongsTo(User::class,'updated_by');
-    }
-
-    /**
-     * Get the comments for the blog post.
-     */
-    public function orders()
-    {
-        return $this->hasMany(toteOrders::class);
     }
 }

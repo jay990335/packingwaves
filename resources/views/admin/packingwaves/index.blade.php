@@ -28,10 +28,13 @@
                 </div>
                 <!-- /.card-header -->
                 <div class="card-body">
+                    @if($PickingWavesCount>0)
                     <div class="col-md-12 text-center mt-3">
-                        <!-- Button Code Here --> 
+                        <div class="alert alert-dark mx-3 mt-2" role="alert" id="Packingwaves" onclick="hide_show(0)">
+                          Packingwaves
+                        </div>
                     </div>
-                    <div class="table-responsive list-table-wrapper">
+                    <div class="table-responsive list-table-wrapper Packingwaves" style="display: none;">
                         <table class="table table-hover dataTable no-footer" id="table" width="100%">
                             <thead style="display: none;">
                                 <tr>
@@ -41,7 +44,25 @@
                             <tbody></tbody>
                         </table>
                     </div>
-                    
+                    @endif
+
+                    @if(count($Totes)>0)
+                    <div class="col-md-12 text-center mt-3">
+                        <div class="alert alert-dark mx-3 mt-2" role="alert" id="Totes" onclick="hide_show(1)">
+                          Totes
+                        </div>
+                    </div>
+                    <div class="table-responsive list-table-wrapper Totes" style="display: none;">
+                        <table class="table table-hover dataTable no-footer" id="table_totes" width="100%">
+                            <thead style="display: none;">
+                                <tr>
+                                    <th>Details</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    @endif
                 </div>
                 <!-- /.card-body -->
             </div>
@@ -81,11 +102,60 @@ function datatables() {
     });
 }
 
+function datatables_totes() {
+    var table = $('#table_totes').DataTable({
+        dom: 'RBfrtip',
+        buttons: [],
+        select: true,
+        
+        aaSorting     : [[0, 'asc']],
+        iDisplayLength: 15,
+        stateSave     : true,
+        responsive    : true,
+        fixedHeader   : true,
+        processing    : true,
+        serverSide    : true,
+        "bDestroy"    : true,
+        searching     : false, 
+        paging        : false, 
+        info          : false,
+        pagingType    : "full_numbers",
+        ajax          : {
+            url     : '{{ url('admin/packingwaves/ajax/data_totes') }}',
+            dataType: 'json'
+        },
+        columns       : [
+            {data: 'Detais', name: 'Detais'},
+            
+        ],
+    });
+}
+
 function pickingAlert() {
     Swal.fire({ icon: 'error',  title: 'Oops...', text: 'Picking list not completed!'})
 }
 
 datatables();
+datatables_totes();
+
+function hide_show(i) {
+    if(i==0){
+        $(".Packingwaves").toggle(); 
+        $(".Totes").hide();
+        $("#Packingwaves").removeClass('alert-dark');
+        $("#Packingwaves").addClass('alert-success');
+        $("#Totes").removeClass('alert-success');
+        $("#Totes").addClass('alert-dark');
+    }else{
+        $("#Totes").removeClass('alert-dark');
+        $("#Totes").addClass('alert-success');
+        $("#Packingwaves").removeClass('alert-success');
+        $("#Packingwaves").addClass('alert-dark');
+        $(".Packingwaves").hide(); 
+        $(".Totes").toggle();
+    }
+}
+hide_show(0);
 </script>
 <style type="text/css">
     .dt-buttons{

@@ -8,6 +8,7 @@ use App\Company;
 use App\Image;
 use App\Linnworks;
 use App\printButtons;
+use App\Totes;
 
 use App\Http\Controllers\Controller;
 use App\Traits\UploadTrait;
@@ -56,7 +57,27 @@ class PackingWavesController extends Controller
      */
     public function index()
     {
-        return view('admin.packingwaves.index');
+        $user_id = auth()->user()->id;
+        $Totes = Totes::where([
+                               'created_by' => $user_id
+                        ])->get();
+        //dd($Totes);
+
+        $LocationId = auth()->user()->location;
+        $linnworks = Linnworks_API::make([
+                'applicationId' => env('LINNWORKS_APP_ID'),
+                'applicationSecret' => env('LINNWORKS_SECRET'),
+                'token' => auth()->user()->linnworks_token()->token,
+            ], $this->client);
+        $records = $linnworks->Picking()->GetAllPickingWaves(null,$LocationId,'All');
+
+        $PickingWavesCount = 0;
+        foreach($records['PickingWaves'] as $record){
+            if($record['EmailAddress']==auth()->user()->linnworks_token()->linnworks_email){
+                $PickingWavesCount++;
+            }
+        }
+        return view('admin.packingwaves.index', compact('Totes','PickingWavesCount'));
     }
 
     /**
@@ -223,6 +244,195 @@ class PackingWavesController extends Controller
                     );
                     $iTotalRecords++;
                 }
+            }
+
+            $response = array(
+                "draw" => intval($draw),
+                "iTotalRecords" => $iTotalRecords,
+                "iTotalDisplayRecords" => $iTotalRecords,
+                "aaData" => $data_arr
+            );
+
+            return json_encode($response);
+        }
+    }
+
+    /**
+     * Datatables Ajax Data
+     *
+     * @return mixed
+     * @throws \Exception
+     */
+    public function datatables_totes(Request $request)
+    {
+
+        if ($request->ajax() == true) {
+            $user_id = auth()->user()->id;
+            $LocationId = auth()->user()->location;
+            $draw = $request->get('draw');
+            $page = ($request->get("start")/$request->get("length"))+1;
+            $start = $request->get("start");
+            $rowperpage = $request->get("length"); // Rows display per page
+            $linnworks = Linnworks_API::make([
+                'applicationId' => env('LINNWORKS_APP_ID'),
+                'applicationSecret' => env('LINNWORKS_SECRET'),
+                'token' => auth()->user()->linnworks_token()->token,
+            ], $this->client);
+
+            $Totes = Totes::where([
+                               'status' => 'Yes',
+                               'created_by' => $user_id
+                        ])->get();
+            $records = $linnworks->Picking()->GetAllPickingWaves(null,$LocationId,'All');
+            
+            $iTotalRecords = 0;
+            foreach ($Totes as $Tote) {
+                $ToteId = $Tote->totes_id;
+                $ToteName = $Tote->name;
+                $orders_not_printed_count = 0;
+                $totalItemQTY = 0;
+                $ordercount = 0;
+                $filter = '';
+                $picked_order = 0;
+                foreach ($records['PickingWaves'] as $record) {
+                    if($record['EmailAddress']==auth()->user()->linnworks_token()->linnworks_email){
+                        $PickingWaveId = $record['PickingWaveId'];
+                        $filter = '{
+                            "BooleanFields":[
+                              {
+                                 "FieldCode":"GENERAL_INFO_LOCKED",
+                                 "Name":"Locked",
+                                 "FieldType":"Boolean",
+                                 "Value":"false"
+                              },
+                              {
+                                 "FieldCode":"GENERAL_INFO_PARKED",
+                                 "Name":"Parked",
+                                 "FieldType":"Boolean",
+                                 "Value":"false"
+                              }
+                           ],
+                           "ListFields":[
+                              /*{
+                                 "FieldCode":"GENERAL_INFO_IDENTIFIER",
+                                 "Name":"Identifiers",
+                                 "FieldType":"List",
+                                 "Value":"Pickwave Complete",
+                                 "Type":0
+                              },*/
+
+                              {
+                                 "FieldCode":"GENERAL_INFO_STATUS",
+                                 "Name":"Status",
+                                 "FieldType":"List",
+                                 "Type":0,
+                                 "Value":1
+                              }
+                            ],
+                           "TextFields":[';
+                                foreach ($record['Orders'] as $Order) {
+                                    $totes_item_count = 0;
+                                    foreach ($Order['Items'] as $Item) {
+
+                                        if(isset($Item['Totes'][0]['ToteId']) && $Item['Totes'][0]['ToteId']==$ToteId){
+                                            $totes_item_count++;
+                                            $totalItemQTY = $totalItemQTY + $Item['Totes'][0]['PickedQuantity'];
+                                        }
+                                    }
+
+                                    if($totes_item_count>0){
+                                        $ordercount++;
+                                        if($Order['PickState']=='Picked' || $Order['PickState']=='PartialPicked'){
+                                            $picked_order++;
+                                        }
+                                        $filter .= '{
+                                            "FieldCode":"GENERAL_INFO_ORDER_ID",
+                                            "Name":"Order Id",
+                                            "FieldType":"Text",
+                                            "Type":0,
+                                            "Text":"'.$Order['OrderId'].'"
+                                        },';
+                                    }
+
+                                    
+                                }
+                            $filter .= '],}';
+
+                        if($ordercount>0){
+                            $orders_pickwave_complete = $linnworks->Orders()->getOpenOrders('',100,$page,$filter,'[]','');
+                        
+                            foreach ($orders_pickwave_complete['Data'] as $order_pickwave_complete) {
+                                if($order_pickwave_complete['GeneralInfo']['LabelPrinted']==false){
+                                    $orders_not_printed_count++;
+                                }
+                            }
+                        }    
+                        
+                        
+                    }
+                }
+
+                if($picked_order==$ordercount && $orders_not_printed_count==0){
+                    $pickingWaveBGClass = 'bg-dark';
+                    $btnBGClass = 'btn-success';
+                    $pickingWaveState = 'Complete';
+                    $href = route("admin.packlist.totesorderslist",$ToteId);
+                }elseif($orders_not_printed_count!=0 || $picked_order!=$ordercount){
+                    $pickingWaveBGClass = 'bg-white';
+                    $btnBGClass = 'btn-purple';
+                    $pickingWaveState = 'Partial Complete';
+                    $href = route("admin.packlist.totesorderslist",$ToteId);
+                }else{
+                    $pickingWaveBGClass = 'bg-danger';
+                    $btnBGClass = 'btn-warning';
+                    $pickingWaveState = 'In Picklist';
+                    $href = 'javascript:pickingAlert();';
+                    //$href = route("admin.packlist.totesorderslist",$ToteId);
+                }
+
+                $picked_order_html = '';
+                if($picked_order!=0){
+                    $picked_order_html .= '<span class="btn btn-sm bg-secondary mt-1" tooltip="Picked Orders: '.$picked_order.'" flow="up">Picked Orders: '.$picked_order.'</span>';                 
+                }
+                
+                $Detais= '<a href="'.$href.'"><div class="row ">
+                            <div class="col-12">
+                              <div class="card '.$pickingWaveBGClass.'" style="margin-bottom: 0px;">
+                                <div class="card-header border-bottom-0">
+                                    <div class="container">
+                                        <div class="row">
+                                            <div class="col-4 text-left">
+                                                <span><b>Totes: '.$ToteName.'</b></span>
+                                            </div>
+                                            <div class="col-8 text-right">
+                                                <span class="btn btn-rounded '.$btnBGClass.' btn-sm">'.$pickingWaveState.'</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-footer">
+                                  <div class="text-left">
+                                    <span class="btn btn-sm bg-secondary mt-1" tooltip="Orders: '.$ordercount.'" flow="up">Orders: '.$ordercount.'</span>
+
+                                    <span class="btn btn-sm bg-secondary mt-1" tooltip="Items: '.$totalItemQTY.'" flow="up">Items: '.$totalItemQTY.'</span>
+                                    
+                                    <span class="btn btn-sm bg-secondary mt-1" tooltip="Picked Orders: '.$picked_order.'" flow="up">Picked Orders: '.$picked_order.'</span>
+
+                                    <span class="btn btn-sm bg-secondary mt-1" tooltip="Printed Orders: '.($ordercount - $orders_not_printed_count).'" flow="up">Printed Orders: '.($ordercount - $orders_not_printed_count).'</span>
+
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div></a>';
+                
+                $data_arr[] = array(
+                    "ToteId" => $ToteId,
+                    "pickingWaveState" => $pickingWaveState,
+                    "Detais" => $Detais,
+                    "pickingWaveBGClass" => $pickingWaveBGClass
+                );
+                $iTotalRecords++;
             }
 
             $response = array(

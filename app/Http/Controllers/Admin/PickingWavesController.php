@@ -87,7 +87,7 @@ class PickingWavesController extends Controller
             $data_arr = array();
 
             foreach($records['PickingWaves'] as $record){
-                if($record['EmailAddress']==auth()->user()->linnworks_token()->linnworks_email){
+                if(isset($record['EmailAddress']) && $record['EmailAddress']==auth()->user()->linnworks_token()->linnworks_email){
                     $PickingWaveId = $record['PickingWaveId']; 
                     /*if($PickingWaveId == 76){
                         dd($record);

@@ -48,10 +48,13 @@ Route::group([
     // packingwaves Routes
     Route::resource('packingwaves', 'PackingWavesController');
     Route::get('packingwaves/ajax/data', 'PackingWavesController@datatables'); // For Datatables
+    Route::get('packingwaves/ajax/data_totes', 'PackingWavesController@datatables_totes'); // For Datatables
+
 
     // Packlist Routes
     Route::resource('packlist', 'PackOrdersController');
     Route::get('packlist/ajax/data', 'PackOrdersController@datatables'); // For Datatables
+    Route::get('packlist/ajax/data_totes', 'PackOrdersController@datatables_totes'); // For Datatables
     Route::post('packlist/ajax/printlabel', 'PackOrdersController@printlabel');
     Route::post('packlist/ajax/multiple_orders_printlabels', 'PackOrdersController@multiple_orders_printlabels');
     Route::get('packlist/order_details/{OrderId}', 'PackOrdersController@order_details')->name('packlist.order_details'); 
@@ -59,6 +62,7 @@ Route::group([
     Route::post('packlist/ajax/cancelOrderShippingLabel', 'PackOrdersController@cancelOrderShippingLabel');
     Route::post('packlist/ajax/assignFolder', 'PackOrdersController@assignFolder');
     Route::get('packlist/packorderslist/{PickingWaveId}', 'PackOrdersController@packorderslist')->name('packlist.packorderslist'); 
+    Route::get('packlist/totesorderslist/{TotesId}', 'PackOrdersController@totesorderslist')->name('packlist.totesorderslist'); 
     Route::post('packlist/ajax/packingwavesCompletedNotificationSend', 'PackOrdersController@packingwavesCompletedNotificationSend')->name('packlist.ajax.packingwavesCompletedNotificationSend');
     
 
@@ -110,6 +114,9 @@ Route::group([
     Route::get('setting/GetTemplateOverridesForZone', 'SettingController@GetTemplateOverridesForZone')->name('setting.GetTemplateOverridesForZone');
     Route::put('setting/UpdateTemplateOverrides', 'SettingController@UpdateTemplateOverrides')->name('setting.UpdateTemplateOverrides');
     
+    Route::resource('totes', 'TotesController');
+    Route::post('totes/create_totes', 'TotesController@create_totes')->name('totes.create_totes'); 
+    Route::post('totes/close_totes', 'TotesController@close_totes')->name('totes.close_totes'); 
 
 });
 

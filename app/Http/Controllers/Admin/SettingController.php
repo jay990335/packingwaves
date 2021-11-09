@@ -110,7 +110,7 @@ class SettingController extends Controller
             $TemplateType = $request->TemplateType;
             $lastSelection = $request->lastSelection;
             if ($lastSelection!="No override") {
-                $i = explode('\\',$lastSelection);
+                $i = explode('&#8726;&#8726;',$lastSelection);
                 $PrinterDestination = $i[0];
                 $PrinterName = $i[1];
             }else{
@@ -119,16 +119,16 @@ class SettingController extends Controller
             }
             
             $ToUpdate = array('PrintZoneCode' => $PrintZoneCode,
-                              'Printer' => $Printer,
+                              //'Printer' => $Printer,
                               'PrinterDestination' => $PrinterDestination,
                               'PrinterName' => $PrinterName,
                               'TemplateId' => $TemplateId,
                               'TemplateName' => $TemplateName,
                               'TemplateType' => $TemplateType,
-                              'lastSelection' => $lastSelection
+                              //'lastSelection' => $lastSelection
             );
-            
-            $UpdateTemplateOverrides = $linnworks->PrintZone()->UpdateTemplateOverrides($ToUpdate); 
+            $ToUpdateArray[] = json_encode($ToUpdate);
+            $UpdateTemplateOverrides = $linnworks->PrintZone()->UpdateTemplateOverrides($ToUpdateArray); 
             
             return response()->json([
                 'success' => 'Successfully Updated'

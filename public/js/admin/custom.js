@@ -50,6 +50,7 @@ $(document).ready(function () {
     $(document).on('submit','#popup-form',function(e){
         e.preventDefault();
         var url = $(this).attr('action');
+        var pageload = $('input[name=pageloader]').val();
         $("#pageloader").fadeIn();
         $.ajax({
             method: "POST",
@@ -60,6 +61,9 @@ $(document).ready(function () {
                 $("#popup-modal").modal('hide');
                 alert_message(message);
                 setTimeout(function() {   //calls click event after a certain time
+                    if(pageload==1){
+                        window.location.reload();
+                    }
                     datatables();
                     $("#pageloader").hide();
                 }, 1000);

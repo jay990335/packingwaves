@@ -15,51 +15,38 @@
                         <div class="row">
                             <div class="col-8 page-titles text-left" id="breadcrumbs">
                                 <h3 class="text-themecolor" style="padding:0px;">
-                                    @if($PickingWaveId==0) 
-                                        Pick List 
+                                    @if($TotesId==0) 
+                                        Totes Id 
                                     @else 
-                                        Pick List Id: {{$PickingWaveId}}
+                                        Totes Id: {{$TotesId}}
                                     @endif
                                 </h3>
                                 <!--crumbs-->
                                 <ol class="breadcrumb float-left">
                                     <li class="breadcrumb-item">App</li>    
-                                    <li class="breadcrumb-item  active active-bread-crumb ">Pick List</li>
+                                    <li class="breadcrumb-item  active active-bread-crumb ">Totes</li>
                                 </ol>
                                 <!--crumbs-->
                             </div>
-
-                            <div class="col text-right">
-                            @if($PickingWaveId!=0)
-                            <a href="{{ url('admin/pickingwaves') }}" class="btn btn-primary btn-sm mt-1">Back</a>
+                            @if($TotesId!=0)
+                            <div class="col text-right"><a href="{{ url('admin/packingwaves') }}" class="btn btn-primary btn-sm mt-1">Back</a></div>
                             @endif
-                            </div>
                         </div>
                     </div>
                 </div>
-
-                @if(isset($Totes->totes_id) && $Totes->totes_id > 0)
-                <div class="alert alert-success mx-3 mt-2" role="alert">
-                  Totes : {{$Totes->name}}
-                  <button type="button" class="close" data-dismiss="modal" onclick="close_totes()">&times;</button>
-                </div>
-                <input type="hidden" name="ToteId" id="ToteId" value="{{$Totes->totes_id}}">
-                @else
-                <input type="hidden" name="ToteId" id="ToteId" value="">
-                @endif
                 <!-- /.card-header -->
                 <div class="card-body">
                     <div class="col-md-12 text-center mt-3" id="sticky-anchor"></div>
                     <div class="col-md-12 text-center mt-3" id="sticky">
                         <button type="button" class="btn btn-primary btn-sm mt-1" id="select_all">Select All</button>
                         <button type="button" class="btn btn-secondary btn-sm mt-1" id="unselect_all">Unselect All</button>
-                        <button type="button" class="btn btn-secondary btn-sm mt-1" id="pick" onclick="multiple_pickitems()">Pick</button>
-                        <button type="button" class="btn btn-primary btn-sm mt-1" id="search_btn" tooltip="Search By" flow="up" data-toggle="modal" data-target="#popup_modal_search"><i class="fas fa-search"></i></button>
-                        @if(!isset($Totes->totes_id) || $Totes->totes_id == 0)
-                        <a href="{{ route('admin.totes.index') }}?PickingWaveId={{$PickingWaveId}}" class="btn btn-primary btn-sm mt-1" id="popup-modal-button">
-                            Open Totes
-                        </a>
+                        @if(isset(auth()->user()->printer_zone))
+                            @foreach ($print_buttons as $print_button)
+                            <a href="javascript:void(0)" onclick="multiple_orders_printlabels({{$print_button->templateID}},'{{$print_button->templateType}}')"  class="{{$print_button->style}} btn-sm mt-1"><span tooltip="{{$print_button->name}}" flow="up"><i class="fas fa-print"></i> {{$print_button->name}}</span></a>
+                            @endforeach
                         @endif
+
+                        <button type="button" class="btn btn-primary btn-sm mt-1" id="search_btn" tooltip="Search By" flow="up" data-toggle="modal" data-target="#popup_modal_search"><i class="fas fa-search"></i></button>
                         <!-- .model-popup [START] -->
                         <div class="modal fade text-center" id="popup_modal_search" tabindex="-1" role="dialog">
                             <div class="modal-dialog modal-sm">
@@ -173,7 +160,6 @@
 
                         
                     </div>
-
                     <div class="table-responsive list-table-wrapper">
                         <table class="table table-hover dataTable no-footer" id="table" width="100%">
                             <thead style="display: none;">
@@ -215,21 +201,15 @@ function datatables(i) {
         "lengthMenu": [[10, 25, 50, 100], [10, 25, 50, 100]],
         pagingType    : "full_numbers",
         ajax          : {
-            url     : '{{ url('admin/picklist/ajax/data') }}',
+            url     : '{{ url('admin/packlist/ajax/data_totes') }}',
             dataType: 'json',
             data: {
-                "PickingWaveId": {{$PickingWaveId}},
+                "TotesId": {{$TotesId}},
                 "sortby_field": sortby_field,
                 "sortby_type": sortby_type,
                 "search_field": search_field,
                 "search_value": search_value
             },
-            error: function (xhr, error, code)
-            {
-                console.log(xhr);
-                console.log(code);
-                datatables(0);
-            }     
         },
         columns       : [
             {data: 'ItemDetais', name: 'ItemDetais'},
@@ -248,148 +228,182 @@ function datatables(i) {
     if(i==1){
       table.page('first').draw('page');  
     }
-    
 }
 
 $('#table tbody').on( 'click', 'tr', function () {
     $(this).toggleClass('selected');
 });
-
-datatables(1);
-
-function multiple_pickitems() {
-    $("#pageloader").fadeIn();
+function printLabel(d) {
+    var OrderId= $(d).data('orderid');
+    var numorderid= $(d).data('numorderid');
+    var LabelPrinted= $(d).data('labelprinted');
+    var templateID= $(d).data('templateid');
+    var templateType= $(d).data('templatetype');
+    var overweight= $(d).data('overweight');
     var table = $('#table').DataTable();
-    let rows = table.rows('.selected');
-    if(rows.data().length > 0 ) {
-        table.rows('.selected').every(function(rowIdx, tableLoop, rowLoop){
-            var data = this.data();
-            var id = data['id'];
-            var PickingWaveItemsRowId = $("#PickingWaveItemsRowId_"+id).val();
-            var OrderQTY = $("#OrderQTY_"+id).val();
-            var qty = $("#ToPickQuantity_"+id).val();
-            var PickedQuantity = $("#PickedQuantity_"+id).val();
-            var ToPickQuantity = $("#ToPickQuantity_"+id).val();
-            var ToteId = $("#ToteId").val();
-            var PickingWaveId = {{$PickingWaveId}};
 
-            console.log(data);
-            if(PickedQuantity!=ToPickQuantity){
-                $.ajax({
-                    method: "POST",
-                    url: "{{ url('admin/picklist/ajax/drop_pickitems') }}",
-                    headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
-                    data: {id:id,
-                            PickingWaveItemsRowId: PickingWaveItemsRowId,
-                            OrderQTY: OrderQTY,
-                            qty: qty,
-                            PickedQuantity: PickedQuantity,
-                            ToPickQuantity: ToPickQuantity,
-                            ToteId: ToteId,
-                            PickingWaveId:PickingWaveId,
-                        },
-                    success: function(message){
-                        //if(typeof(message.error) != "undefined" && message.error !== null){
-                            //alert_message(message);
-                        //}
-                        setTimeout(function() {   //calls click event after a certain time
-                            datatables(0);
-                            $("#pageloader").hide();
-                        }, 1000);
-                    }/*,
-                    error: function (error) {
-                        alert('Error!!  Please resubmit data!!');
-                        datatables(0);
-                        $("#pageloader").hide();
-                    }*/
-                });
+    var successPrint = 0;
+    console.log(table.row().data());
+    if(LabelPrinted=="Label Printed"){
+        swal({
+            title: "Warning",
+            text: "This label already printed, So are you sure want to reprint it?",
+            type: "warning",
+            showCancelButton: !0,
+            confirmButtonText: "Yes, print it!",
+            cancelButtonText: "No, cancel!",
+            reverseButtons: !0
+        }).then(function (r) {
+            if (r.value === true) {
+                if(overweight==1){
+                    
+                   swal({
+                        title: "Warning",
+                        text: "Order #"+numorderid+" is overwight international shipping, So are you sure want to print it?",
+                        type: "warning",
+                        showCancelButton: !0,
+                        confirmButtonText: "Yes, print it!",
+                        cancelButtonText: "No, cancel!",
+                        reverseButtons: !0
+                    }).then(function (r) {
+                        if (r.value === true) {
+                            printLabelAjex(OrderId,templateID,templateType);
+                        } else {
+                            r.dismiss;
+                        }
+                    }, function (dismiss) {
+                        return false;
+                    }) 
+                }else{
+                    printLabelAjex(OrderId,templateID,templateType);
+                }
+                    
+            } else {
+                r.dismiss;
             }
-        });
-
-        setTimeout(function() {   //calls click event after a certain time
-            datatables(0);
-            $("#pageloader").hide();
-        }, 1000);
+        }, function (dismiss) {
+            return false;
+        })
+    }else{
+        if(overweight==1){
+            swal({
+                title: "Warning",
+                text: "Order #"+numorderid+" is overwight international shipping, So are you sure want to print it?",
+                type: "warning",
+                showCancelButton: !0,
+                confirmButtonText: "Yes, print it!",
+                cancelButtonText: "No, cancel!",
+                reverseButtons: !0
+            }).then(function (r) {
+                if (r.value === true) {
+                    printLabelAjex(OrderId,templateID,templateType);
+                } else {
+                    r.dismiss;
+                }
+            }, function (dismiss) {
+                return false;
+            }) 
+        }else{
+            printLabelAjex(OrderId,templateID,templateType);
+        }
     }
 }
 
-function pickitems(d) {
+function printLabelAjex(OrderId,templateID,templateType) {
     $("#pageloader").fadeIn();
-    var id = $(d).data('id');
-    var PickingWaveItemsRowId = $("#PickingWaveItemsRowId_"+id).val();
-    var OrderQTY = $("#OrderQTY_"+id).val();
-    var qty = $("#ToPickQuantity_"+id).val();
-    var PickedQuantity = $("#PickedQuantity_"+id).val();
-    var ToPickQuantity = $("#ToPickQuantity_"+id).val();
-    var ToteId = $("#ToteId").val();
-    var PickingWaveId = {{$PickingWaveId}};
-
     $.ajax({
         method: "POST",
-        url: "{{ url('admin/picklist/ajax/drop_pickitems') }}",
+        url: "{{ url('admin/packlist/ajax/printlabel') }}",
         headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
-        data: {id:id,
-                PickingWaveItemsRowId: PickingWaveItemsRowId,
-                OrderQTY: OrderQTY,
-                qty: qty,
-                PickedQuantity: PickedQuantity,
-                ToPickQuantity: ToPickQuantity,
-                ToteId: ToteId,
-                PickingWaveId:PickingWaveId,
+        data: { OrderId: OrderId,
+                templateID: templateID,
+                templateType: templateType,
             },
         success: function(message){
-            alert_message(message);
+            if(typeof(message.error) != "undefined" && message.error !== null){
+                alert_message(message);
+            }
             setTimeout(function() {   //calls click event after a certain time
                 datatables(0);
                 $("#pageloader").hide();
             }, 1000);
-        }/*,
-        error: function (error) {
-            alert('Error!!  Please resubmit data!!');
-            datatables(0);
-            $("#pageloader").hide();
-        }*/
+        }
     });
 }
 
-function drop_pickitems(d) {
-    var id = $(d).data('id');
-    var PickingWaveItemsRowId = $("#PickingWaveItemsRowId_"+id).val();
-    var OrderQTY = $("#OrderQTY_"+id).val();
-    var qty = $(d).val();
-    var PickedQuantity = $("#PickedQuantity_"+id).val();
-    var ToPickQuantity = $("#ToPickQuantity_"+id).val();
-    var ToteId = $("#ToteId").val();
-    var PickingWaveId = {{$PickingWaveId}};
+function multiple_orders_printlabels(templateID,templateType) {
+    var table = $('#table').DataTable();
+    let rows = table.rows('.selected');
+    if(rows.data().length > 0 ) {
+        var OrderIds=[];
+        var z=1;
+        table.rows('.selected').every(function(rowIdx, tableLoop, rowLoop){
+            var data = this.data();
+            var overweight = data['overweight'];
+            var OrderId = data['OrderId'];
+            var numorderid = data['numorderid']
+            if(OrderId!=''){
+                if(overweight==1){
+                   swal({
+                        title: "Warning",
+                        text: "Order #"+numorderid+" is overwight international shipping, So are you sure want to print it?",
+                        type: "warning",
+                        showCancelButton: !0,
+                        confirmButtonText: "Yes, print it!",
+                        cancelButtonText: "No, cancel!",
+                        reverseButtons: !0
+                    }).then(function (r) {
+                        if (r.value === true) {
+                            OrderIds.push(OrderId);
+                            if(rows.data().length==z){
+                               multiple_orders_printlabels_ajax(OrderIds,templateID,templateType);
+                            }
+                            z++;
+                        } else {
+                            if(rows.data().length==z){
+                               multiple_orders_printlabels_ajax(OrderIds,templateID,templateType); 
+                            }
+                            z++;
+                            r.dismiss;
+                        } 
+                    }) 
+                }else{
+                    OrderIds.push(OrderId);
+                    if(rows.data().length==z){
+                       multiple_orders_printlabels_ajax(OrderIds,templateID,templateType);
+                    }
+                    z++;
+                }   
+            }
 
-    //alert(qty);
+        });
+    }
+}
+
+function multiple_orders_printlabels_ajax(OrderIds,templateID,templateType) {
+    $("#pageloader").fadeIn();
+    console.log(OrderIds);
     $.ajax({
         method: "POST",
-        url: "{{ url('admin/picklist/ajax/drop_pickitems') }}",
+        url: "{{ url('admin/packlist/ajax/multiple_orders_printlabels') }}",
         headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
-        data: {id:id,
-                PickingWaveItemsRowId: PickingWaveItemsRowId,
-                OrderQTY: OrderQTY,
-                qty: qty,
-                PickedQuantity: PickedQuantity,
-                ToPickQuantity: ToPickQuantity,
-                ToteId: ToteId,
-                PickingWaveId:PickingWaveId,
-            },
+        data: {TotesId:{{$TotesId}},
+                OrderIds: OrderIds,
+                templateID: templateID,
+                templateType: templateType},
         success: function(message){
-            alert_message(message);
+            if(typeof(message.error) != "undefined" && message.error !== null){
+                alert_message(message);
+            }
             setTimeout(function() {   //calls click event after a certain time
                 datatables(0);
                 $("#pageloader").hide();
             }, 1000);
-        }/*,
-        error: function (error) {
-            alert('Error!!  Please resubmit data!!');
-            datatables(0);
-            $("#pageloader").hide();
-        }*/
+        }
     });
 }
+
+datatables(1);
 
 function sticky_relocate() {
   var window_top = $(window).scrollTop();
@@ -419,21 +433,6 @@ function clear_serch() {
     setTimeout(function() {   //calls click event after a certain time
         datatables(1);
     }, 1000);
-}
-
-function close_totes() {
-    @if(isset($Totes->id))
-        var totes_id = {{$Totes->id}};
-        $.ajax({
-            method: "POST",
-            url: "{{ route('admin.totes.close_totes') }}",
-            headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}, 
-            data: {totes_id:totes_id},
-            success: function(message){
-                window.location.reload();
-            }
-        });
-    @endif
 }
 </script>
 @endsection

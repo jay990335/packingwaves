@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
-use App\Totes;
+use App\toteOrders;
 use Illuminate\Http\Request;
 
-class TotesController extends Controller
+class ToteOrdersController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -41,10 +41,10 @@ class TotesController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Totes  $totes
+     * @param  \App\toteOrders  $toteOrders
      * @return \Illuminate\Http\Response
      */
-    public function show(Totes $totes)
+    public function show(toteOrders $toteOrders)
     {
         //
     }
@@ -52,10 +52,10 @@ class TotesController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Totes  $totes
+     * @param  \App\toteOrders  $toteOrders
      * @return \Illuminate\Http\Response
      */
-    public function edit(Totes $totes)
+    public function edit(toteOrders $toteOrders)
     {
         //
     }
@@ -64,10 +64,10 @@ class TotesController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Totes  $totes
+     * @param  \App\toteOrders  $toteOrders
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Totes $totes)
+    public function update(Request $request, toteOrders $toteOrders)
     {
         //
     }
@@ -75,10 +75,10 @@ class TotesController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Totes  $totes
+     * @param  \App\toteOrders  $toteOrders
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Totes $totes)
+    public function destroy(toteOrders $toteOrders)
     {
         //
     }
