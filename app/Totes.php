@@ -11,10 +11,11 @@ use Illuminate\Support\Facades\Storage;
 use Laravel\Passport\HasApiTokens;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Totes extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $primaryKey = 'id';
     
@@ -24,7 +25,7 @@ class Totes extends Model
      * @var array
      */
     protected $fillable = [
-        'totes_id','name', 'PickingWaveId', 'status', 'created_at', 'updated_at', 'created_by', 'updated_by'
+        'totes_id','name', 'PickingWaveId', 'status', 'created_at', 'updated_at', 'deleted_at', 'created_by', 'updated_by'
     ];
 
     /**

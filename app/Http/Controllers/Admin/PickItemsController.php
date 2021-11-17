@@ -86,7 +86,8 @@ class PickItemsController extends Controller
         $Totes = Totes::where([
                                'status' => 'Yes',
                                'created_by' => $user_id,
-                               'PickingWaveId' => $PickingWaveId
+                               'PickingWaveId' => $PickingWaveId,
+                               'deleted_at' => null
                         ])->first();
         //dd($Totes);
         return view('admin.picklist.index', compact('PickingWaveId','Totes')); 

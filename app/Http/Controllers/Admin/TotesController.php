@@ -67,7 +67,7 @@ class TotesController extends Controller
         $totes = $linnworks->Locations()->GetWarehouseTOTEs(json_encode($LocationId));
 
         $user_id = auth()->user()->id;
-        $open_totes = Totes::pluck('totes_id')->toArray();
+        $open_totes = Totes::pluck('totes_id')->where('deleted_at', null)->toArray();
         
         $PickingWaveId = $request->PickingWaveId;
         return view('admin.totes.index', compact('totes','open_totes','PickingWaveId'));

@@ -63,6 +63,8 @@ Route::group([
     Route::post('packlist/ajax/assignFolder', 'PackOrdersController@assignFolder');
     Route::get('packlist/packorderslist/{PickingWaveId}', 'PackOrdersController@packorderslist')->name('packlist.packorderslist'); 
     Route::get('packlist/totesorderslist/{TotesId}', 'PackOrdersController@totesorderslist')->name('packlist.totesorderslist'); 
+
+    Route::get('packlist/totes_destroy/{TotesId}', 'PackOrdersController@totes_destroy')->name('packlist.totes_destroy'); 
     Route::post('packlist/ajax/packingwavesCompletedNotificationSend', 'PackOrdersController@packingwavesCompletedNotificationSend')->name('packlist.ajax.packingwavesCompletedNotificationSend');
     
 

@@ -21,6 +21,7 @@ class CreateTotesTable extends Migration
             $table->enum('status', ['Yes', 'No'])->default('Yes');
             $table->unsignedBigInteger('created_by')->index();
             $table->unsignedBigInteger('updated_by')->index();
+            $table->softDeletes();
             $table->timestamps();
 
             $table->foreign('created_by')->references('id')->on('users');

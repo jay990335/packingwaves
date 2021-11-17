@@ -156,6 +156,40 @@ function hide_show(i) {
     }
 }
 hide_show(0);
+
+function delete_totes(url) {
+    
+    swal({
+        title: "Delete?",
+        text: "Are you sure want to delete it?",
+        type: "warning",
+        showCancelButton: !0,
+        confirmButtonText: "Yes, delete it!",
+        cancelButtonText: "No, cancel!",
+        reverseButtons: !0
+    }).then(function (r) {
+        if (r.value === true) {
+            $("#pageloader").fadeIn();
+            $.ajax({
+                method: "GET",
+                url: "{{ url('admin/packlist/totes_destroy') }}/1",
+                headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                success: function(message){
+                    setTimeout(function() {   //calls click event after a certain time
+                        datatables_totes();
+                        $("#pageloader").hide();
+                        alert_message(message);
+                    }, 1000);
+                },
+            });
+        } else {
+            r.dismiss;
+        }
+    }, function (dismiss) {
+        return false;
+    })
+    return false;
+}
 </script>
 <style type="text/css">
     .dt-buttons{

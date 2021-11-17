@@ -10,6 +10,7 @@ use App\Linnworks;
 use App\printButtons;
 use App\folderSettings;
 use App\shipmentSettings;
+use App\Totes;
 
 use App\Http\Controllers\Controller;
 use App\Traits\UploadTrait;
@@ -428,9 +429,32 @@ class PackOrdersController extends Controller
     public function totesorderslist(Request $request)
     {
         $TotesId = $request->TotesId;
-        $user_id = auth()->user()->id;
-        $print_buttons = printButtons::where('status','Yes')->whereHas('users', function($q) use ($user_id) { $q->where('user_id', $user_id); })->get();
-        return view('admin.packlist.totesorderslist', compact('print_buttons','TotesId')); 
+        $open_totes = Totes::where('totes_id',$TotesId)->where('deleted_at', null)->count();
+        if($open_totes>0){
+           $user_id = auth()->user()->id;
+            $print_buttons = printButtons::where('status','Yes')->whereHas('users', function($q) use ($user_id) { $q->where('user_id', $user_id); })->get();
+            return view('admin.packlist.totesorderslist', compact('print_buttons','TotesId'));  
+        }else{
+            return redirect()->route('admin/packingwaves');
+        }
+        
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  \App\folderSettings  $folder_setting
+     * @return \Illuminate\Http\Response
+     */
+    public function totes_destroy(Request $request)
+    {
+        $TotesId = $request->TotesId;
+        $Totes = Totes::find($TotesId);
+        $Totes->delete();
+
+        return response()->json([
+            'delete' => 'totes closed successfully.' // for status 200
+        ]);
     }
 
     /**

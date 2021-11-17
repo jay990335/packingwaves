@@ -59,7 +59,8 @@ class PackingWavesController extends Controller
     {
         $user_id = auth()->user()->id;
         $Totes = Totes::where([
-                               'created_by' => $user_id
+                               'created_by' => $user_id,
+                               'deleted_at' => null
                         ])->get();
         //dd($Totes);
 
@@ -286,7 +287,9 @@ class PackingWavesController extends Controller
             $records = $linnworks->Picking()->GetAllPickingWaves(null,$LocationId,'All');
             
             $iTotalRecords = 0;
+            $data_arr = array();
             foreach ($Totes as $Tote) {
+                $Tote_system_id = $Tote->id;
                 $ToteId = $Tote->totes_id;
                 $ToteName = $Tote->name;
                 $orders_not_printed_count = 0;
@@ -395,21 +398,26 @@ class PackingWavesController extends Controller
                     $picked_order_html .= '<span class="btn btn-sm bg-secondary mt-1" tooltip="Picked Orders: '.$picked_order.'" flow="up">Picked Orders: '.$picked_order.'</span>';                 
                 }
                 
-                $Detais= '<a href="'.$href.'"><div class="row ">
+                $Detais= '<div class="row ">
                             <div class="col-12">
                               <div class="card '.$pickingWaveBGClass.'" style="margin-bottom: 0px;">
+
                                 <div class="card-header border-bottom-0">
                                     <div class="container">
                                         <div class="row">
-                                            <div class="col-4 text-left">
-                                                <span><b>Totes: '.$ToteName.'</b></span>
+                                            
+                                            <div class="col-8 text-left">
+                                                <a href="'.$href.'"><span style="color: white;"><b>Totes: '.$ToteName.'</b></span></a>
                                             </div>
-                                            <div class="col-8 text-right">
+
+                                            <div class="col-4 text-right">
                                                 <span class="btn btn-rounded '.$btnBGClass.' btn-sm">'.$pickingWaveState.'</span>
+                                                <span class="btn btn-rounded btn-primary btn-sm" onclick="delete_totes('.$Tote_system_id.')">Close Tote</span>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
+                                <a href="'.$href.'">
                                 <div class="card-footer">
                                   <div class="text-left">
                                     <span class="btn btn-sm bg-secondary mt-1" tooltip="Orders: '.$ordercount.'" flow="up">Orders: '.$ordercount.'</span>
@@ -422,9 +430,10 @@ class PackingWavesController extends Controller
 
                                   </div>
                                 </div>
+                                </a>
                               </div>
                             </div>
-                          </div></a>';
+                          </div>';
                 
                 $data_arr[] = array(
                     "ToteId" => $ToteId,
